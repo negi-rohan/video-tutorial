@@ -24,7 +24,7 @@
             password: '',
             phone: '',
         };
-        vm.isOtp = false;
+        vm.isOtp = true;
         vm.isOtpSend = false;
         vm.isOtpValid = false;
 
