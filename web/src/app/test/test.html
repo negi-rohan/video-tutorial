@@ -1,0 +1,135 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span class="pull-right" ng-if="!vm.isQuestionSelected">
+                        <button type="button" class="btn btn-default" ng-click="vm.editTest('insert');">
+                            <i class="fa fa-plus" aria-hidden="true"></i> New Test
+                        </button>
+                        <button type="button" class="btn btn-default" ng-click="vm.editQuestionPaper('insert');">
+                            <i class="fa fa-plus" aria-hidden="true"></i> New Question Paper
+                        </button>
+                        <button type="button" class="btn btn-default" ng-click="vm.editQuestion('insert');">
+                            <i class="fa fa-plus" aria-hidden="true"></i> New Question
+                        </button>
+                    </span>
+                    <span class="pull-right" ng-if="vm.isQuestionSelected">
+                        <span uib-dropdown>
+                            <button id="questionPaperList" type="button" class="btn btn-default" uib-dropdown-toggle ng-disabled="disabled">
+                                Add To Question Paper <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="questionPaperList">
+                                <li role="menuitem" ng-click="vm.addToPaper(quesPaper.id);" ng-repeat="quesPaper in vm.questionPapers">
+                                    <a href="javascript:void(0);" ng-bind="quesPaper.name"></a>
+                                </li>
+                            </ul>
+                        </span>
+                    </span>
+                    <span class="pull-right" ng-if="vm.selectedTab == 2">
+                        <input class="btn btn-default" type="button" value="Import Questions" ngf-select="vm.importQuestion($file)" ng-model="vm.question.file" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB" />
+                    </span>
+                    <div class="clearfix"></div>
+                </div>
+                <uib-tabset active="vm.selectedTab" type="pills" justified="true">
+                    <uib-tab index="0" heading="Test" select="vm.getAllTests();vm.selectedTab=0;">
+                        <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;margin-bottom:0px;">
+                            <thead>
+                                <tr class="success">
+                                    <th>#</th>
+                                    <th>Title</th>
+                                    <th>Durations</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Question Paper</th>
+                                    <th>Students</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="test in vm.tests">
+                                    <th scope="row" ng-bind="$index + 1"></th>
+                                    <td ng-bind="test.title"></td>
+                                    <td ng-bind="test.duration"></td>
+                                    <td ng-bind="test.startDate | date : 'fullDate'"></td>
+                                    <td ng-bind="test.endDate | date : 'fullDate'"></td>
+                                    <td ng-bind="test.questionPaperName"></td>
+                                    <td ng-bind="test.userCount"></td>
+                                    <td>
+                                        <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getTestById(test.id); " style="vertical-align:-4px;"></i>
+                                        <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteTest(test.id)"></i>
+                                        <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" ng-click="vm.getTestUsers(test);"></i>
+                                        <i class="fa fa-check-square-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.evaluation(test.id)"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </uib-tab>
+                    <uib-tab index="1" heading="Question Paper" select="vm.getAllquestionPapers();vm.selectedTab=1;">
+                        <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;margin-bottom:0px;">
+                            <thead>
+                                <tr class="success">
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>No. Of Questions</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="quesPaper in vm.questionPapers">
+                                    <th scope="row" ng-bind="$index + 1"></th>
+                                    <td ng-bind="quesPaper.name"></td>
+                                    <td ng-bind="quesPaper.questionCount"></td>
+                                    <td>
+                                        <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.editQuestionPaper('edit', quesPaper); " style="vertical-align:-4px;"></i>
+                                        <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteQuestionPaper(quesPaper.id)"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </uib-tab>
+                    <uib-tab index="2" heading="Questions" select="vm.getAllQuestions();vm.selectedTab=2;">
+                        <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;margin-bottom:0px;">
+                            <thead>
+                                <tr class="success">
+                                    <th>#</th>
+                                    <th>Question</th>
+                                    <th>Type</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="question in vm.questions">
+                                    <th scope="row">
+                                        <input type="checkbox" ng-change="vm.questionSelection();" ng-model="question.isSelected" />
+                                    </th>
+                                    <td ng-bind="question.question | htmlToPlaintext"></td>
+                                    <td ng-bind="question.type"></td>
+                                    <td>
+                                        <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getQuestionById(question.id); " style="vertical-align:-4px;"></i>
+                                        <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteQuestion(question.id)"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+            <script type="text/ng-template" id="editQuestionPaper.html">
+                <div class="modal-header">
+                    <h3 class="modal-title">Question Paper</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="quesPaper.name">Name</label>
+                        <input type="text" class="form-control" id="quesPaper.name" placeholder="Name" ng-model="quesPaper.name" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" ng-click="ok();$close();">OK</button>
+                    <button class="btn btn-warning" type="button" ng-click="$close();">Cancel</button>
+                </div>
+            </script>
+        </div>
+    </div>
+</div>

@@ -6,9 +6,10 @@
         .controller('LoginController', LoginController);
 
     /** @ngInject */
-    function LoginController($http, $state, CommonInfo, growl, $location) {
+    function LoginController($http, $state, CommonInfo, growl, $location, $timeout) {
         var vm = this;
-        var codeStr="";
+        var codeStr = "";
+        var otpTimeout;
 
         vm.forget = {
             status: false,
@@ -24,7 +25,7 @@
             password: '',
             phone: '',
         };
-        vm.isOtp = true;
+        vm.isOtp = false;
         vm.isOtpSend = false;
         vm.isOtpValid = false;
 
@@ -120,13 +121,25 @@
             }
         }
 
-        function requestOtp(){
+        function requestOtp() {
+            vm.showResendOtp = false;
             if (vm.newUser.phone) {
                 $http.post(CommonInfo.getAppUrl() + "/api/sendOtp", vm.newUser).then(
                     function(response) {
                         if (response && response.data.secret) {
                             codeStr = response.data.secret;
                             vm.isOtpSend = true;
+                            otpTimeout = $timeout(function() { vm.showResendOtp = true; }, 15000);
+                        } else if (response && response.data && response.data.Code) {
+                            if (response.data.isPhone) {
+                                growl.info('Sorry it looks like ' + vm.newUser.phone + ' belongs to an existing account. Please login using this phone number');
+                                vm.user.userName = vm.newUser.phone;
+                            }
+                            vm.forget = {
+                                status: false
+                            };
+                            vm.newUser = {};
+                            vm.activeForm = 0;
                         } else {
                             growl.info('Some error occured, try after some time');
                         }
@@ -138,8 +151,9 @@
             }
         }
 
-        function validateOtp(){
+        function validateOtp() {
             if (vm.newUser.otp && codeStr) {
+                $setTimeout.cancel(otpTimeout);
                 var data = {
                     code: vm.newUser.otp,
                     secret: codeStr

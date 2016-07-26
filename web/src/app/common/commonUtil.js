@@ -55,7 +55,7 @@
                 $localStorage.$reset();
             },
             getAppUrl: function() {
-                return 'http://52.66.82.252';
+                return 'http://localhost:3000';
             }
         };
     }
@@ -76,10 +76,15 @@
                                 myCourses: false,
                                 allLessons: true,
                                 instructor: true,
-                                students: true
+                                students: true,
+                                test: true,
+                                exam: false
                             },
                             createCourse: true,
-                            createLesson: true
+                            createLesson: true,
+                            createTest: true,
+                            createQuestionPaper: true,
+                            createQuestion: true
                         };
                         break;
                     case 'student':
@@ -90,10 +95,15 @@
                                 myCourses: true,
                                 allLessons: false,
                                 instructor: false,
-                                students: false
+                                students: false,
+                                test: false,
+                                exam: true
                             },
                             createCourse: false,
-                            createLesson: false
+                            createLesson: false,
+                            createTest: false,
+                            createQuestionPaper: false,
+                            createQuestion: false
                         };
                         break;
                 };

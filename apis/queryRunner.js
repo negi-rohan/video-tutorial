@@ -352,7 +352,6 @@ var self = {
         var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE email=VALUES(email), phone=VALUES(phone), fullName=VALUES(fullName), about=VALUES(about), billingAddress=VALUES(billingAddress), profilePhoto=VALUES(profilePhoto), status=VALUES(status)";
         var queryValues = ["user", "id", "email", "phone", "fullName", "about", "billingAddress", "profilePhoto", "status", "profileType", request.id, request.email, request.phone, request.fullName, request.about, request.billingAddress, request.profilePhoto, request.status, request.profileType];
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 connection.release();
@@ -367,26 +366,34 @@ var self = {
     generatOtp: function(request, callback) {
         // var secret = totp.utils.generateSecret();
         // var code = totp.generate(secret);
-        var secret = speakeasy.generateSecret();
-        secret = secret.base32;
-        var code = speakeasy.totp({
-            secret: secret,
-            encoding: 'base32',
-            step: 120
-        });
-        //callback({ "Error": false, "secret": secret, "code": code });
-        msg91.send(request.phone, "Your OTP:" + code, function(err, response) {
-            if (err) {
-                callback({ "Error": true, "Message": "Unable to send message to phone number" });
+        self.findUser(data, pool, function(result) {
+            if (result && !result.Error && !result.Code) {
+                var secret = speakeasy.generateSecret();
+                secret = secret.base32;
+                var code = speakeasy.totp({
+                    secret: secret,
+                    encoding: 'base32',
+                    step: 120
+                });
+                //callback({ "Error": false, "secret": secret, "code": code });
+                msg91.send(request.phone, "Your OTP:" + code, function(err, response) {
+                    if (err) {
+                        callback({ "Error": true, "Message": "Unable to send message to phone number" });
+                    } else {
+                        callback({ "Error": false, "secret": secret });
+                    }
+                    msg91.getBalance(function(err, msgCount) {
+                        console.log(err);
+                        console.log(msgCount);
+                    });
+                });
+            } else if (result && !result.Error && result.Code) {
+                result.Error = true
+                callback(result);
             } else {
-                callback({ "Error": false, "secret": secret });
+                callback({ "Error": true, "Message": "Error occured, Please try after some time" });
             }
-            msg91.getBalance(function(err, msgCount) {
-                console.log(err);
-                console.log(msgCount);
-            });
         });
-
     },
     validatetOtp: function(request, callback) {
         //var status = totp.check(request.code, request.secret);

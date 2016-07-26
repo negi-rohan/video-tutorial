@@ -1,8 +1,10 @@
 var queryHelper = require('./queryRunner');
+var testQueryHelper = require('./testQueries');
 var config = require('./config');
 var path = require('path');
 var request = require('request');
 var watermark = require('image-watermark');
+var excel2json = require("excel-to-json");
 var fs = require('fs');
 
 
@@ -273,6 +275,169 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
     /* Category related routes ends*/
+
+    /* Test related routes starts*/
+
+    router.post("/test", function(req, res) { /// add update tests
+        testQueryHelper.addUpdateTest(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/test/byId", function(req, res) { /// get all tests
+        testQueryHelper.getTestById(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.get("/test/all", function(req, res) { /// get all tests
+        testQueryHelper.getAllTest(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/test/delete", function(req, res) {
+        testQueryHelper.deleteTest(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/test/users", function(req, res) {
+        testQueryHelper.getTestUsers(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/exam/all", function(req, res) { /// get all tests
+        testQueryHelper.getAllExams(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/exam/byId", function(req, res) { /// get all tests
+        testQueryHelper.getTestQuestions(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/exam/userInfo", function(req, res) { /// get all tests
+        testQueryHelper.getTestUserInfo(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/exam/submit", function(req, res) { /// get all tests
+        testQueryHelper.submitTest(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/exam/evaluation", function(req, res) { /// get all tests
+        testQueryHelper.testEvaluation(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/exam/userAnswers", function(req, res) { /// get all tests
+        testQueryHelper.getUserAnswers(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/questionPaper", function(req, res) { /// get all tests
+        testQueryHelper.addUpdateQuestionPaper(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.get("/questionPaper/all", function(req, res) { /// get all tests
+        testQueryHelper.getAllQuestionPaper(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/questionPaper/delete", function(req, res) {
+        testQueryHelper.deleteQuestionPaper(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/question", function(req, res) { /// get all tests
+        testQueryHelper.addUpdateQuestion(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/question/byId", function(req, res) { /// get all tests
+        testQueryHelper.getQuestionById(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.get("/question/all", function(req, res) { /// get all tests
+        testQueryHelper.getAllQuestion(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/question/delete", function(req, res) {
+        testQueryHelper.deleteQuestion(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/question/addToPaper", function(req, res) {
+        testQueryHelper.addUpdateToPaper(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/question/import", fileUpload, function(req, res) {
+        //console.log(req.files)
+        if (req && req.files && req.files.file && req.files.file.path) {
+            //console.log(req.files.file)
+            console.log(0988)
+            excel2json({
+                trans: {
+                    input: req.files.file.path,
+                    output: 'question.json'
+                }
+            }, function(err, result) {
+                if (err) {
+                    console.log(123)
+                    console.log(err);
+                } else {
+                    console.log(321)
+                    console.log(result);
+                }
+            });
+            // node_xj({
+            //     input: req.files.file.path,
+            //     output: null,
+            //     sheet: "Sheet1", // specific sheetname
+            // }, function(err, result) {
+            //     console.log(123)
+            //     if (err) {
+            //         console.error(err);
+            //     } else {
+            //         console.log(result);
+            //     }
+            // });
+            // console.log(req.file)
+            // var folderPath = './public/question';
+            // var read = fs.createReadStream(req.files.file.path);
+            // var ext = path.parse(req.files.file.name).ext;
+            // var fName = path.basename(req.files.file.name, ext) + '_admin';
+            // var fn = req.files.file.name; //Math.floor(Math.random() * 1000000000000000) + ext;
+            // var fileName = path.join(folderPath, fName + ext);
+            // var write = fs.createWriteStream(fileName);
+            // read.pipe(write);
+        }
+        // testQueryHelper.importQuestion(req, pool, function(result) {
+        res.json();
+        // });
+    });
+    /* Test related routes ends*/
 
     router.post("/util/downloadFile", function(req, res) {
         queryHelper.getProfile(req.body, pool, function(result) {

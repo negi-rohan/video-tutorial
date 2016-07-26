@@ -18,10 +18,12 @@
                 <span class="nav navbar-nav navbar-right" uib-dropdown>
                     <img ng-src="{{vm.userInfo.profilePhoto || 'assets/images/defaultProfileImg.png'}}" style="width:50px;border:1px solid gainsboro;" class="img-responsive center-block img-circle" id="simple-dropdown" uib-dropdown-toggle>
                     <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
-                        <li ng-repeat="choice in items">
-                            <li role="menuitem" ng-click="vm.editUser('update', vm.userInfo);"><a href="javascript:void(0);">Edit Profile</a></li>
-                            <li class="divider"></li>
-                            <li role="menuitem" ng-click="vm.signout()"><a href="javascript:void(0);">Sign Out</a></li>
+                        <li role="menuitem" ng-click="vm.editUser('update', vm.userInfo);">
+                            <a href="javascript:void(0);">Edit Profile</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li role="menuitem" ng-click="vm.signout()">
+                            <a href="javascript:void(0);">Sign Out</a>
                         </li>
                     </ul>
                 </span>
@@ -63,6 +65,16 @@
                     <li ui-sref="main.students" ui-sref-active="active" ng-if="vm.config.tabs.students">
                         <a href="javascript:void(0);" ng-click="vm.getUsers('student');">
                             <i class="fa fa-users fa-fw" aria-hidden="true"></i> Students
+                        </a>
+                    </li>
+                    <li ui-sref="main.test.home" ui-sref-active="active" ng-if="vm.config.tabs.test">
+                        <a href="javascript:void(0);" ng-click="vm.getAllTests();">
+                            <i class="fa fa-users fa-fw" aria-hidden="true"></i> Test
+                        </a>
+                    </li>
+                    <li ui-sref="main.examsList" ui-sref-active="active" ng-if="vm.config.tabs.exam">
+                        <a href="javascript:void(0);">
+                            <i class="fa fa-users fa-fw" aria-hidden="true"></i> Exams
                         </a>
                     </li>
                 </ul>

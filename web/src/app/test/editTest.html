@@ -1,0 +1,95 @@
+<div class="container-fluid" ng-cloak>
+    <form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="test.title">Title</label>
+                    <input type="text" class="form-control" id="test.title" placeholder="Test Title" ng-model="vm.test.title" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="test.duration">Duration(in hours)</label>
+                    <input type="text" class="form-control" id="test.duration" placeholder="Duration" ng-model="vm.test.duration" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="test.startDate">Start Date</label>
+                        <p class="input-group">
+                            <input type="text" class="form-control" uib-datepicker-popup="{{vm.format}}" ng-model="vm.test.startDate" is-open="popup1.opened" datepicker-options="vm.dateOptions" close-text="Close" />
+                            <!-- <input date-range-picker class="form-control date-picker" type="text" ng-model="vm.test" /> -->
+                            <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="popup1.opened = true">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </button>
+                        </span>
+                        </p>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="test.endDate">End Date</label>
+                        <p class="input-group">
+                            <input type="text" class="form-control" uib-datepicker-popup="{{vm.format}}" ng-model="vm.test.endDate" is-open="popup2.opened" datepicker-options="vm.dateOptions" close-text="Close" />
+                            <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="popup2.opened = true">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </button>
+                        </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="test.marksPerQues">Marks Per Question</label>
+                        <input type="text" class="form-control" id="test.marksPerQues" placeholder="Marks" ng-model="vm.test.marksPerQues" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="test.negativeMarks">Negative Marks</label>
+                        <input type="text" class="form-control" id="test.negativeMarks" placeholder="Negative Marks" ng-model="vm.test.negativeMarks" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="test.video">Instant To Students</label>
+                    <div class="form-group">
+                        <label class="checkbox-inline">
+                            <input type="checkbox" ng-model="vm.test.instantResult"> Result
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="checkbox" ng-model="vm.test.instantRank"> Rank
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="test.questionPaper">Question Paper</label>
+                    <select class="form-control" ng-options="questionPaper.id as questionPaper.name for questionPaper in vm.questionPapers" ng-model="vm.test.questionPaperId">
+                        <option value="">Choose</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <text-angular ta-toolbar="vm.toolBar" id="test.description" placeholder="Instruction" ng-model="vm.test.instruction"></text-angular>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-default pull-right" ng-click="vm.updateTest()">
+                    <span ng-if="vm.objMode == 'edit'">Update</span>
+                    <span ng-if="vm.objMode == 'insert'">Save</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

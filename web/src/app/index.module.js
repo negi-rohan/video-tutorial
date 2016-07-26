@@ -16,7 +16,9 @@
             'ngFileUpload',
             'angular-growl',
             'blockUI',
-            'textAngular'
+            'textAngular',
+            'rt.resize',
+            'timer'
         ]);
 
 })();

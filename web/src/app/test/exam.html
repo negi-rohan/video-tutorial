@@ -1,0 +1,76 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row" ng-if="!vm.isExamStarted">
+        <div class="col-md-10 col-md-offset-1">
+            <div ng-bind-html="vm.exam.instruction" instruction-board style="overflow:auto;"></div>
+        </div>
+        <div class="col-md-12">
+            <button type="button" class="btn btn-primary btn-lg center-block" ng-click="vm.startExam();">
+                Start Exam
+            </button>
+        </div>
+    </div>
+    <div class="row" ng-if="vm.isExamStarted">
+        <div class="col-md-9">
+            <div class="well well-sm row" style="margin-bottom:10px;">
+                <div class="col-md-4">
+                    <h3 style="margin:3px 0px;">Question: <span ng-bind="vm.currentQuestionIndex"></span></h3>
+                </div>
+                <div class="col-md-8">
+                    <span class="pull-right">
+                        <span class="checkbox" style="display:inline;">
+                            <label>
+                                <input type="checkbox" ng-model="vm.userCurrentQuestion[vm.currentIndex].isMarked"> <small>Mark This Question</small>
+                            </label>
+                        </span>
+                    <button type="button" class="btn btn-primary" style="width:100px;" title="Previous Question" ng-click="vm.showQuestion(vm.currentIndex-1);" ng-disabled="vm.currentIndex==0">
+                        <i class="fa fa-arrow-left" aria-hidden="true"></i> Previous
+                    </button>
+                    <button type="button" class="btn btn-primary" style="width:100px;" title="Next Question" ng-click="vm.showQuestion(vm.currentIndex+1);" ng-disabled="vm.currentIndex==vm.exam.questions.length-1">
+                        Next <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                    </button>
+                    </span>
+                </div>
+            </div>
+            <div question-area style="overflow:auto;margin-right:-13px;">
+                <div ng-bind-html="vm.currentQuestion.passage">
+                </div>
+                <div ng-bind-html="vm.currentQuestion.question">
+                </div>
+                <ul class="list-group">
+                    <li class="list-group-item" ng-repeat="answer in vm.currentQuestion.answers">
+                        <label>
+                            <input type="radio" name="answerOptions" ng-model="vm.userCurrentQuestion[vm.currentIndex].answer" ng-value="answer.ansKey" ng-click="vm.selectAnswer();"> <span ng-bind-html="answer.answerText" style="display:inline-block;"></span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div style="overflow:auto;">
+                <div class="panel panel-default" style="margin-bottom:0px;">
+                    <div class="panel-heading">
+                        <div style="font-size:xx-large;display:flex;justify-content:center;">
+                            <timer countdown="vm.timer" interval="1000">
+                                {{hhours}}:{{mminutes}}:{{sseconds}}
+                            </timer>
+                        </div>
+                    </div>
+                    <div class="panel-body" navigation-area style="overflow:auto;min-height:120px;">
+                        <div class="row">
+                            <div class="col-md-2" ng-repeat="question in vm.exam.questions">
+                                <button type="button" class="btn btn-circle" ng-class="{'btn-default': !vm.userCurrentQuestion[$index].answer, 'btn-success': vm.userCurrentQuestion[$index].answer, 'btn-warning': vm.userCurrentQuestion[$index].isMarked}" ng-click="vm.showQuestion($index);">
+                                    <span ng-bind="$index + 1"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer" style="display:flex;justify-content:center;">
+                        <button type="button" class="btn btn-primary btn-lg" style="left:108px;" ng-click="vm.submitExam(false);">
+                            Submit Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

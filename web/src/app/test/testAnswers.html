@@ -1,0 +1,95 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row">
+        <div class="col-md-12">
+            <h3 ng-bind="vm.exam.title"></h3>
+        </div>
+        <div class="col-md-12">
+            <uib-tabset active="vm.selectedTab" type="pills" justified="true">
+                <uib-tab index="0" heading="Scorecard" select="" class="row">
+                    <div class="col-md-4 col-md-offset-4" style="margin-top:10px;">
+                        <table class="table table-striped" style="border:1px solid #DDD;">
+                            <tbody>
+                                <tr>
+                                    <td>Score</td>
+                                    <td ng-bind="vm.userAnswers.score"></td>
+                                </tr>
+                                <tr>
+                                    <td>Correct</td>
+                                    <td ng-bind="vm.userAnswers.totalCorrect"></td>
+                                </tr>
+                                <tr>
+                                    <td>Incorrect</td>
+                                    <td ng-bind="vm.userAnswers.totalIncorrect"></td>
+                                </tr>
+                                <tr>
+                                    <td>Marks Per Question</td>
+                                    <td ng-bind="vm.userAnswers.marksPerQues"></td>
+                                </tr>
+                                <tr ng-if="vm.userAnswers.negativeMarks">
+                                    <td>Negative Marks</td>
+                                    <td ng-bind="vm.userAnswers.negativeMarks"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </uib-tab>
+                <uib-tab index="1" heading="Answer Details" select="">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td colspan="2">
+                                    <div>
+                                        Score: <span ng-bind="vm.userAnswers.score"></span>
+                                        Rank: <span ng-bind="vm.userAnswers.rank"></span>
+                                        Correct: <span ng-bind="vm.userAnswers.totalCorrect"></span>
+                                        Incorrect: <span ng-bind="vm.userAnswers.totalIncorrect"></span>
+                                    </div>
+                                    <input type="text" ng-model="vm.searchQue.result" />
+                                </td>
+                            </tr>
+                            <tr ng-repeat="question in vm.questions | filter: vm.searchQue : true">
+                                <td>
+                                    <span ng-bind="$index + 1"></span>
+                                </td>
+                                <td>
+                                    <div ng-bind="question.result"></div>
+                                    <div style="background-color:#F8F8F8;padding:4px;" ng-bind-html="question.passage"></div>
+                                    <div style="background-color:#F8F8F8;padding:4px;" ng-bind-html="question.question"></div>
+                                    <div>
+                                        <u>Options</u>:
+                                        <p class="options-review" ng-repeat="answer in question.answers" ng-bind-html="answer.answerText"></p>
+                                    </div>
+                                    <u>Your Answer</u>:
+                                    <p class="options-review" ng-bind-html="question.userAnswer"></p>
+                                    <u>Correct Answer</u>:
+                                    <p class="options-review" ng-bind-html="question.correctAnswer"></p>
+                                    <span ng-bind-html="question.explanation"></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </uib-tab>
+                <uib-tab index="2" heading="Ranking" select="">
+                    <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;margin-bottom:0px;">
+                        <thead>
+                            <tr class="success">
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Score</th>
+                                <th>Rank</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="user in vm.testUsers">
+                                <td ng-bind="$index+1"></td>
+                                <td ng-bind="user.fullName"></td>
+                                <td ng-bind="user.score"></td>
+                                <td ng-bind="user.rank"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </uib-tab>
+            </uib-tabset>
+        </div>
+    </div>
+</div>
