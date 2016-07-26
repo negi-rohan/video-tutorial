@@ -26,7 +26,7 @@ var self = {
     },
     getTestById: function(req, pool, callback) {
         var query = "SELECT t.*, qp.name as questionPaperName FROM ?? t LEFT JOIN (?? qp) ON t.questionPaperId = qp.id WHERE t.isDeleted=false and t.id=?";
-        var queryValues = ["tests", "questionPapers", req.testId];
+        var queryValues = ["tests", "questionpapers", req.testId];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -46,7 +46,7 @@ var self = {
     },
     getAllTest: function(req, pool, callback) {
         var query = "SELECT t.*, qp.name as questionPaperName, count(ui.id) as userCount FROM ?? t LEFT JOIN (?? qp) ON t.questionPaperId = qp.id LEFT JOIN (testuserinfo ui) ON t.id=ui.testId WHERE t.isDeleted=false GROUP BY t.id";
-        var queryValues = ["tests", "questionPapers"];
+        var queryValues = ["tests", "questionpapers"];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -135,6 +135,7 @@ var self = {
                     } else {
                         query = "SELECT id, question, type, parentQuestionId FROM ?? WHERE isDeleted=false AND (id IN (?) OR parentQuestionId IN (?))";
                     }
+                    //
                     //query = "SELECT id, question, type, parentQuestionId FROM ?? WHERE isDeleted=false AND (id IN (?) OR parentQuestionId IN (?))";
                     queryValues = ["questions", questionIds, questionIds];
                     query = mysql.format(query, queryValues);
@@ -400,7 +401,7 @@ var self = {
     },
     addUpdateQuestionPaper: function(req, pool, callback) {
         var query = "INSERT INTO ??(??, ??) VALUES (?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name)";
-        var queryValues = ["questionPapers", "id", "name", req.id, req.name];
+        var queryValues = ["questionpapers", "id", "name", req.id, req.name];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -415,7 +416,7 @@ var self = {
     },
     getAllQuestionPaper: function(req, pool, callback) {
         var query = "SELECT qp.*, count(qq.id) as questionCount FROM ?? qp LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = qp.id WHERE qp.isDeleted=false GROUP BY qp.id";
-        var queryValues = ["questionPapers"];
+        var queryValues = ["questionpapers"];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -430,7 +431,7 @@ var self = {
     },
     deleteQuestionPaper: function(req, pool, callback) {
         var query = "UPDATE ?? SET isDeleted = true WHERE id=?";
-        var queryValues = ["questionPapers", req.questionPaperId];
+        var queryValues = ["questionpapers", req.questionPaperId];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
