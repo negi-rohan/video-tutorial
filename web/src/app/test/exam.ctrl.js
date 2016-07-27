@@ -100,7 +100,7 @@
             $http.post(CommonInfo.getAppUrl() + '/api/exam/userInfo', data).then(function(response) {
                 if (response && response.data) {
                     vm.exam.userInfo = response.data.userTestInfo;
-                    if (vm.exam && vm.exam.userInfo && !vm.exam.userInfo.timeRemaining) {
+                    if (vm.exam && vm.exam.userInfo && vm.exam.userInfo.status == 'pending' && vm.exam.userInfo.timeRemaining == 0) {
                         alert('Your exam time is over, press ok to submit exam')
                         submitExam(true);
                     } else {
@@ -125,8 +125,6 @@
                     function(event, toState, toParams, fromState, fromParams) {
                         if (vm.isExamStarted)
                             event.preventDefault();
-                        // transitionTo() promise will be rejected with
-                        // a 'transition prevented' error
                     });
             }
         }
