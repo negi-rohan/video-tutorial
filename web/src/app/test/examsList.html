@@ -23,7 +23,7 @@
                             <td>
                                 <i class="fa fa-play" aria-hidden="true" ng-click="vm.startExam(exam)" ng-if="!exam.status"></i>
                                 <i class="fa fa-repeat" ng-click="vm.startExam(exam)" ng-if="exam.status == 'pending'"></i>
-                                <i class="fa fa-newspaper-o" aria-hidden="true" ng-click="vm.showAnswers(exam)" ng-if="exam.status == 'completed' || exam.status=='evaluated'"></i>
+                                <i class="fa fa-newspaper-o" aria-hidden="true" ng-click="vm.showAnswers(exam)" ng-if="exam.status=='evaluated'"></i>
                             </td>
                         </tr>
                     </tbody>

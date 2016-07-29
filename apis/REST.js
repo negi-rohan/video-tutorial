@@ -3,8 +3,8 @@ var testQueryHelper = require('./testQueries');
 var config = require('./config');
 var path = require('path');
 var request = require('request');
-var watermark = require('image-watermark');
-var excel2json = require("excel-to-json");
+var _ = require("lodash");
+var xlsxtojson = require("xlsx-to-json-lc");
 var fs = require('fs');
 
 
@@ -393,75 +393,42 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
     });
 
     router.post("/question/import", fileUpload, function(req, res) {
-        //console.log(req.files)
         if (req && req.files && req.files.file && req.files.file.path) {
-            //console.log(req.files.file)
-            console.log(0988)
-            excel2json({
-                trans: {
-                    input: req.files.file.path,
-                    output: 'question.json'
-                }
+            var exceltojson = xlsxtojson;
+            var questions = [];
+            var answers = [];
+            exceltojson({
+                input: req.files.file.path,
+                output: null,
+                lowerCaseHeaders: true,
+                sheet: "Sheet1"
             }, function(err, result) {
                 if (err) {
-                    console.log(123)
                     console.log(err);
-                } else {
-                    console.log(321)
-                    console.log(result);
                 }
+                questions = result;
+                _.forEach(questions, function(value) {
+                    value.question = '<p>' + value.question + '</p>'
+                    value.correctAnswer = value.answer;
+                    value.answers = [];
+                    _.forIn(value, function(childValue, childKey){
+                        if(childKey.length == 1 && childValue){
+                            value.answers.push({   
+                                ansKey: childKey,
+                                answerText: '<p>' + childValue + '</p>'
+                            });
+                        }
+                    });
+                });
+                testQueryHelper.addImportedQuestion({ questions: questions }, pool, function(result) {
+                    res.json(result);
+                });
             });
-            // node_xj({
-            //     input: req.files.file.path,
-            //     output: null,
-            //     sheet: "Sheet1", // specific sheetname
-            // }, function(err, result) {
-            //     console.log(123)
-            //     if (err) {
-            //         console.error(err);
-            //     } else {
-            //         console.log(result);
-            //     }
-            // });
-            // console.log(req.file)
-            // var folderPath = './public/question';
-            // var read = fs.createReadStream(req.files.file.path);
-            // var ext = path.parse(req.files.file.name).ext;
-            // var fName = path.basename(req.files.file.name, ext) + '_admin';
-            // var fn = req.files.file.name; //Math.floor(Math.random() * 1000000000000000) + ext;
-            // var fileName = path.join(folderPath, fName + ext);
-            // var write = fs.createWriteStream(fileName);
-            // read.pipe(write);
+        } else {
+            res.json({ "Error": true, "Message": "No file attached" });
         }
-        // testQueryHelper.importQuestion(req, pool, function(result) {
-        res.json();
-        // });
     });
     /* Test related routes ends*/
-
-    router.post("/util/downloadFile", function(req, res) {
-        queryHelper.getProfile(req.body, pool, function(result) {
-            if (result && result.user.email) {
-
-                // var options = {
-                //     keyLength: 40,
-                //     password: result.user.email,
-                //     restrictions: {
-                //         modify: 'n',
-                //         extract: 'n'
-                //     }
-                // };
-                // var doc = qpdf.encrypt('http://localhost:3000/filesPath/fA-TGxr-cCGIfMw8gHUcgTvF.pdf', options);
-                // doc.pipe(res);
-                res.download('http://localhost:3000/filesPath/sGo-xBpvMsUFSNLwPSv9zbke.pdf');
-                res.writeHead(200, {
-                    'Content-Type': 'application/pdf',
-                    'Access-Control-Allow-Origin': '*',
-                    'Content-Disposition': 'inline; filename=' + req.body.fileName
-                });
-            }
-        })
-    });
 
     function setFileToCorrectLocation(id, protocol, host) {
         queryHelper.getCourseFile(id, pool, function(result) {
@@ -477,7 +444,6 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 }
             }
         });
-
     }
 
     var saveTODB = function(file, protocol, host, path) {

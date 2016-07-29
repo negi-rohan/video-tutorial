@@ -10,24 +10,22 @@
         </div>
     </div>
     <div class="row" ng-if="vm.isExamStarted">
-        <div class="col-md-9">
+        <div class="col-md-10">
             <div class="well well-sm row" style="margin-bottom:10px;">
                 <div class="col-md-4">
                     <h3 style="margin:3px 0px;">Question: <span ng-bind="vm.currentQuestionIndex"></span></h3>
                 </div>
                 <div class="col-md-8">
                     <span class="pull-right">
-                        <span class="checkbox" style="display:inline;">
-                            <label>
-                                <input type="checkbox" ng-model="vm.userCurrentQuestion[vm.currentIndex].isMarked"> <small>Mark This Question</small>
-                            </label>
-                        </span>
-                    <button type="button" class="btn btn-primary" style="width:100px;" title="Previous Question" ng-click="vm.showQuestion(vm.currentIndex-1);" ng-disabled="vm.currentIndex==0">
-                        <i class="fa fa-arrow-left" aria-hidden="true"></i> Previous
-                    </button>
-                    <button type="button" class="btn btn-primary" style="width:100px;" title="Next Question" ng-click="vm.showQuestion(vm.currentIndex+1);" ng-disabled="vm.currentIndex==vm.exam.questions.length-1">
-                        Next <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                    </button>
+                         <button type="button" class="btn btn-primary" style="width:110px;" title="Mark this question for later review" ng-click="vm.userCurrentQuestion[vm.currentIndex].isMarked = !vm.userCurrentQuestion[vm.currentIndex].isMarked;">
+                            <i class="fa fa-flag" aria-hidden="true"></i> Mark Flag
+                        </button>
+                        <button type="button" class="btn btn-primary" style="width:110px;" title="Previous Question" ng-click="vm.showQuestion(vm.currentIndex-1);" ng-disabled="vm.currentIndex==0">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-primary" style="width:110px;" title="Next Question" ng-click="vm.showQuestion(vm.currentIndex+1);" ng-disabled="vm.currentIndex==vm.exam.questions.length-1">
+                            Next <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        </button>
                     </span>
                 </div>
             </div>
@@ -38,14 +36,14 @@
                 </div>
                 <ul class="list-group">
                     <li class="list-group-item" ng-repeat="answer in vm.currentQuestion.answers">
-                        <label>
-                            <input type="radio" name="answerOptions" ng-model="vm.userCurrentQuestion[vm.currentIndex].answer" ng-value="answer.ansKey" ng-click="vm.selectAnswer();"> <span ng-bind-html="answer.answerText" style="display:inline-block;"></span>
+                        <label style="margin-bottom:0px;">
+                            <input type="radio" name="answerOptions" ng-model="vm.userCurrentQuestion[vm.currentIndex].answer" ng-value="answer.ansKey" ng-click="vm.selectAnswer();" /> <span ng-bind-html="answer.answerText" class="options-review" style="display:inline-block;"></span>
                         </label>
                     </li>
                 </ul>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div style="overflow:auto;">
                 <div class="panel panel-default" style="margin-bottom:0px;">
                     <div class="panel-heading">
@@ -55,14 +53,16 @@
                             </timer>
                         </div>
                     </div>
-                    <div class="panel-body" navigation-area style="overflow:auto;min-height:120px;">
-                        <div class="row">
-                            <div class="col-md-2" ng-repeat="question in vm.exam.questions">
+                    <div class="panel-body" navigation-area style="overflow:auto;min-height:120px;padding:12px;">
+                        <!-- <div class="row">
+                            <div class="col-md-2" ng-repeat="question in vm.exam.questions"> -->
+                            <span ng-repeat="question in vm.exam.questions">
                                 <button type="button" class="btn btn-circle" ng-class="{'btn-default': !vm.userCurrentQuestion[$index].answer, 'btn-success': vm.userCurrentQuestion[$index].answer, 'btn-warning': vm.userCurrentQuestion[$index].isMarked}" ng-click="vm.showQuestion($index);">
                                     <span ng-bind="$index + 1"></span>
                                 </button>
-                            </div>
-                        </div>
+                            </span>
+                            <!-- </div>
+                        </div> -->
                     </div>
                     <div class="panel-footer" style="display:flex;justify-content:center;">
                         <button type="button" class="btn btn-primary btn-lg" style="left:108px;" ng-click="vm.submitExam(false);">

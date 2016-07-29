@@ -655,6 +655,7 @@ var self = {
             queryValues = ["courses", "courseId", "userId", id];
         }
         query = mysql.format(query, queryValues);
+        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 connection.release();

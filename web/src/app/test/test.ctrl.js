@@ -13,7 +13,7 @@
     }
 
     /** @ngInject */
-    function TestController($http, CommonInfo, $state, growl, $uibModal, Upload, _) {
+    function TestController($http, CommonInfo, $state, growl, $uibModal, Upload, _, $window) {
         var vm = this;
         var selectedQuestionGrid = [];
 
@@ -49,6 +49,7 @@
         vm.addToPaper = addToPaper;
         vm.importQuestion = importQuestion;
         vm.getTestUsers = getTestUsers;
+        vm.showTestPreview = showTestPreview;
         activate();
 
         function activate() {
@@ -213,13 +214,20 @@
             }
         }
 
-        function updateQuestion() {
+        function updateQuestion(addNew) {
             if (vm.question) {
                 $http.post(CommonInfo.getAppUrl() + '/api/question', vm.question).then(function(response) {
                     if (response && response.data && !response.data.Error) {
                         growl.success('Question added successfully');
-                        $state.go('main.test.home');
-                        getAllQuestions();
+                        if(!addNew){
+                            $state.go('main.test.home');
+                            getAllQuestions();
+                        } else {
+                            vm.question = {
+                                answers: [{ answerText: '', isDeleted: 0 }],
+                                childQuestions: [{ question: '', isDeleted: 0, answers: [{ answerText: '' }] }]
+                            };
+                        }
                     }
                 }, function(response) {});
             }
@@ -260,9 +268,13 @@
             }, function(response) {});
         }
 
+        function showTestPreview(test) {
+            test.isPreview = true
+            CommonInfo.setInfo('exam', test);
+            $window.open($state.href('main.exam', {isPreview: true}),'_blank');
+        }
+
         function importQuestion(file) {
-            console.log(file);
-            console.log(vm.question.file)
             if (vm.question.file) {
                 Upload.upload({
                     url: CommonInfo.getAppUrl() + '/api/question/import',

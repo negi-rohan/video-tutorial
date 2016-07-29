@@ -55,7 +55,7 @@ var self = {
                     callback({ "Error": true, "Message": err });
                 } else {
                     _.forEach(rows, function(value) {
-                        value.duration = value.duration / 3600;
+                        value.durationInHrs = value.duration / 3600;
                     });
                     callback({ "Error": false, "Message": "Successfully", "tests": rows });
                 }
@@ -266,7 +266,6 @@ var self = {
             }
             queryValues.push(values);
             query = mysql.format(query, queryValues);
-            console.log(query)
             pool.getConnection(function(err, connection) {
                 connection.query(query, function(err, rows) {
                     connection.release();
@@ -278,15 +277,13 @@ var self = {
                 });
             });
         } else {
-        	self.submitTestUser(req, pool, callback);
+            self.submitTestUser(req, pool, callback);
         }
     },
     submitTestUser: function(req, pool, callback) {
-    	console.log(req.userId)
-        query = "INSERT INTO ??(??, ??, ??, ??) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE status=VALUES(status), timeRemaining=VALUES(timeRemaining)";
-        queryValues = ["testuserinfo", "userId", "testId", "status", "timeRemaining", req.userId, req.testId, req.status, req.timeRemaining];
+        query = "INSERT INTO ??(??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status=VALUES(status), timeRemaining=VALUES(timeRemaining), totalQuestions=VALUES(totalQuestions)";
+        queryValues = ["testuserinfo", "userId", "testId", "status", "timeRemaining", "totalQuestions", req.userId, req.testId, req.status, req.timeRemaining, req.answers.length];
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 connection.release();
@@ -454,6 +451,30 @@ var self = {
             self.addUpdatePassageQuestion(query, req, pool, callback);
         }
     },
+    addImportedQuestion: function(req, pool, callback) {
+        var query, queryValues, issues = 0,
+            added = 0;
+        async.eachSeries(req.questions, function(question, childCallback) {
+            query = "INSERT INTO ??(??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE question=VALUES(question), type=VALUES(type), explanation=VALUES(explanation), correctAnswer=VALUES(correctAnswer)";
+            queryValues = ["questions", "id", "question", "type", "explanation", "correctAnswer", question.id, question.question, question.type, question.explanation, question.correctAnswer];
+            query = mysql.format(query, queryValues);
+            self.addUpdateMcqQuestion(query, question, pool, function(result) {
+                if (result.Error)
+                    issues++;
+                else
+                    added++;
+                console.log(issues + ":" + added)
+                childCallback(null, { 'issues': issues, 'added': added });
+            });
+        }, function(err, rows) {
+            if (err) {
+                console.log(err)
+                callback({ "Error": true, "Message": err });
+            }
+            console.log(rows);
+            callback({ "Error": false, "Message": "Question added Successfully", "counts": rows });
+        });
+    },
     addUpdateMcqQuestion: function(query, req, pool, callback) {
         var query = query,
             queryValues;
@@ -474,7 +495,7 @@ var self = {
                     queryValues = ["answers", "id", "questionId", "answerText", "ansKey", "isDeleted"];
                     var values = [];
                     for (var i = 0; i < req.answers.length; i++) {
-                        values.push([req.answers[i].id, questionId, req.answers[i].answerText, req.answers[i].ansKey, req.answers[i].isDeleted]);
+                        values.push([req.answers[i].id, questionId, req.answers[i].answerText, req.answers[i].ansKey, req.answers[i].isDeleted ? true : false]);
                     }
                     queryValues.push(values);
                     query = mysql.format(query, queryValues);
@@ -616,16 +637,40 @@ var self = {
         });
     },
     getAllQuestion: function(req, pool, callback) {
-        var query = "SELECT * FROM ?? WHERE isDeleted=false and parentQuestionId IS NULL";
+    	var questions = questionPapers = [];
+        var query = "SELECT q.*, GROUP_CONCAT(qq.questionPaperId) as questionPaperList FROM ?? q LEFT JOIN (question_questionpaper qq) ON q.id = qq.questionId WHERE q.isDeleted=false and q.parentQuestionId IS NULL GROUP BY q.id";
         var queryValues = ["questions"];
         query = mysql.format(query, queryValues);
+        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
-                connection.release();
                 if (err) {
+                	connection.release();
                     callback({ "Error": true, "Message": err });
                 } else {
-                    callback({ "Error": false, "Message": "Successfully", "questions": rows });
+                	questions = rows;
+                	query = "SELECT * FROM ?? WHERE isDeleted=false";
+                	queryValues = ["questionpapers"];
+                	query = mysql.format(query, queryValues);
+                	connection.query(query, function(err, rows) {
+                		connection.release();
+		                if (err) {
+		                    callback({ "Error": false, "Message": "Successfully", "questions": questions });
+		                } else {
+		                	questionPapers = rows;
+		                	_.forEach(questions, function(value){
+		                		value.questionPapers = [];
+		                		if(value.questionPaperList){
+		                			_.forEach(value.questionPaperList.split(','), function(childValue){
+		                				var questionPaper = _.find(questionPapers, { 'id': parseInt(childValue) });
+		                				if(questionPaper)
+		                					value.questionPapers.push({ questionPaperId: questionPaper.id, name: questionPaper.name});
+		                			});
+		                		}
+		                	});
+                    		callback({ "Error": false, "Message": "Successfully", "questions": questions });
+                    	}
+                    });
                 }
             });
         });
@@ -667,7 +712,7 @@ var self = {
         });
     },
     importQuestion: function(req, pool, callback) {
-    	console.log(req.file)
+        console.log(req.file)
         var folderPath = './public/question';
         var read = fs.createReadStream(req.files.file.path);
         var ext = path.parse(req.files.file.name).ext;

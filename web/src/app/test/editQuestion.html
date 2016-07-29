@@ -32,14 +32,14 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="answer in vm.question.answers | filter: { isDeleted: 0 }" ng-init="answer.ansKey = vm.keyCode[$index]">
-                        <td scope="row" ng-bind="$index + 1"></td>
+                        <td scope="row" ng-bind="vm.keyCode[$index]"></td>
                         <td>
                             <text-angular class="test-answer-options" ta-toolbar="vm.toolBar" placeholder="Answer option" ng-model="answer.answerText"></text-angular>
                         </td>
                         <td>
                             <div class="radio">
                                 <label>
-                                    <input type="radio" name="answerOption" ng-model="vm.question.correctAnswer" ng-value="answer.ansKey">
+                                    <input type="radio" name="answerOption" ng-model="vm.question.correctAnswer" ng-value="vm.keyCode[$index]">
                                 </label>
                             </div>
                         </td>
@@ -118,9 +118,13 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-default pull-right" ng-click="vm.updateQuestion()">
+                <button type="button" class="btn btn-default pull-right" ng-click="vm.updateQuestion(false)">
                     <span ng-if="vm.objMode == 'edit'">Update</span>
                     <span ng-if="vm.objMode == 'insert'">Save</span>
+                </button>
+                <button type="button" class="btn btn-default pull-right" ng-click="vm.updateQuestion(true)">
+                    <span ng-if="vm.objMode == 'edit'">Update And New</span>
+                    <span ng-if="vm.objMode == 'insert'">Save And New</span>
                 </button>
             </div>
         </div>

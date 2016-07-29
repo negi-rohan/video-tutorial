@@ -36,12 +36,12 @@
                             _.forEach(vm.userAnswers.questions, function(value) {
                                 if (value.type != 'Passage') {
                                     var userAnswer = _.find(vm.userAnswers.userInfo, { 'questionId': value.id });
-                                    value.userAnsKey = userAnswer ? userAnswer.answer : 'None';
+                                    value.userAnsKey = userAnswer ? userAnswer.answer : null;
                                     if(value.userAnsKey == value.correctAnswer){
                                         vm.userAnswers.totalCorrect++;
                                         value.result = 'correct';
                                     }
-                                    else if(value.userAnsKey == 'None'){
+                                    else if(!value.userAnsKey){
                                         vm.userAnswers.totalUnanswered++;
                                         value.result = 'unanswered';
                                     }
@@ -53,6 +53,7 @@
                                         value.userAnswer = _.find(value.answers, { 'ansKey': value.userAnsKey }).answerText;
                                     else
                                         value.userAnswer = "NA"
+                                    value.correctAnsKey = value.correctAnswer;
                                     value.correctAnswer = _.find(value.answers, { 'ansKey': value.correctAnswer }).answerText;
                                 }
                             });

@@ -13,6 +13,9 @@
                         <button type="button" class="btn btn-default" ng-click="vm.editQuestion('insert');">
                             <i class="fa fa-plus" aria-hidden="true"></i> New Question
                         </button>
+                        <button ng-if="vm.selectedTab == 2" class="btn btn-default" type="button" ngf-select="vm.importQuestion($file)" ng-model="vm.question.file" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB">
+                            <i class="fa fa-upload" aria-hidden="true"></i> Import Questions
+                        </button>
                     </span>
                     <span class="pull-right" ng-if="vm.isQuestionSelected">
                         <span uib-dropdown>
@@ -26,14 +29,11 @@
                             </ul>
                         </span>
                     </span>
-                    <span class="pull-right" ng-if="vm.selectedTab == 2">
-                        <input class="btn btn-default" type="button" value="Import Questions" ngf-select="vm.importQuestion($file)" ng-model="vm.question.file" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB" />
-                    </span>
                     <div class="clearfix"></div>
                 </div>
                 <uib-tabset active="vm.selectedTab" type="pills" justified="true">
                     <uib-tab index="0" heading="Test" select="vm.getAllTests();vm.selectedTab=0;">
-                        <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;margin-bottom:0px;">
+                        <table class="table table-striped table-hover table-valign-middle" style="border:1px solid lightgrey;margin-bottom:0px;">
                             <thead>
                                 <tr class="success">
                                     <th>#</th>
@@ -50,7 +50,7 @@
                                 <tr ng-repeat="test in vm.tests">
                                     <th scope="row" ng-bind="$index + 1"></th>
                                     <td ng-bind="test.title"></td>
-                                    <td ng-bind="test.duration"></td>
+                                    <td ng-bind="test.durationInHrs"></td>
                                     <td ng-bind="test.startDate | date : 'fullDate'"></td>
                                     <td ng-bind="test.endDate | date : 'fullDate'"></td>
                                     <td ng-bind="test.questionPaperName"></td>
@@ -60,13 +60,14 @@
                                         <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteTest(test.id)"></i>
                                         <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" ng-click="vm.getTestUsers(test);"></i>
                                         <i class="fa fa-check-square-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.evaluation(test.id)"></i>
+                                        <i class="fa fa-search fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.showTestPreview(test)"></i>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </uib-tab>
                     <uib-tab index="1" heading="Question Paper" select="vm.getAllquestionPapers();vm.selectedTab=1;">
-                        <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;margin-bottom:0px;">
+                        <table class="table table-striped table-hover table-valign-middle" style="border:1px solid lightgrey;margin-bottom:0px;">
                             <thead>
                                 <tr class="success">
                                     <th>#</th>
@@ -89,12 +90,13 @@
                         </table>
                     </uib-tab>
                     <uib-tab index="2" heading="Questions" select="vm.getAllQuestions();vm.selectedTab=2;">
-                        <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;margin-bottom:0px;">
+                        <table class="table table-striped table-hover table-valign-middle" style="border:1px solid lightgrey;margin-bottom:0px;">
                             <thead>
                                 <tr class="success">
                                     <th>#</th>
                                     <th>Question</th>
                                     <th>Type</th>
+                                    <th><span style="white-space:nowrap;">Question Papers</span></th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -103,8 +105,14 @@
                                     <th scope="row">
                                         <input type="checkbox" ng-change="vm.questionSelection();" ng-model="question.isSelected" />
                                     </th>
-                                    <td ng-bind="question.question | htmlToPlaintext"></td>
+                                    <td ng-bind="question.question | htmlToPlaintext">
+                                    </td>
                                     <td ng-bind="question.type"></td>
+                                    <td>
+                                        <span ng-repeat="questionPaper in question.questionPapers">
+                                            <span style="white-space:nowrap;" ng-bind="questionPaper.name"></span><br ng-if="!$last" />
+                                        </span>
+                                    </td>
                                     <td>
                                         <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getQuestionById(question.id); " style="vertical-align:-4px;"></i>
                                         <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteQuestion(question.id)"></i>

@@ -66,6 +66,8 @@
 
         function activate() {
             vm.exam = CommonInfo.getInfo('exam');
+            vm.isPreview = vm.exam.isPreview ? true : false;
+            alert(vm.isPreview)
             vm.user = CommonInfo.getInfo('user');
             if (vm.exam && vm.user) {
                 vm.timer = vm.exam.duration;
@@ -75,6 +77,7 @@
 
         $scope.$on('timer-tick', function(event, args) {
             userTime = args.millis
+            console.log(args)
         });
 
         $scope.$on('timer-stopped', function(event, data) {
@@ -97,24 +100,34 @@
                 userId: vm.user.id,
                 testId: vm.exam.id
             };
-            $http.post(CommonInfo.getAppUrl() + '/api/exam/userInfo', data).then(function(response) {
-                if (response && response.data) {
-                    vm.exam.userInfo = response.data.userTestInfo;
-                    if (vm.exam && vm.exam.userInfo && vm.exam.userInfo.status == 'pending' && vm.exam.userInfo.timeRemaining == 0) {
-                        alert('Your exam time is over, press ok to submit exam')
-                        submitExam(true);
-                    } else {
-                        vm.timer = vm.exam.userInfo.timeRemaining || vm.timer;
-                        _.forEach(vm.exam.questions, function(value, key) {
-                            vm.userCurrentQuestion[key] = _.find(vm.exam.userInfo.answers, { 'questionId': value.id }) || {
-                                questionId: value.id,
-                                answer: '',
-                                isMarked: false
-                            };
-                        });
+            if (!vm.isPreview) {
+                $http.post(CommonInfo.getAppUrl() + '/api/exam/userInfo', data).then(function(response) {
+                    if (response && response.data) {
+                        vm.exam.userInfo = response.data.userTestInfo;
+                        if (vm.exam && vm.exam.userInfo && vm.exam.userInfo.status == 'pending' && vm.exam.userInfo.timeRemaining == 0) {
+                            alert('Your exam time is over, press ok to submit exam')
+                            submitExam(true);
+                        } else {
+                            vm.timer = vm.exam.userInfo.timeRemaining || vm.timer;
+                            _.forEach(vm.exam.questions, function(value, key) {
+                                vm.userCurrentQuestion[key] = _.find(vm.exam.userInfo.answers, { 'questionId': value.id }) || {
+                                    questionId: value.id,
+                                    answer: '',
+                                    isMarked: false
+                                };
+                            });
+                        }
                     }
-                }
-            }, function(response) {});
+                }, function(response) {});
+            } else {
+                _.forEach(vm.exam.questions, function(value, key) {
+                    vm.userCurrentQuestion[key] = {
+                        questionId: value.id,
+                        answer: '',
+                        isMarked: false
+                    };
+                });
+            }
         }
 
         function startExam() {
@@ -149,20 +162,22 @@
                 answers: vm.userCurrentQuestion,
                 status: status
             };
-            if (isForced || status == 'pending' || confirm('Are you sure, you want to submit(final) you answers')) {
-                $http.post(CommonInfo.getAppUrl() + '/api/exam/submit', data).then(function(response) {
-                    if (response && response.data) {
-                        if (status == 'completed') {
-                            vm.isExamStarted = false;
-                            growl.success('Your answers saved successfully');
-                            $scope.$on('$stateChangeStart',
-                                function(event, toState, toParams, fromState, fromParams) {
-                                    return true;
-                                });
-                            $state.go('main.examsList');
+            if(!vm.isPreview){
+                if (isForced || status == 'pending' || confirm('Are you sure, you want to submit(final) your answers')) {
+                    $http.post(CommonInfo.getAppUrl() + '/api/exam/submit', data).then(function(response) {
+                        if (response && response.data) {
+                            if (status == 'completed') {
+                                vm.isExamStarted = false;
+                                growl.success('Your answers saved successfully');
+                                $scope.$on('$stateChangeStart',
+                                    function(event, toState, toParams, fromState, fromParams) {
+                                        return true;
+                                    });
+                                $state.go('main.examsList');
+                            }
                         }
-                    }
-                }, function(response) {});
+                    }, function(response) {});
+                }
             }
         }
     }
