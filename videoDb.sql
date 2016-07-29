@@ -22,99 +22,6 @@ CREATE DATABASE IF NOT EXISTS tutorialsdb;
 USE tutorialsdb;
 
 --
--- Definition of table `answers`
---
-
-DROP TABLE IF EXISTS `answers`;
-CREATE TABLE `answers` (
-  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
-  `questionId` int(70) unsigned NOT NULL,
-  `answerText` text NOT NULL,
-  `isDeleted` tinyint(1) DEFAULT '0',
-  `ansKey` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
-
---
--- Definition of table `question_questionpaper`
---
-
-DROP TABLE IF EXISTS `question_questionpaper`;
-CREATE TABLE `question_questionpaper` (
-  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
-  `questionPaperId` int(70) unsigned NOT NULL,
-  `questionId` int(70) unsigned NOT NULL,
-  `isDeleted` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `Combo` (`questionPaperId`,`questionId`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
-
---
--- Definition of table `questionpapers`
---
-
-DROP TABLE IF EXISTS `questionpapers`;
-CREATE TABLE `questionpapers` (
-  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `isDeleted` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
-
---
--- Definition of table `questions`
---
-
-DROP TABLE IF EXISTS `questions`;
-CREATE TABLE `questions` (
-  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
-  `question` text NOT NULL,
-  `type` varchar(45) DEFAULT NULL,
-  `parentQuestionId` int(70) unsigned DEFAULT NULL,
-  `isDeleted` tinyint(1) DEFAULT '0',
-  `explanation` text,
-  `correctAnswer` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
-
---
--- Definition of table `test_user_answer`
---
-
-DROP TABLE IF EXISTS `test_user_answer`;
-CREATE TABLE `test_user_answer` (
-  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
-  `userId` int(70) unsigned NOT NULL,
-  `testId` int(70) unsigned NOT NULL,
-  `questionId` int(70) unsigned NOT NULL,
-  `answer` varchar(45) DEFAULT NULL,
-  `isMarked` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `combo` (`userId`,`testId`,`questionId`)
-) ENGINE=InnoDB AUTO_INCREMENT=611 DEFAULT CHARSET=latin1;
-
---
--- Definition of table `tests`
---
-
-DROP TABLE IF EXISTS `tests`;
-CREATE TABLE `tests` (
-  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
-  `title` varchar(100) NOT NULL,
-  `instruction` text,
-  `marksPerQues` double DEFAULT NULL,
-  `negativeMarks` double DEFAULT NULL,
-  `instantResult` tinyint(1) unsigned DEFAULT '0',
-  `duration` int(10) unsigned DEFAULT NULL,
-  `startDate` datetime DEFAULT NULL,
-  `endDate` datetime DEFAULT NULL,
-  `instantRank` tinyint(1) DEFAULT '0',
-  `questionPaperId` int(70) unsigned DEFAULT NULL,
-  `isDeleted` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
-
---
 -- Definition of table `testuserinfo`
 --
 
@@ -127,23 +34,10 @@ CREATE TABLE `testuserinfo` (
   `timeRemaining` int(10) unsigned DEFAULT NULL,
   `score` varchar(45) DEFAULT NULL,
   `rank` int(70) unsigned DEFAULT NULL,
+  `totalQuestions` int(100) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `combo` (`userId`,`testId`)
-) ENGINE=InnoDB AUTO_INCREMENT=204 DEFAULT CHARSET=latin1;
-
---
--- Definition of table `units`
---
-
-DROP TABLE IF EXISTS `units`;
-CREATE TABLE `units` (
-  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `description` varchar(200) NOT NULL,
-  `courseId` int(10) unsigned NOT NULL,
-  `isDeleted` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=209 DEFAULT CHARSET=latin1;
 
 --
 -- Definition of procedure `calculateRank`
