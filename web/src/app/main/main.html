@@ -27,7 +27,7 @@
                         </li>
                     </ul>
                 </span>
-                <form class="navbar-form navbar-right" role="search">
+                <form class="navbar-form navbar-right" role="search" ng-if="false">
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Search courses by name.." ng-model="vm.searchText" />
                         <span class="input-group-btn">
@@ -67,14 +67,14 @@
                             <i class="fa fa-users fa-fw" aria-hidden="true"></i> Students
                         </a>
                     </li>
-                    <li ui-sref="main.test.home" ui-sref-active="active" ng-if="vm.config.tabs.test">
+                    <li ui-sref="main.test.home" ng-if="vm.config.tabs.test">
                         <a href="javascript:void(0);" ng-click="vm.getAllTests();">
-                            <i class="fa fa-users fa-fw" aria-hidden="true"></i> Test
+                            <i class="fa fa-certificate fa-fw" aria-hidden="true"></i> Test
                         </a>
                     </li>
-                    <li ui-sref="main.examsList" ui-sref-active="active" ng-if="vm.config.tabs.exam">
+                    <li ui-sref="main.examsList" ng-if="vm.config.tabs.exam">
                         <a href="javascript:void(0);">
-                            <i class="fa fa-users fa-fw" aria-hidden="true"></i> Exams
+                            <i class="fa fa-certificate fa-fw" aria-hidden="true"></i> Exams
                         </a>
                     </li>
                 </ul>

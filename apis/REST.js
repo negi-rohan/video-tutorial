@@ -51,7 +51,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
     });
 
     router.post("/sendOtp", function(req, res) {
-        queryHelper.generatOtp(req.body, function(result) {
+        queryHelper.generatOtp(req.body, pool, function(result) {
             res.json(result);
         });
     });
@@ -128,32 +128,38 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
     });
 
     router.post("/course/subscribe", function(req, res) {
-        var headers = { 'X-Api-Key': config.instamojo.APIKey, 'X-Auth-Token': config.instamojo.AuthToken }
-        var payload = {
-            purpose: req.body.purpose,
-            amount: req.body.amt,
-            phone: req.body.phone,
-            buyer_name: req.body.fullName,
-            redirect_url: 'http://52.66.78.88/#/main/libary',
-            send_email: false,
-            webhook: 'http://52.66.82.252/api/course/payment',
-            send_sms: false,
-            email: req.body.email,
-            allow_repeated_payments: false
-        };
-        request.post('https://www.instamojo.com/api/1.1/payment-requests/', { form: payload, headers: headers }, function(error, response, body) {
-            if (!error && response.statusCode == 201) {
-                var requestLink = JSON.parse(body);
-                queryHelper.savePaymentDetails(req.body, requestLink.payment_request, pool, function(result) {
-                    if (result && !result.Error)
-                        res.json({ 'url': requestLink.payment_request.longurl });
-                    else
-                        res.json({ "Error": true, "Message": "Try after some time" });
-                });
-            } else {
-                res.json({ "Error": true, "Message": error });
-            }
-        })
+        if (req.body.amt && req.body.amt > 0) {
+            var headers = { 'X-Api-Key': config.instamojo.APIKey, 'X-Auth-Token': config.instamojo.AuthToken }
+            var payload = {
+                purpose: req.body.purpose,
+                amount: req.body.amt,
+                phone: req.body.phone,
+                buyer_name: req.body.fullName,
+                redirect_url: 'http://52.66.78.88/#/main/libary',
+                send_email: false,
+                webhook: 'http://52.66.82.252/api/course/payment',
+                send_sms: false,
+                email: req.body.email,
+                allow_repeated_payments: false
+            };
+            request.post('https://www.instamojo.com/api/1.1/payment-requests/', { form: payload, headers: headers }, function(error, response, body) {
+                if (!error && response.statusCode == 201) {
+                    var requestLink = JSON.parse(body);
+                    queryHelper.savePaymentDetails(req.body, requestLink.payment_request, pool, function(result) {
+                        if (result && !result.Error)
+                            res.json({ 'url': requestLink.payment_request.longurl });
+                        else
+                            res.json({ "Error": true, "Message": "Try after some time" });
+                    });
+                } else {
+                    res.json({ "Error": true, "Message": error });
+                }
+            });
+        } else {
+            queryHelper.subscribeCourse(req.body, pool, function(result) {
+                res.json(result);
+            });
+        }
     });
 
     router.post("/course/payment", function(req, res) {
@@ -362,6 +368,18 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/subject", function(req, res) { /// get all tests
+        testQueryHelper.addSubject(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.get("/subject/all", function(req, res) { /// get all tests
+        testQueryHelper.getAllSubject(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/question", function(req, res) { /// get all tests
         testQueryHelper.addUpdateQuestion(req.body, pool, function(result) {
             res.json(result);
@@ -411,9 +429,9 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                     value.question = '<p>' + value.question + '</p>'
                     value.correctAnswer = value.answer;
                     value.answers = [];
-                    _.forIn(value, function(childValue, childKey){
-                        if(childKey.length == 1 && childValue){
-                            value.answers.push({   
+                    _.forIn(value, function(childValue, childKey) {
+                        if (childKey.length == 1 && childValue) {
+                            value.answers.push({
                                 ansKey: childKey,
                                 answerText: '<p>' + childValue + '</p>'
                             });

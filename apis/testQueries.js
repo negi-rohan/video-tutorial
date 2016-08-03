@@ -79,10 +79,10 @@ var self = {
     },
     getTestUsers: function(req, pool, callback) {
         if (req.withEvaluatedStatus) {
-            query = "SELECT u.id, u.fullName, tu.score, tu.rank FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status=? ORDER BY tu.rank";
+            query = "SELECT u.id, u.fullName, tu.score, tu.rank, tu.percentile FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status=? ORDER BY tu.rank";
             queryValues = [req.testId, "evaluated"];
         } else {
-            query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.rank";
+            query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.rank";
             queryValues = [req.testId];
         }
         query = mysql.format(query, queryValues);
@@ -98,13 +98,14 @@ var self = {
         });
     },
     getAllExams: function(req, pool, callback) {
-        var query = "SELECT t.*, u.status, u.score, u.rank FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ? WHERE isDeleted=false AND questionPaperId IS NOT NULL AND subdate(current_date, 1) >= ?? and subdate(current_date, 1) <= ??";
+        var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.questionPaperId IS NOT NULL AND subdate(current_date, 1) >= ?? and subdate(current_date, 1) <= ?? GROUP By t.id";
         var queryValues = ["tests", req.userId, "startDate", "endDate"];
         query = mysql.format(query, queryValues);
+        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
+            	connection.release();
                 if (err) {
-                    connection.release();
                     callback({ "Error": true, "Message": err });
                 } else if (rows && rows.length > 0) {
                     _.forEach(rows, function(value) {
@@ -131,7 +132,7 @@ var self = {
                 } else if (rows && rows.length > 0) {
                     var questionIds = _.map(rows, 'questionId');
                     if (req.selectAll) {
-                        query = "SELECT * FROM ?? WHERE isDeleted=false AND (id IN (?) OR parentQuestionId IN (?))";
+                        query = "SELECT q.*, s.name as subjectName FROM ?? q LEFT JOIN (subjects s) ON s.id = q.subjectId WHERE q.isDeleted=false AND (q.id IN (?) OR q.parentQuestionId IN (?))";
                     } else {
                         query = "SELECT id, question, type, parentQuestionId FROM ?? WHERE isDeleted=false AND (id IN (?) OR parentQuestionId IN (?))";
                     }
@@ -296,9 +297,13 @@ var self = {
         });
     },
     testEvaluation: function(req, pool, callback) {
-        var query, queryValues, userList, questions, userAnswer;
-        query = "SELECT u.*, t.marksPerQues, t.negativeMarks FROM ?? u LEFT JOIN (?? t) ON t.id = u.testId WHERE u.testId=? AND u.status=?";
-        queryValues = ["testuserinfo", "tests", req.testId, "completed"];
+        var query, queryValues, userList, questions, userAnswer, status = [];
+        if(req.isForced)
+        	status = ["completed", "evaluated"];
+        else
+        	status = ["completed"]
+        query = "SELECT u.*, t.marksPerQues, t.negativeMarks FROM ?? u LEFT JOIN (?? t) ON t.id = u.testId WHERE u.testId=? AND u.status IN (?)";
+        queryValues = ["testuserinfo", "tests", req.testId, status];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -341,16 +346,26 @@ var self = {
                                 });
                             },
                             function(err, rows) {
-                                connection.release();
                                 if (err) {
+                                	connection.release();
                                     callback({ "Error": true, "Message": err });
                                 } else {
-                                    query = "CALL calculateRank()";
+                                    query = "CALL calculateRank(?)";
+                                    queryValues = [req.testId];
+                                    query = mysql.format(query, queryValues);
                                     connection.query(query, function(err, rows) {
                                         if (err) {
                                             callback({ "Error": true, "Message": err });
                                         }
-                                        callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+                                        query = "CALL calculatePercentile(?)";
+	                                    queryValues = [req.testId];
+	                                    query = mysql.format(query, queryValues);
+	                                    connection.query(query, function(err, rows) {
+	                                        if (err) {
+	                                            callback({ "Error": true, "Message": err });
+	                                        }
+	                                        callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+	                                    });
                                     });
                                 }
                             });
@@ -441,9 +456,39 @@ var self = {
             });
         });
     },
+    addSubject: function(req, pool, callback) {
+        var query = "INSERT INTO ??(??, ??) VALUES (?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name)";
+        var queryValues = ["subjects", "id", "name", req.id, req.name];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                connection.release();
+                if (err) {
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Subject added Successfully" });
+                }
+            });
+        });
+    },
+    getAllSubject: function(req, pool, callback) {
+        var query = "SELECT * FROM ??";
+        var queryValues = ["subjects"];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                connection.release();
+                if (err) {
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Successfully", "subjects": rows });
+                }
+            });
+        });
+    },
     addUpdateQuestion: function(req, pool, callback) {
-        var query = "INSERT INTO ??(??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE question=VALUES(question), type=VALUES(type), explanation=VALUES(explanation), correctAnswer=VALUES(correctAnswer)";
-        var queryValues = ["questions", "id", "question", "type", "explanation", "correctAnswer", req.id, req.question, req.type, req.explanation, req.correctAnswer];
+        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE question=VALUES(question), type=VALUES(type), explanation=VALUES(explanation), correctAnswer=VALUES(correctAnswer), subjectId=VALUES(subjectId)";
+        var queryValues = ["questions", "id", "question", "type", "explanation", "correctAnswer", "subjectId", req.id, req.question, req.type, req.explanation, req.correctAnswer, req.subjectId];
         query = mysql.format(query, queryValues);
         if (req.type.toLowerCase() == 'mcq') {
             self.addUpdateMcqQuestion(query, req, pool, callback);
@@ -463,7 +508,6 @@ var self = {
                     issues++;
                 else
                     added++;
-                console.log(issues + ":" + added)
                 childCallback(null, { 'issues': issues, 'added': added });
             });
         }, function(err, rows) {
@@ -641,7 +685,6 @@ var self = {
         var query = "SELECT q.*, GROUP_CONCAT(qq.questionPaperId) as questionPaperList FROM ?? q LEFT JOIN (question_questionpaper qq) ON q.id = qq.questionId WHERE q.isDeleted=false and q.parentQuestionId IS NULL GROUP BY q.id";
         var queryValues = ["questions"];
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 if (err) {

@@ -8,7 +8,7 @@
     font-size: 12px;
     line-height: 1.428571429;
     border-radius: 15px;
-    margin:4px 0px;
+    margin: 4px 0px;
 }
 
 
@@ -91,16 +91,28 @@
     text-overflow: ellipsis;
 }
 
+
 /* Table css */
+
 .table-valign-middle > tbody > tr > td {
     vertical-align: middle;
 }
 
+
 /* Test result css */
+
 .incorrect-answer {
     background-color: red;
 }
 
 .correct-answer {
     background-color: green;
+}
+
+.body-background {
+    background-image: url('/assets/images/forumias-academy-image.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    height:100%;
+    width:100%;
 }

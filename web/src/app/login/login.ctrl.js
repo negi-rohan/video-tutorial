@@ -3,7 +3,24 @@
 
     angular
         .module('web')
-        .controller('LoginController', LoginController);
+        .controller('LoginController', LoginController)
+        .directive('loginArea', loginArea);
+
+
+    //style = "background-image: url('assets/images/forumias-academy-image.jpg');background-repeat: no-repeat;background-size: cover;"
+    /** @ngInject */
+    function loginArea($window, resize) {
+        return {
+            restrict: 'A',
+            link: function(scope, elem, attrs) {
+
+                resize(scope).call(function() {
+                    elem.css('height', $window.innerHeight + 'px');
+                });
+            }
+        };
+    }
+
 
     /** @ngInject */
     function LoginController($http, $state, CommonInfo, growl, $location, $timeout) {
@@ -25,7 +42,7 @@
             password: '',
             phone: '',
         };
-        vm.isOtp = false;
+        vm.isOtp = true;
         vm.isOtpSend = false;
         vm.isOtpValid = false;
 
@@ -34,6 +51,7 @@
         vm.forgetPassword = forgetPassword;
         vm.requestOtp = requestOtp;
         vm.validateOtp = validateOtp;
+        vm.isLoginPage = true;
 
         activate();
 

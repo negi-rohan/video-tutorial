@@ -3,7 +3,15 @@
 
     angular
         .module('web')
-        .controller('MainController', MainController);
+        .controller('MainController', MainController)
+        .filter('truncate', truncate);
+
+    /** @ngInject */
+    function truncate(_) {
+        return function(text) {
+            return _.truncate(text, { 'length': 213 });
+        }
+    }
 
     /** @ngInject */
     function MainController($http, CommonInfo, Upload, $state, credentials, $uibModal, _, growl, $scope) {
@@ -34,7 +42,7 @@
         vm.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
         vm.format = 'dd-MMMM-yyyy';
         vm.toolBar = [
-            ['h1','h2','h3', 'bold','italics', 'underline'],
+            ['h1', 'h2', 'h3', 'bold', 'italics', 'underline'],
             ['ol', 'ul'],
             ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
             ['html', 'insertImage', 'insertLink', 'insertVideo']
@@ -167,8 +175,12 @@
                     courseId: course.id
                 };
                 $http.post(CommonInfo.getAppUrl() + '/api/course/subscribe', data).then(function(response) {
-                    if (response && response.data) {
-                        window.open(response.data.url + '?embed=form');
+                    if (response && response.data && !response.data.Error) {
+                        if (response.data.url) {
+                            window.open(response.data.url + '?embed=form');
+                        } else if (response.data.code) {
+                            growl.success('Course subscribed successfully');
+                        }
                     }
                 }, function(response) {});
             }

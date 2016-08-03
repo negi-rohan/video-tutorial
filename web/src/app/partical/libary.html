@@ -9,7 +9,7 @@
                         <span ng-bind="course.duration"></span> hours</span>
                 </div>
                 <div class="panel-body fixedheight">
-                    <div class="body-fixed-height" ng-bind-html="course.description"></div>
+                    <div class="body-fixed-height" ng-bind="course.description | truncate"></div>
                     <div class="btn-group bottomright">
                         <button type="button" class="btn btn-default btn-sm" ng-click="vm.showCourseInfo(course.id, course.name, course.description)">
                             <i class="fa fa-info" aria-hidden="true"></i> View More
@@ -33,7 +33,10 @@
                         </div>
                         <div class="col-md-8 col-xs-8 text-right">
                             <button type="button" class="btn btn-default btn-sm" ng-click="vm.subscribeCourse(course)">
-                                <i class="fa fa-credit-card" aria-hidden="true"></i> Subscribe Now @ <i class="fa fa-inr" aria-hidden="true"></i> <span ng-bind="course.subscriptionFee"></span>
+                                <i class="fa fa-credit-card" aria-hidden="true" ng-if="course.subscriptionFee"></i> Subscribe Now 
+                                <span ng-if="course.subscriptionFee">@ </span>
+                                <i class="fa fa-inr" aria-hidden="true" ng-if="course.subscriptionFee"></i> 
+                                <span ng-bind="course.subscriptionFee"></span>
                             </button>
                         </div>
                     </div>

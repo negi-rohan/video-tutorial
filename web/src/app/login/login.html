@@ -82,93 +82,90 @@
 </div>
 </div>
 -->
-<div class="container-fluid" ng-cloak style="margin-top:30px;">
-    <div class="row">
-        <div class="col-md-12">
-            <img class="center-block" src="assets/images/forumias-png.png" />
-        </div>
-    </div>
-    <div class="row" style="margin-top:20px;">
-        <div class="col-md-4 col-md-offset-8 col-xs-12 col-xs-offset-1" style="margin-right:4px;">
-            <div class=" well">
-                <uib-tabset active="vm.activeForm">
-                    <uib-tab index="0" heading="Login">
-                        <form style="margin-top:15px;" ng-if="!vm.forget.status">
-                            <div class="form-group">
-                                <label for="profile.email">Email or Phone number</label>
-                                <input type="text" class="form-control" id="profile.email" placeholder="Email or Phone number" ng-model="vm.user.userName" />
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.password">Password</label>
-                                <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" ng-keyup="$event.keyCode == 13 && vm.login()" />
-                                <div class="text-right">
-                                    <a href="javascript:void(0);" ng-click="vm.forget.status = true;">Forgot Password</a>
+<div class="body-background" login-area>
+    <div class="container-fluid" ng-cloak>
+        <div class="row" style="margin-top:40px;">
+            <div class="col-md-4 col-md-offset-8 col-xs-12 col-xs-offset-1" style="margin-right:4px;">
+                <div class=" well" style="opacity: 0.7;margin-right: 32px;background:azure;">
+                    <uib-tabset active="vm.activeForm">
+                        <uib-tab index="0" heading="Login">
+                            <form style="margin-top:15px;" ng-if="!vm.forget.status">
+                                <div class="form-group">
+                                    <label for="profile.email">Email or Phone number</label>
+                                    <input type="text" class="form-control" id="profile.email" placeholder="Email or Phone number" ng-model="vm.user.userName" />
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <input class="btn btn-default pull-right" type="button" ng-click="vm.login()" value="Login">
-                            </div>
-                            <div class="clearfix"></div>
-                        </form>
-                        <form style="margin-top:15px;" ng-if="vm.forget.status">
-                            <div class="form-group">
-                                <label for="profile.email">Email</label>
-                                <input type="text" required class="form-control" id="profile.email" placeholder="Email" ng-model="vm.forget.email" />
-                            </div>
-                            <div class="form-group">
-                                <input class="btn btn-default pull-right" type="button" ng-click="vm.forgetPassword();" value="Send Request">
-                            </div>
-                            <div class="clearfix"></div>
-                        </form>
-                    </uib-tab>
-                    <uib-tab index="1" heading="Signup">
-                        <form style="margin-top:15px;" ng-if="vm.isOtp && !vm.isOtpSend && !vm.isOtpValid" name="signup">
-                            <div class="form-group">
-                                <label for="profile.phone">Phone</label>
-                                <input name="phone" type="text" required="" ng-minlength="10" min="10" class="form-control" id="profile.phone" maxlength="10" placeholder="Phone" ng-model="vm.newUser.phone" />
-                            </div>
-                            <input class="btn btn-default pull-right" ng-disabled="!signup.phone.$valid" type="button" ng-click="vm.requestOtp()" value="Get OTP">
-                            <div class="clearfix"></div>
-                        </form>
-                        <form style="margin-top:15px;" ng-if="vm.isOtp && vm.isOtpSend && !vm.isOtpValid">
-                            <div class="form-group">
-                                <label for="profile.otp">Enter verification code</label>
-                                <input type="text" class="form-control" id="profile.otp" placeholder="Verification Code" ng-model="vm.newUser.otp" />
-                                <div class="text-right" ng-if="vm.showResendOtp">
-                                    <a href="javascript:void(0);" ng-click="vm.requestOtp();">Resend verification code</a>
+                                <div class="form-group">
+                                    <label for="profile.password">Password</label>
+                                    <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" ng-keyup="$event.keyCode == 13 && vm.login()" />
+                                    <div class="text-right">
+                                        <a href="javascript:void(0);" ng-click="vm.forget.status = true;">Forgot Password</a>
+                                    </div>
                                 </div>
-                            </div>
-                            <input class="btn btn-default pull-right" type="button" ng-click="vm.validateOtp()" value="Submit Verification Code">
-                            <div class="clearfix"></div>
-                        </form>
-                        <form style="margin-top:15px;" ng-if="!vm.isOtp || vm.isOtpValid">
-                            <div class="form-group">
-                                <label for="profile.fullName">Full Name</label>
-                                <i class="pull-right">(All fields are mandatory)</i>
-                                <input type="text" class="form-control" id="profile.fullName" placeholder="Full Name" ng-model="vm.newUser.fullName" />
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.email">Email</label>
-                                <input type="email" class="form-control" id="profile.email" placeholder="Email" ng-model="vm.newUser.email" />
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.phone">Phone</label>
-                                <input type="text" class="form-control" id="profile.phone" maxlength="10" ng-if="!vm.isOtp" placeholder="Phone" ng-model="vm.newUser.phone" />
-                                <p class="form-control-static" ng-bind="vm.newUser.phone" ng-if="vm.isOtp"></p>
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.password">Password</label>
-                                <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.newUser.password" />
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.confirmPassword">Confirm Password</label>
-                                <input type="password" class="form-control" id="profile.confirmPassword" placeholder="Confirm Password" ng-model="vm.newUser.confirmPassword" />
-                            </div>
-                            <input class="btn btn-default pull-right" type="button" ng-click="vm.signup()" value="Sign me Up">
-                            <div class="clearfix"></div>
-                        </form>
-                    </uib-tab>
-                </uib-tabset>
+                                <div class="form-group">
+                                    <input class="btn btn-primary pull-right" type="button" ng-click="vm.login()" value="Login">
+                                </div>
+                                <div class="clearfix"></div>
+                            </form>
+                            <form style="margin-top:15px;" ng-if="vm.forget.status">
+                                <div class="form-group">
+                                    <label for="profile.email">Email</label>
+                                    <input type="text" required class="form-control" id="profile.email" placeholder="Email" ng-model="vm.forget.email" />
+                                </div>
+                                <div class="form-group">
+                                    <input class="btn btn-primary pull-right" type="button" ng-click="vm.forgetPassword();" value="Send Request">
+                                </div>
+                                <div class="clearfix"></div>
+                            </form>
+                        </uib-tab>
+                        <uib-tab index="1" heading="Signup">
+                            <form style="margin-top:15px;" ng-if="vm.isOtp && !vm.isOtpSend && !vm.isOtpValid" name="signup">
+                                <div class="form-group">
+                                    <label for="profile.phone">Phone</label>
+                                    <input name="phone" type="text" required="" ng-minlength="10" min="10" class="form-control" id="profile.phone" maxlength="10" placeholder="Phone" ng-model="vm.newUser.phone" />
+                                </div>
+                                <input class="btn btn-primary pull-right" ng-disabled="!signup.phone.$valid" type="button" ng-click="vm.requestOtp()" value="Get OTP">
+                                <div class="clearfix"></div>
+                            </form>
+                            <form style="margin-top:15px;" ng-if="vm.isOtp && vm.isOtpSend && !vm.isOtpValid">
+                                <div class="form-group">
+                                    <label for="profile.otp">Enter verification code</label>
+                                    <input type="text" class="form-control" id="profile.otp" placeholder="Verification Code" ng-model="vm.newUser.otp" />
+                                    <div class="text-right" ng-if="vm.showResendOtp">
+                                        <a href="javascript:void(0);" ng-click="vm.requestOtp();">Resend verification code</a>
+                                    </div>
+                                </div>
+                                <input class="btn btn-primary pull-right" type="button" ng-click="vm.validateOtp()" value="Submit Verification Code">
+                                <div class="clearfix"></div>
+                            </form>
+                            <form style="margin-top:15px;" ng-if="!vm.isOtp || vm.isOtpValid">
+                                <div class="form-group">
+                                    <label for="profile.fullName">Full Name</label>
+                                    <i class="pull-right">(All fields are mandatory)</i>
+                                    <input type="text" class="form-control" id="profile.fullName" placeholder="Full Name" ng-model="vm.newUser.fullName" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile.email">Email</label>
+                                    <input type="email" class="form-control" id="profile.email" placeholder="Email" ng-model="vm.newUser.email" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile.phone">Phone</label>
+                                    <input type="text" class="form-control" id="profile.phone" maxlength="10" ng-if="!vm.isOtp" placeholder="Phone" ng-model="vm.newUser.phone" />
+                                    <p class="form-control-static" ng-bind="vm.newUser.phone" ng-if="vm.isOtp"></p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile.password">Password</label>
+                                    <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.newUser.password" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile.confirmPassword">Confirm Password</label>
+                                    <input type="password" class="form-control" id="profile.confirmPassword" placeholder="Confirm Password" ng-model="vm.newUser.confirmPassword" />
+                                </div>
+                                <input class="btn btn-primary pull-right" type="button" ng-click="vm.signup()" value="Sign me Up">
+                                <div class="clearfix"></div>
+                            </form>
+                        </uib-tab>
+                    </uib-tabset>
+                </div>
             </div>
         </div>
     </div>

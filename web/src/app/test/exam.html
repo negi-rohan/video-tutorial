@@ -4,12 +4,12 @@
             <div ng-bind-html="vm.exam.instruction" instruction-board style="overflow:auto;"></div>
         </div>
         <div class="col-md-12">
-            <button type="button" class="btn btn-primary btn-lg center-block" ng-click="vm.startExam();">
+            <button type="button" class="btn btn-primary btn-lg center-block" ng-click="vm.startExam();" ng-disabled="!vm.userCurrentQuestion || vm.userCurrentQuestion.length == 0">
                 Start Exam
             </button>
         </div>
     </div>
-    <div class="row" ng-if="vm.isExamStarted">
+    <div class="row" ng-if="vm.isExamStarted && !vm.isExamEnded">
         <div class="col-md-10">
             <div class="well well-sm row" style="margin-bottom:10px;">
                 <div class="col-md-4">
@@ -17,7 +17,10 @@
                 </div>
                 <div class="col-md-8">
                     <span class="pull-right">
-                         <button type="button" class="btn btn-primary" style="width:110px;" title="Mark this question for later review" ng-click="vm.userCurrentQuestion[vm.currentIndex].isMarked = !vm.userCurrentQuestion[vm.currentIndex].isMarked;">
+                        <button type="button" class="btn btn-primary" style="width:110px;" title="Unanswer this question" ng-click="vm.userCurrentQuestion[vm.currentIndex].answer = '';" ng-disabled="!vm.userCurrentQuestion[vm.currentIndex].answer">
+                            <i class="fa fa-flag" aria-hidden="true"></i> Unanswer
+                        </button>
+                        <button type="button" class="btn btn-primary" style="width:110px;" title="Mark this question for later review" ng-click="vm.userCurrentQuestion[vm.currentIndex].isMarked = !vm.userCurrentQuestion[vm.currentIndex].isMarked;">
                             <i class="fa fa-flag" aria-hidden="true"></i> Mark Flag
                         </button>
                         <button type="button" class="btn btn-primary" style="width:110px;" title="Previous Question" ng-click="vm.showQuestion(vm.currentIndex-1);" ng-disabled="vm.currentIndex==0">

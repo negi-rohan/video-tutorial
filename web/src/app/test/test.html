@@ -10,6 +10,9 @@
                         <button type="button" class="btn btn-default" ng-click="vm.editQuestionPaper('insert');">
                             <i class="fa fa-plus" aria-hidden="true"></i> New Question Paper
                         </button>
+                        <button type="button" class="btn btn-default" ng-click="vm.addSubject();">
+                            <i class="fa fa-plus" aria-hidden="true"></i> New Subject
+                        </button>
                         <button type="button" class="btn btn-default" ng-click="vm.editQuestion('insert');">
                             <i class="fa fa-plus" aria-hidden="true"></i> New Question
                         </button>
@@ -58,9 +61,10 @@
                                     <td>
                                         <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getTestById(test.id); " style="vertical-align:-4px;"></i>
                                         <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteTest(test.id)"></i>
-                                        <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" ng-click="vm.getTestUsers(test);"></i>
-                                        <i class="fa fa-check-square-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.evaluation(test.id)"></i>
-                                        <i class="fa fa-search fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.showTestPreview(test)"></i>
+                                        <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" ng-if="test.userCount" title="Show User" ng-click="vm.getTestUsers(test);"></i>
+                                        <i class="fa fa-check-square-o fa-lg fa-fw" title="Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluation(test.id)"></i>
+                                        <i class="fa fa-check-square-o fa-lg fa-fw" title="Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluationAll(test.id)" style="color:red;"></i>
+                                        <i class="fa fa-search fa-lg fa-fw" title="Preview" aria-hidden="true" ng-click="vm.showTestPreview(test)"></i>
                                     </td>
                                 </tr>
                             </tbody>
@@ -131,6 +135,21 @@
                     <div class="form-group">
                         <label for="quesPaper.name">Name</label>
                         <input type="text" class="form-control" id="quesPaper.name" placeholder="Name" ng-model="quesPaper.name" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" ng-click="ok();$close();">OK</button>
+                    <button class="btn btn-warning" type="button" ng-click="$close();">Cancel</button>
+                </div>
+            </script>
+            <script type="text/ng-template" id="addSubjects.html">
+                <div class="modal-header">
+                    <h3 class="modal-title">Subject</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="subject.name">Name</label>
+                        <input type="text" class="form-control" id="subject.name" placeholder="Name" ng-model="subject.name" />
                     </div>
                 </div>
                 <div class="modal-footer">

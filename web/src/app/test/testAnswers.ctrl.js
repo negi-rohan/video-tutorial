@@ -9,6 +9,8 @@
     function TestAnswersController($http, CommonInfo, _) {
         var vm = this;
 
+        vm.subjectWise = {};
+
         activate();
 
         function activate() {
@@ -35,26 +37,34 @@
                         if (vm.userAnswers.userInfo && vm.userAnswers.userInfo.length > 0) {
                             _.forEach(vm.userAnswers.questions, function(value) {
                                 if (value.type != 'Passage') {
+                                    vm.subjectWise[value.subjectId] = vm.subjectWise[value.subjectId] || {total:0, correct:0, unanswered:0, incorrect:0};
+                                    vm.subjectWise[value.subjectId].name = value.subjectName;
+                                    vm.subjectWise[value.subjectId].total++;
+
                                     var userAnswer = _.find(vm.userAnswers.userInfo, { 'questionId': value.id });
                                     value.userAnsKey = userAnswer ? userAnswer.answer : null;
                                     if(value.userAnsKey == value.correctAnswer){
                                         vm.userAnswers.totalCorrect++;
+                                        vm.subjectWise[value.subjectId].correct++;
                                         value.result = 'correct';
                                     }
                                     else if(!value.userAnsKey){
                                         vm.userAnswers.totalUnanswered++;
+                                        vm.subjectWise[value.subjectId].unanswered++;
                                         value.result = 'unanswered';
                                     }
                                     else{
+                                        vm.subjectWise[value.subjectId].incorrect++;
                                         vm.userAnswers.totalIncorrect++;
                                         value.result = 'incorrect';
                                     }
                                     if (value.userAnsKey)
                                         value.userAnswer = _.find(value.answers, { 'ansKey': value.userAnsKey }).answerText;
                                     else
-                                        value.userAnswer = "NA"
+                                        value.userAnswer = "Not Answered"
                                     value.correctAnsKey = value.correctAnswer;
-                                    value.correctAnswer = _.find(value.answers, { 'ansKey': value.correctAnswer }).answerText;
+                                    if(value.correctAnswer)
+                                        value.correctAnswer = _.find(value.answers, { 'ansKey': value.correctAnswer }).answerText;
                                 }
                             });
                             vm.questions = [];
@@ -67,6 +77,7 @@
                                     vm.questions = vm.questions.concat(childQuestions);
                                 }
                             });
+                            console.log(vm.subjectWise)
                         }
                     }
                 }

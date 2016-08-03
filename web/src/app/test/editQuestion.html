@@ -10,6 +10,12 @@
                 </div>
             </div>
             <div class="col-md-6">
+                <div class="form-group">
+                    <label for="question.subject">Subject</label>
+                    <select class="form-control" ng-options="subject.id as subject.name for subject in vm.subjectList" ng-model="vm.question.subjectId">
+                        <option value="">Choose</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="row">

@@ -1,7 +1,7 @@
 module.exports = {
     'secret': 'stallerpvtltd',
     'database': {
-        connectionLimit: 100,
+        connectionLimit: 200,
         host: 'localhost',
         user: 'root',
         password: 'data',

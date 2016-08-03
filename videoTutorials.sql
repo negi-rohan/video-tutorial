@@ -22,31 +22,29 @@ CREATE DATABASE IF NOT EXISTS tutorialsdb;
 USE tutorialsdb;
 
 --
+-- Definition of table `answers`
+--
+
+DROP TABLE IF EXISTS `answers`;
+CREATE TABLE `answers` (
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `questionId` int(70) unsigned NOT NULL,
+  `answerText` text NOT NULL,
+  `isDeleted` tinyint(1) DEFAULT '0',
+  `ansKey` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=530 DEFAULT CHARSET=latin1;
+
+--
 -- Definition of table `categories`
 --
 
 DROP TABLE IF EXISTS `categories`;
 CREATE TABLE `categories` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `categories`
---
-
-/*!40000 ALTER TABLE `categories` DISABLE KEYS */;
-INSERT INTO `categories` (`id`,`name`) VALUES 
- (1,'Categoyr1'),
- (2,'Category2'),
- (3,'Category3'),
- (4,'Category4'),
- (5,'Category 5'),
- (6,'Category 6'),
- (7,'Category 7');
-/*!40000 ALTER TABLE `categories` ENABLE KEYS */;
-
 
 --
 -- Definition of table `course_subscription`
@@ -54,22 +52,11 @@ INSERT INTO `categories` (`id`,`name`) VALUES
 
 DROP TABLE IF EXISTS `course_subscription`;
 CREATE TABLE `course_subscription` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `courseId` int(10) NOT NULL,
-  `userId` int(10) NOT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `courseId` int(70) unsigned NOT NULL,
+  `userId` int(70) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `course_subscription`
---
-
-/*!40000 ALTER TABLE `course_subscription` DISABLE KEYS */;
-INSERT INTO `course_subscription` (`id`,`courseId`,`userId`) VALUES 
- (1,7,8),
- (2,6,8);
-/*!40000 ALTER TABLE `course_subscription` ENABLE KEYS */;
-
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Definition of table `course_unit_lesson_r`
@@ -77,25 +64,12 @@ INSERT INTO `course_subscription` (`id`,`courseId`,`userId`) VALUES
 
 DROP TABLE IF EXISTS `course_unit_lesson_r`;
 CREATE TABLE `course_unit_lesson_r` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `courseId` int(10) NOT NULL,
-  `unitId` int(10) NOT NULL,
-  `lessonId` int(10) NOT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `courseId` int(70) unsigned NOT NULL,
+  `unitId` int(70) unsigned NOT NULL,
+  `lessonId` int(70) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `course_unit_lesson_r`
---
-
-/*!40000 ALTER TABLE `course_unit_lesson_r` DISABLE KEYS */;
-INSERT INTO `course_unit_lesson_r` (`id`,`courseId`,`unitId`,`lessonId`) VALUES 
- (1,7,2,1),
- (2,7,2,2),
- (3,6,3,3),
- (4,11,28,4);
-/*!40000 ALTER TABLE `course_unit_lesson_r` ENABLE KEYS */;
-
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Definition of table `courses`
@@ -103,36 +77,22 @@ INSERT INTO `course_unit_lesson_r` (`id`,`courseId`,`unitId`,`lessonId`) VALUES
 
 DROP TABLE IF EXISTS `courses`;
 CREATE TABLE `courses` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) NOT NULL,
-  `description` varchar(500) NOT NULL,
-  `demoVideo` varchar(100) DEFAULT NULL,
-  `validFrom` int(10) DEFAULT NULL,
-  `validTo` int(10) DEFAULT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `demoVideo` varchar(255) DEFAULT NULL,
   `duration` int(10) unsigned DEFAULT NULL,
   `color_code` varchar(45) DEFAULT NULL,
   `subscriptionFee` varchar(45) DEFAULT NULL,
   `filePath` varchar(255) DEFAULT NULL,
   `categoryId` int(10) unsigned DEFAULT NULL,
-  `fileName` varchar(45) DEFAULT NULL,
+  `fileName` varchar(100) DEFAULT NULL,
   `isDeleted` tinyint(1) DEFAULT '0',
-  `demoPoster` varchar(100) DEFAULT NULL,
+  `demoPoster` varchar(255) DEFAULT NULL,
+  `validTo` varchar(45) DEFAULT NULL,
+  `shortDescription` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `courses`
---
-
-/*!40000 ALTER TABLE `courses` DISABLE KEYS */;
-INSERT INTO `courses` (`id`,`name`,`description`,`demoVideo`,`validFrom`,`validTo`,`duration`,`color_code`,`subscriptionFee`,`filePath`,`categoryId`,`fileName`,`isDeleted`,`demoPoster`) VALUES 
- (2,'Current Affairs','National and internation news','http://d38mgtvgmsvii9.cloudfront.net/rising/2MayCurrAff/2MayCurrAff.m3u8',123123,NULL,10,'#D9EDF7','100','null',1,'null',0,'https://s3-ap-southeast-1.amazonaws.com/flavido-encodes/rising/2nd+May.jpg'),
- (5,'Gk','GK','http://d38mgtvgmsvii9.cloudfront.net/rising/3MayCurrAff/3MayCurrAff.m3u8',NULL,123123,20,'#F2DEDE','200','http://localhost:3000\\filesPath\\rOb6Kf16RmCbiCCYGatM15HF.pdf',2,'Node.js Recipes - Cory Gackenheimer.pdf',0,'https://s3-ap-southeast-1.amazonaws.com/flavido-encodes/rising/3rd+May.jpg'),
- (6,'History','This course will be taken by Tariq Anwar. It will be 24 hour course covering Ancient India, Modern India, World History and India Since Independence','http://d38mgtvgmsvii9.cloudfront.net/rising/4JulyRisingCurrAff-Rev1/4JulyRisingCurrAff-Rev1.m3u8',NULL,NULL,10,'#20898C','150','null',0,'null',0,'http://i.imgur.com/t1nI8bJ.jpg'),
- (7,'Civil','Civil','//www.youtube.com/v/ylLzyHk54Z0',NULL,NULL,30,'#F092B0','300',NULL,3,NULL,0,NULL),
- (11,'Economics','Economics world wide','',NULL,NULL,NULL,'#B2D3BA',NULL,'http://localhost:3000\\filesPath\\fA-TGxr-cCGIfMw8gHUcgTvF.pdf',3,'Node.js Recipes - Cory Gackenheimer.pdf',0,NULL);
-/*!40000 ALTER TABLE `courses` ENABLE KEYS */;
-
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 
 --
 -- Definition of table `courses_instructor`
@@ -140,30 +100,13 @@ INSERT INTO `courses` (`id`,`name`,`description`,`demoVideo`,`validFrom`,`validT
 
 DROP TABLE IF EXISTS `courses_instructor`;
 CREATE TABLE `courses_instructor` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `courseId` int(10) NOT NULL,
-  `userId` int(10) NOT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `courseId` int(70) unsigned NOT NULL,
+  `userId` int(70) unsigned NOT NULL,
   `isDeleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_index` (`userId`,`courseId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `courses_instructor`
---
-
-/*!40000 ALTER TABLE `courses_instructor` DISABLE KEYS */;
-INSERT INTO `courses_instructor` (`id`,`courseId`,`userId`,`isDeleted`) VALUES 
- (13,2,8,0),
- (14,2,7,0),
- (39,7,8,0),
- (40,8,10,0),
- (41,9,10,0),
- (42,10,10,0),
- (49,11,10,0),
- (65,5,10,0);
-/*!40000 ALTER TABLE `courses_instructor` ENABLE KEYS */;
-
 
 --
 -- Definition of table `lesson_comments`
@@ -171,9 +114,9 @@ INSERT INTO `courses_instructor` (`id`,`courseId`,`userId`,`isDeleted`) VALUES
 
 DROP TABLE IF EXISTS `lesson_comments`;
 CREATE TABLE `lesson_comments` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `lessonId` int(10) NOT NULL,
-  `comments` varchar(100) NOT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `lessonId` int(70) unsigned NOT NULL,
+  `comments` varchar(255) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `userId` int(10) unsigned NOT NULL,
   `isDeleted` tinyint(1) DEFAULT '0',
@@ -181,50 +124,17 @@ CREATE TABLE `lesson_comments` (
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `lesson_comments`
---
-
-/*!40000 ALTER TABLE `lesson_comments` DISABLE KEYS */;
-INSERT INTO `lesson_comments` (`id`,`lessonId`,`comments`,`timestamp`,`userId`,`isDeleted`) VALUES 
- (1,1,'qwer tyu iop','2016-06-29 17:05:41',8,0),
- (2,1,'asasd adasdsad asdsadsa asdasdsad','2016-06-29 17:05:41',9,0),
- (3,1,'fxvtfbdfbf fgb vfbgcvb gf','2016-06-29 17:05:41',8,0),
- (4,1,'qwere dgh hjkmj','2016-06-29 17:47:11',9,0),
- (5,1,'This is good','2016-06-29 17:57:19',8,0),
- (6,1,'Thats good','2016-06-29 18:59:13',8,0),
- (8,2,'sgfsdgd','2016-06-30 01:07:00',8,0),
- (9,1,'Just like that','2016-06-30 13:12:44',8,0),
- (10,1,'just for fun','2016-06-30 13:18:17',8,0),
- (11,1,'its fun','2016-07-05 14:53:42',9,0);
-/*!40000 ALTER TABLE `lesson_comments` ENABLE KEYS */;
-
-
---
 -- Definition of table `lesson_files`
 --
 
 DROP TABLE IF EXISTS `lesson_files`;
 CREATE TABLE `lesson_files` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `lessonId` int(10) NOT NULL,
-  `filePath` varchar(100) NOT NULL,
-  `fileName` varchar(100) NOT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `lessonId` int(70) unsigned NOT NULL,
+  `filePath` varchar(255) NOT NULL,
+  `fileName` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `lesson_files`
---
-
-/*!40000 ALTER TABLE `lesson_files` DISABLE KEYS */;
-INSERT INTO `lesson_files` (`id`,`lessonId`,`filePath`,`fileName`) VALUES 
- (1,1,'text.txt','text.txt'),
- (2,1,'pdffile.pdf','pdffile.pdf'),
- (3,3,'text1.pdf','text1.pdf'),
- (4,2,'http://localhost:3000\\filesPath\\2Xw-5z8rIPi1XXnHDkNyFgM9.pdf','Node.js Design Patterns - Casciaro, Mario [PDF][StormRG].pdf'),
- (5,2,'http://localhost:3000\\filesPath\\SfLpxqqD-JLNAAcvnM0DJ_6x.pdf','Node.js Recipes - Cory Gackenheimer.pdf');
-/*!40000 ALTER TABLE `lesson_files` ENABLE KEYS */;
-
 
 --
 -- Definition of table `lessons`
@@ -232,29 +142,16 @@ INSERT INTO `lesson_files` (`id`,`lessonId`,`filePath`,`fileName`) VALUES
 
 DROP TABLE IF EXISTS `lessons`;
 CREATE TABLE `lessons` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) NOT NULL,
-  `description` varchar(100) NOT NULL,
-  `video` varchar(100) DEFAULT NULL,
-  `air_date` int(10) DEFAULT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(200) NOT NULL,
+  `video` varchar(255) DEFAULT NULL,
+  `air_date` varchar(20) DEFAULT NULL,
   `duration` int(100) unsigned DEFAULT NULL,
   `isDeleted` tinyint(1) DEFAULT '0',
-  `poster` varchar(100) DEFAULT NULL,
+  `poster` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `lessons`
---
-
-/*!40000 ALTER TABLE `lessons` DISABLE KEYS */;
-INSERT INTO `lessons` (`id`,`name`,`description`,`video`,`air_date`,`duration`,`isDeleted`,`poster`) VALUES 
- (1,'lesson1','this is the lesson 1','http://d38mgtvgmsvii9.cloudfront.net/rising/4JulyRisingCurrAff-Rev1/4JulyRisingCurrAff-Rev1.m3u8',NULL,10,0,'http://i.imgur.com/t1nI8bJ.jpg'),
- (2,'lesson2','This is the lesson 2','//www.youtube.com/v/ylLzyHk54Z0',NULL,10,0,'https://s3-ap-southeast-1.amazonaws.com/flavido-encodes/rising/2nd+May.jpg'),
- (3,'lesson3','This is the lesson 3',NULL,NULL,10,0,NULL),
- (4,'Lesson4','Lesson number 4','Video link',NULL,14,0,NULL);
-/*!40000 ALTER TABLE `lessons` ENABLE KEYS */;
-
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Definition of table `payment_details`
@@ -262,30 +159,17 @@ INSERT INTO `lessons` (`id`,`name`,`description`,`video`,`air_date`,`duration`,`
 
 DROP TABLE IF EXISTS `payment_details`;
 CREATE TABLE `payment_details` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `payment_request_id` varchar(200) DEFAULT NULL,
-  `phone` varchar(100) DEFAULT NULL,
-  `purpose` varchar(100) DEFAULT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `payment_request_id` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `purpose` varchar(40) DEFAULT NULL,
   `amount` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
-  `fullName` varchar(100) DEFAULT NULL,
-  `userId` varchar(100) DEFAULT NULL,
-  `courseId` varchar(100) DEFAULT NULL,
+  `fullName` varchar(255) DEFAULT NULL,
+  `userId` int(70) unsigned DEFAULT NULL,
+  `courseId` int(70) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `payment_details`
---
-
-/*!40000 ALTER TABLE `payment_details` DISABLE KEYS */;
-INSERT INTO `payment_details` (`id`,`payment_request_id`,`phone`,`purpose`,`amount`,`email`,`fullName`,`userId`,`courseId`) VALUES 
- (7,'fcae0d9e73c44b1d9af333b2ae01f380','9900015910','Subscription: Udit Negi for Gk','200','negi.udit@gmail.com','Udit Negi','8','5'),
- (8,'365ff08b333b47178bc7936aab0ebf7b','9900015910','Subscription: Udit Negi for Gk','200','negi.udit@gmail.com','Udit Negi','8','5'),
- (9,'06e6a62653bc4471bb88e59e2833ff5e','9900015910','Subscription: Udit Negi for Gk','200','negi.udit@gmail.com','Udit Negi','8','5'),
- (10,'d846952c8c9142e0bca812feeab40528','9900015910','Subscription: Udit Negi for Gk','200','negi.udit@gmail.com','Udit Negi','8','5');
-/*!40000 ALTER TABLE `payment_details` ENABLE KEYS */;
-
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
 --
 -- Definition of table `payment_log`
@@ -293,29 +177,126 @@ INSERT INTO `payment_details` (`id`,`payment_request_id`,`phone`,`purpose`,`amou
 
 DROP TABLE IF EXISTS `payment_log`;
 CREATE TABLE `payment_log` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `payment_request_id` varchar(200) DEFAULT NULL,
-  `payment_id` varchar(200) DEFAULT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `payment_request_id` varchar(255) DEFAULT NULL,
+  `payment_id` varchar(255) DEFAULT NULL,
   `fees` varchar(100) DEFAULT NULL,
-  `mac` varchar(100) DEFAULT NULL,
+  `mac` varchar(255) DEFAULT NULL,
   `status` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `payment_log`
+-- Definition of table `question_questionpaper`
 --
 
-/*!40000 ALTER TABLE `payment_log` DISABLE KEYS */;
-INSERT INTO `payment_log` (`id`,`payment_request_id`,`payment_id`,`fees`,`mac`,`status`) VALUES 
- (6,'fcae0d9e73c44b1d9af333b2ae01f380',NULL,NULL,NULL,'Pending'),
- (8,'8b6080c3e97149d684f2d7cf05792313','MOJO5369558911814992','3.80','800b13088cb9704fe55d8cec77ef9615097526f1','Credit'),
- (9,'b0da0313f418443a9b01d7c9cf3b957c','MOJO2391764479175223','3.80','0d3f1e7920f973160b572a80279cb73cc2ed9ddb','Credit'),
- (10,'365ff08b333b47178bc7936aab0ebf7b',NULL,NULL,NULL,'Pending'),
- (11,'06e6a62653bc4471bb88e59e2833ff5e',NULL,NULL,NULL,'Pending'),
- (12,'d846952c8c9142e0bca812feeab40528',NULL,NULL,NULL,'Pending');
-/*!40000 ALTER TABLE `payment_log` ENABLE KEYS */;
+DROP TABLE IF EXISTS `question_questionpaper`;
+CREATE TABLE `question_questionpaper` (
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `questionPaperId` int(70) unsigned NOT NULL,
+  `questionId` int(70) unsigned NOT NULL,
+  `isDeleted` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `Combo` (`questionPaperId`,`questionId`)
+) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
 
+--
+-- Definition of table `questionpapers`
+--
+
+DROP TABLE IF EXISTS `questionpapers`;
+CREATE TABLE `questionpapers` (
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `isDeleted` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+
+--
+-- Definition of table `questions`
+--
+
+DROP TABLE IF EXISTS `questions`;
+CREATE TABLE `questions` (
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `question` text NOT NULL,
+  `type` varchar(45) DEFAULT NULL,
+  `parentQuestionId` int(70) unsigned DEFAULT NULL,
+  `isDeleted` tinyint(1) DEFAULT '0',
+  `explanation` text,
+  `correctAnswer` varchar(45) DEFAULT NULL,
+  `subjectId` int(70) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=148 DEFAULT CHARSET=latin1;
+
+--
+-- Definition of table `subjects`
+--
+
+DROP TABLE IF EXISTS `subjects`;
+CREATE TABLE `subjects` (
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+
+--
+-- Definition of table `test_user_answer`
+--
+
+DROP TABLE IF EXISTS `test_user_answer`;
+CREATE TABLE `test_user_answer` (
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `userId` int(70) unsigned NOT NULL,
+  `testId` int(70) unsigned NOT NULL,
+  `questionId` int(70) unsigned NOT NULL,
+  `answer` varchar(45) DEFAULT NULL,
+  `isMarked` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `combo` (`userId`,`testId`,`questionId`)
+) ENGINE=InnoDB AUTO_INCREMENT=5520 DEFAULT CHARSET=latin1;
+
+--
+-- Definition of table `tests`
+--
+
+DROP TABLE IF EXISTS `tests`;
+CREATE TABLE `tests` (
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `instruction` text,
+  `marksPerQues` double DEFAULT NULL,
+  `negativeMarks` double DEFAULT NULL,
+  `instantResult` tinyint(1) unsigned DEFAULT '0',
+  `duration` int(10) unsigned DEFAULT NULL,
+  `startDate` datetime DEFAULT NULL,
+  `endDate` datetime DEFAULT NULL,
+  `instantRank` tinyint(1) DEFAULT '0',
+  `questionPaperId` int(70) unsigned DEFAULT NULL,
+  `isDeleted` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+
+--
+-- Definition of table `testuserinfo`
+--
+
+DROP TABLE IF EXISTS `testuserinfo`;
+CREATE TABLE `testuserinfo` (
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `userId` int(70) unsigned NOT NULL,
+  `testId` int(70) unsigned NOT NULL,
+  `status` varchar(45) DEFAULT NULL,
+  `timeRemaining` int(10) unsigned DEFAULT NULL,
+  `score` varchar(45) DEFAULT NULL,
+  `rank` int(70) unsigned DEFAULT NULL,
+  `totalQuestions` int(100) unsigned DEFAULT NULL,
+  `percentile` double DEFAULT NULL,
+  `totalResults` int(70) unsigned DEFAULT NULL,
+  `timestamp` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `combo` (`userId`,`testId`)
+) ENGINE=InnoDB AUTO_INCREMENT=230 DEFAULT CHARSET=latin1;
 
 --
 -- Definition of table `units`
@@ -323,29 +304,13 @@ INSERT INTO `payment_log` (`id`,`payment_request_id`,`payment_id`,`fees`,`mac`,`
 
 DROP TABLE IF EXISTS `units`;
 CREATE TABLE `units` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) NOT NULL,
-  `description` varchar(100) NOT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(200) NOT NULL,
   `courseId` int(10) unsigned NOT NULL,
   `isDeleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `units`
---
-
-/*!40000 ALTER TABLE `units` DISABLE KEYS */;
-INSERT INTO `units` (`id`,`name`,`description`,`courseId`,`isDeleted`) VALUES 
- (2,'Civil1','civil1',7,0),
- (3,'History1','history2',6,1),
- (11,'Civil2','Civil2',7,0),
- (12,'Civil3','Civil3',7,0),
- (18,'civil4','civil4',7,0),
- (28,'Eco1','Eco1',11,0),
- (29,'Eco2','Eco2',11,0);
-/*!40000 ALTER TABLE `units` ENABLE KEYS */;
-
 
 --
 -- Definition of table `user`
@@ -353,19 +318,19 @@ INSERT INTO `units` (`id`,`name`,`description`,`courseId`,`isDeleted`) VALUES
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
-  `id` int(70) NOT NULL AUTO_INCREMENT,
-  `fullName` varchar(45) DEFAULT NULL,
+  `id` int(70) unsigned NOT NULL AUTO_INCREMENT,
+  `fullName` varchar(255) DEFAULT NULL,
   `joinDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `about` varchar(100) DEFAULT NULL,
-  `profilePhoto` varchar(200) DEFAULT NULL,
-  `billingAddress` varchar(100) DEFAULT NULL,
+  `about` varchar(200) DEFAULT NULL,
+  `profilePhoto` varchar(255) DEFAULT NULL,
+  `billingAddress` varchar(255) DEFAULT NULL,
   `email` varchar(45) NOT NULL,
-  `phone` varchar(45) NOT NULL,
+  `phone` varchar(20) NOT NULL,
   `status` varchar(45) DEFAULT NULL,
   `profileType` varchar(45) DEFAULT NULL,
-  `password` varchar(45) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `user`
@@ -373,12 +338,90 @@ CREATE TABLE `user` (
 
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 INSERT INTO `user` (`id`,`fullName`,`joinDate`,`about`,`profilePhoto`,`billingAddress`,`email`,`phone`,`status`,`profileType`,`password`) VALUES 
- (8,'Udit Negi','2016-06-28 19:50:36','just fine','http://localhost:3000\\imagesPath\\vllR_RcJQ5JeoJu7iTIgSVxf.png','','negi.udit@gmail.com','9900015910','active','student','81dc9bdb52d04dc20036dbd8313ed055'),
- (9,'Admin','2016-06-28 19:51:13','fine','http://localhost:3000\\imagesPath\\m4Cf1sb1rrX4DQf94tXuZ_jL.png','','admin@gmail.com','1234567890','null','admin','81dc9bdb52d04dc20036dbd8313ed055'),
- (10,'Ayush Sinha','2016-07-01 15:33:18',NULL,NULL,NULL,'ayush.sinha@gmail.com','9874563210','active','instructor','81dc9bdb52d04dc20036dbd8313ed055'),
- (11,'Ayushman','2016-07-04 20:48:11',NULL,NULL,NULL,'ayush@forumias.com','7070700521',NULL,'student','91e01cf003a151f5694d07c70e908994');
+ (9,'Admin','2016-06-28 19:51:13','fine','http://localhost:3000\\imagesPath\\m4Cf1sb1rrX4DQf94tXuZ_jL.png','','admin@gmail.com','1234567890','null','admin','81dc9bdb52d04dc20036dbd8313ed055');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
+
+--
+-- Definition of procedure `calculatePercentile`
+--
+
+DROP PROCEDURE IF EXISTS `calculatePercentile`;
+
+DELIMITER $$
+
+/*!50003 SET @TEMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `calculatePercentile`(IN testId INT(70))
+BEGIN
+  DECLARE v_finished INTEGER DEFAULT 0;
+  DECLARE v_id INTEGER;
+  DECLARE v_score INTEGER;
+  DECLARE v_lscore INTEGER;
+  DECLARE v_escore INTEGER;
+  DECLARE v_percentile DOUBLE;
+  DECLARE user_cnt INTEGER;
+  DECLARE scores CURSOR FOR SELECT ui.id, ui.score, count(lui.id) as lscore, count(eui.id) as escore
+  FROM
+    tutorialsdb.testuserinfo ui
+      left join (tutorialsdb.testuserinfo eui) on eui.score = ui.score and eui.id != ui.id and eui.testId = testId
+      left join (tutorialsdb.testuserinfo lui) on lui.score < ui.score and lui.testId = testId
+      where ui.status="evaluated" AND ui.testId = testId
+      GROUP BY ui.id
+      ORDER BY ui.score DESC;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_finished = 1;
+  OPEN scores;
+  select FOUND_ROWS() into user_cnt;
+  get_Percentile: loop
+    fetch scores into v_id, v_score, v_lscore, v_escore;
+    if v_finished = 1 then
+    leave get_Percentile;
+    END IF;
+    set v_percentile = ((v_lscore + (0.5*v_escore))/user_cnt)*100;
+    UPDATE tutorialsdb.testuserinfo SET percentile = v_percentile, totalResults = user_cnt where id=v_id;
+  END loop get_Percentile;
+  close scores;
+END $$
+/*!50003 SET SESSION SQL_MODE=@TEMP_SQL_MODE */  $$
+
+DELIMITER ;
+
+--
+-- Definition of procedure `calculateRank`
+--
+
+DROP PROCEDURE IF EXISTS `calculateRank`;
+
+DELIMITER $$
+
+/*!50003 SET @TEMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `calculateRank`(IN testId INT(70))
+BEGIN
+DECLARE v_finished INTEGER DEFAULT 0;
+  DECLARE v_id INTEGER;
+  DECLARE v_score INTEGER;
+  DECLARE v_prev INTEGER;
+  DECLARE v_curr INTEGER;
+  DECLARE v_rank INTEGER;
+  DECLARE scores CURSOR FOR SELECT id, score, @prev := @curr, @curr := score, @rank := IF(@prev = @curr, @rank, @rank+1) AS rank
+  FROM
+    tutorialsdb.testuserinfo ui,
+    (SELECT @curr := null, @prev := null, @rank := 0) sel1
+      where ui.status="evaluated" AND ui.testId = testId
+     ORDER BY score DESC;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_finished = 1;
+  OPEN scores;
+  get_Rank: loop
+    fetch scores into v_id, v_score, v_prev, v_curr, v_rank;
+    if v_finished = 1 then
+    leave get_Rank;
+    END IF;
+    UPDATE tutorialsdb.testuserinfo SET rank = v_rank where id=v_id;
+  END loop get_Rank;
+  close scores;
+END $$
+/*!50003 SET SESSION SQL_MODE=@TEMP_SQL_MODE */  $$
+
+DELIMITER ;
 
 
 

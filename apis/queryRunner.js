@@ -363,9 +363,12 @@ var self = {
             });
         });
     },
-    generatOtp: function(request, callback) {
+    generatOtp: function(request, pool, callback) {
         // var secret = totp.utils.generateSecret();
         // var code = totp.generate(secret);
+        var data = {
+            phone: request.phone
+        };
         self.findUser(data, pool, function(result) {
             if (result && !result.Error && !result.Code) {
                 var secret = speakeasy.generateSecret();
@@ -498,6 +501,21 @@ var self = {
                         });
                     }
                 });
+            });
+        });
+    },
+    subscribeCourse: function(request, pool, callback) {
+        var query = "INSERT INTO ??(??, ??) VALUES (?, ?)";
+        var queryValues = ["course_subscription", "courseId", "userId", request.courseId, request.userId];
+        query = mysql.format(query, queryValues);
+        console.log(query)
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                connection.release();
+                if (err) {
+                    callback({ "Error": true, "Message": err });
+                }
+                callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
             });
         });
     },

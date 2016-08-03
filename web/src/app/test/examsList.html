@@ -5,11 +5,13 @@
                 <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;">
                     <thead>
                         <tr class="success">
-                            <th>#</th>
-                            <th>Exam</th>
+                            <th>S No.</th>
+                            <th>Exam Title</th>
                             <th>Durations(in hours)</th>
+                            <th>Questions</th>
                             <th>Score</th>
                             <th>Rank</th>
+                            <th>Percentile</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -18,12 +20,23 @@
                             <th scope="row" ng-bind="$index + 1"></th>
                             <td ng-bind="exam.title"></td>
                             <td ng-bind="exam.durationInHrs"></td>
+                            <td ng-bind="exam.questionCount"></td>
                             <td ng-bind="exam.score"></td>
                             <td ng-bind="exam.rank"></td>
+                            <td ng-bind="exam.percentile"></td>
                             <td>
-                                <i class="fa fa-play" aria-hidden="true" ng-click="vm.startExam(exam)" ng-if="!exam.status"></i>
-                                <i class="fa fa-repeat" ng-click="vm.startExam(exam)" ng-if="exam.status == 'pending'"></i>
-                                <i class="fa fa-newspaper-o" aria-hidden="true" ng-click="vm.showAnswers(exam)" ng-if="exam.status=='evaluated'"></i>
+                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.startExam(exam)" ng-if="!exam.status">
+                                    <i class="fa fa-play fa-fw" aria-hidden="true"></i> Start Exam
+                                </button>
+                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.startExam(exam)" ng-if="exam.status == 'pending'">
+                                    <i class="fa fa-repeat fa-fw" aria-hidden="true"></i> Resume Exam
+                                </button>
+                                <button type="button" class="btn btn-primary btn-xs" ng-disabled="true" ng-if="exam.status=='completed'">
+                                    <i class="fa fa-info fa-fw" aria-hidden="true"></i> Waiting For evaluation
+                                </button>
+                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.showAnswers(exam)" ng-if="exam.status=='evaluated'">
+                                    <i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i> Review Result
+                                </button>
                             </td>
                         </tr>
                     </tbody>

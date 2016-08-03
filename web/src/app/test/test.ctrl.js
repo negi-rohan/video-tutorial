@@ -37,8 +37,10 @@
         vm.updateTest = updateTest
         vm.deleteTest = deleteTest;
         vm.evaluation = evaluation;
+        vm.evaluationAll = evaluationAll;
         vm.getAllquestionPapers = getAllquestionPapers;
         vm.editQuestionPaper = editQuestionPaper;
+        vm.addSubject = addSubject;
         vm.deleteQuestionPaper = deleteQuestionPaper;
         vm.getAllQuestions = getAllQuestions;
         vm.questionSelection = questionSelection;
@@ -54,6 +56,7 @@
 
         function activate() {
             getAllTests();
+            getAllSubjects();
         }
 
         //////// Test related ///////////////////////////////////////////////////////////
@@ -123,6 +126,15 @@
             }, function(response) {});
         }
 
+        function evaluationAll(testId){
+            $http.post(CommonInfo.getAppUrl() + '/api/exam/evaluation', { 'testId': testId, 'isForced': true }).then(function(response) {
+                if (response && response.data && !response.data.Error) {
+                    growl.success('Test evaluation successfully');
+                    //getAllTests();
+                }
+            }, function(response) {});
+        }
+
         ////////// Question Paper related ////////////////////////////////////////////////////////
         function getAllquestionPapers(holdSelection) {
             if (!holdSelection)
@@ -153,6 +165,39 @@
                 resolve: {
                     item: function() {
                         return questionPaper || {};
+                    }
+                }
+            });
+        }
+
+        function getAllSubjects() {
+            $http.get(CommonInfo.getAppUrl() + '/api/subject/all').then(function(response) {
+                if (response && response.data) {
+                    vm.subjectList = response.data.subjects;
+                }
+            }, function(response) {});
+        }
+
+        function addSubject(){
+            var modalInstance = $uibModal.open({
+                animation: true,
+                templateUrl: 'addSubjects.html',
+                controller: function($scope, item) {
+                    $scope.subjects = item;
+                    $scope.ok = function() {
+                        if ($scope.subject.name) {
+                            $http.post(CommonInfo.getAppUrl() + '/api/subject', $scope.subject).then(function(response) {
+                                if (response && response.data && !response.data.Error) {
+                                    growl.success('Subject added successfully');
+                                    getAllSubjects();
+                                }
+                            }, function(response) {});
+                        }
+                    };
+                },
+                resolve: {
+                    item: function() {
+                        return vm.subjectList || [];
                     }
                 }
             });
