@@ -86,45 +86,19 @@
     <div class="container-fluid" ng-cloak>
         <div class="row" style="margin-top:40px;">
             <div class="col-md-4 col-md-offset-8 col-xs-12 col-xs-offset-1" style="margin-right:4px;">
-                <div class=" well" style="opacity: 0.7;margin-right: 32px;background:azure;">
+                <div class=" well" style="margin-right: 32px;background:azure;">
                     <uib-tabset active="vm.activeForm">
-                        <uib-tab index="0" heading="Login">
-                            <form style="margin-top:15px;" ng-if="!vm.forget.status">
-                                <div class="form-group">
-                                    <label for="profile.email">Email or Phone number</label>
-                                    <input type="text" class="form-control" id="profile.email" placeholder="Email or Phone number" ng-model="vm.user.userName" />
-                                </div>
-                                <div class="form-group">
-                                    <label for="profile.password">Password</label>
-                                    <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" ng-keyup="$event.keyCode == 13 && vm.login()" />
-                                    <div class="text-right">
-                                        <a href="javascript:void(0);" ng-click="vm.forget.status = true;">Forgot Password</a>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <input class="btn btn-primary pull-right" type="button" ng-click="vm.login()" value="Login">
-                                </div>
-                                <div class="clearfix"></div>
-                            </form>
-                            <form style="margin-top:15px;" ng-if="vm.forget.status">
-                                <div class="form-group">
-                                    <label for="profile.email">Email</label>
-                                    <input type="text" required class="form-control" id="profile.email" placeholder="Email" ng-model="vm.forget.email" />
-                                </div>
-                                <div class="form-group">
-                                    <input class="btn btn-primary pull-right" type="button" ng-click="vm.forgetPassword();" value="Send Request">
-                                </div>
-                                <div class="clearfix"></div>
-                            </form>
-                        </uib-tab>
-                        <uib-tab index="1" heading="Signup">
+                        <uib-tab index="0" heading="Signup">
                             <form style="margin-top:15px;" ng-if="vm.isOtp && !vm.isOtpSend && !vm.isOtpValid" name="signup">
                                 <div class="form-group">
                                     <label for="profile.phone">Phone</label>
                                     <input name="phone" type="text" required="" ng-minlength="10" min="10" class="form-control" id="profile.phone" maxlength="10" placeholder="Phone" ng-model="vm.newUser.phone" />
                                 </div>
-                                <input class="btn btn-primary pull-right" ng-disabled="!signup.phone.$valid" type="button" ng-click="vm.requestOtp()" value="Get OTP">
+                                <input class="btn btn-primary pull-right" ng-disabled="!signup.phone.$valid" type="button" ng-click="vm.requestOtp()" value="Continue">
                                 <div class="clearfix"></div>
+                                <a href="javascript:void(0);" ng-click="vm.activeForm=1">
+                                    <span>Exisiting User? Login</span>
+                                </a>
                             </form>
                             <form style="margin-top:15px;" ng-if="vm.isOtp && vm.isOtpSend && !vm.isOtpValid">
                                 <div class="form-group">
@@ -161,6 +135,35 @@
                                     <input type="password" class="form-control" id="profile.confirmPassword" placeholder="Confirm Password" ng-model="vm.newUser.confirmPassword" />
                                 </div>
                                 <input class="btn btn-primary pull-right" type="button" ng-click="vm.signup()" value="Sign me Up">
+                                <div class="clearfix"></div>
+                            </form>
+                        </uib-tab>
+                        <uib-tab index="1" heading="Login">
+                            <form style="margin-top:15px;" ng-if="!vm.forget.status">
+                                <div class="form-group">
+                                    <label for="profile.email">Email or Phone number</label>
+                                    <input type="text" class="form-control" id="profile.email" placeholder="Email or Phone number" ng-model="vm.user.userName" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile.password">Password</label>
+                                    <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" ng-keyup="$event.keyCode == 13 && vm.login()" />
+                                    <div class="text-right">
+                                        <a href="javascript:void(0);" ng-click="vm.forget.status = true;">Forgot Password</a>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input class="btn btn-primary pull-right" type="button" ng-click="vm.login()" value="Login">
+                                </div>
+                                <div class="clearfix"></div>
+                            </form>
+                            <form style="margin-top:15px;" ng-if="vm.forget.status">
+                                <div class="form-group">
+                                    <label for="profile.email">Email</label>
+                                    <input type="text" required class="form-control" id="profile.email" placeholder="Email" ng-model="vm.forget.email" />
+                                </div>
+                                <div class="form-group">
+                                    <input class="btn btn-primary pull-right" type="button" ng-click="vm.forgetPassword();" value="Send Request">
+                                </div>
                                 <div class="clearfix"></div>
                             </form>
                         </uib-tab>

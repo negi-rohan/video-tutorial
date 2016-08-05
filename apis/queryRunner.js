@@ -265,12 +265,12 @@ var self = {
                 var transporter = nodemailer.createTransport({
                     service: 'Gmail',
                     auth: {
-                        user: 'rohan@stellardigital.in', // Your email id
-                        pass: '123rohan' // Your password
+                        user: 'care@forumias.com', // Your email id
+                        pass: '123@academy' // Your password
                     }
                 });
                 var mailOptions = {
-                    from: 'rohan@stellardigital.in', // sender address
+                    from: 'care@forumias.com', // sender address
                     to: request.email, // list of receivers
                     subject: 'Password reset link', // Subject line
                     text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +

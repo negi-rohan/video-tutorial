@@ -14,6 +14,6 @@ module.exports = {
     },
     'msgSms': {
         authKey: '118471AWlmRlrKskG577b846a',
-        sender: 'FLAVDO'
+        sender: 'FRMIAS'
     }
 };

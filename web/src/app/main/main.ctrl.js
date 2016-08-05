@@ -226,6 +226,7 @@
 
         function selectLesson(lesson) {
             vm.lesson = lesson
+            vm.lesson.comments = vm.lesson.comments || [];
             if (lesson.video) {
                 vm.lesson.options = {
                     file: lesson.video,

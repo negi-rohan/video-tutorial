@@ -1,4 +1,4 @@
-<div class="container-fluid" ng-cloak>
+<div class="container-fluid" ng-cloak confirm-on-exit>
     <div class="row" ng-if="!vm.isExamStarted">
         <div class="col-md-10 col-md-offset-1">
             <div ng-bind-html="vm.exam.instruction" instruction-board style="overflow:auto;"></div>
@@ -40,7 +40,7 @@
                 <ul class="list-group">
                     <li class="list-group-item" ng-repeat="answer in vm.currentQuestion.answers">
                         <label style="margin-bottom:0px;">
-                            <input type="radio" name="answerOptions" ng-model="vm.userCurrentQuestion[vm.currentIndex].answer" ng-value="answer.ansKey" ng-click="vm.selectAnswer();" /> <span ng-bind-html="answer.answerText" class="options-review" style="display:inline-block;"></span>
+                            <input type="radio" name="answerOptions" ng-model="vm.userCurrentQuestion[vm.currentIndex].answer" ng-value="answer.ansKey" ng-click="vm.saveLocal();" /> <span ng-bind-html="answer.answerText" class="options-review" style="display:inline-block;"></span>
                         </label>
                     </li>
                 </ul>

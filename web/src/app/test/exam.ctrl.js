@@ -7,6 +7,23 @@
         .directive('instructionBoard', instructionBoard)
         .directive('questionArea', questionArea)
         .directive('navigationArea', navigationArea);
+        //.directive('confirmOnExit', confirmOnExit);
+
+    /** @ngInject */
+    // function confirmOnExit() {
+    //     return {
+    //         link: function($scope, elem, attrs) {
+    //             window.onbeforeunload = function() {
+    //                 return "The form is dirty, do you want to stay on the page?";
+    //             }
+    //             $scope.$on('$locationChangeStart', function(event, next, current) {
+    //                 if (!confirm("The form is dirty, do you want to stay on the page?")) {
+    //                     event.preventDefault();
+    //                 }
+    //             });
+    //         }
+    //     };
+    // }
 
     /** @ngInject */
     function instructionBoard(resize, $window) {
@@ -64,7 +81,7 @@
         vm.startExam = startExam;
         vm.showQuestion = showQuestion;
         vm.submitExam = submitExam;
-        vm.selectAnswer = selectAnswer;
+        vm.saveLocal = saveLocal;
 
         activate();
 
@@ -85,7 +102,7 @@
         $scope.$on('timer-stopped', function(event, data) {
             vm.isExamEnded = true;
             alert('Your exam time is over, press ok to submit exam');
-            //submitExam(true);
+            submitExam(true);
         });
 
         function getExamQuestions() {
@@ -162,7 +179,8 @@
             if (vm.exam && vm.exam.questions && vm.exam.questions.length > 0) {
                 vm.isExamStarted = true;
                 showQuestion(0);
-                $interval(function() { selectAnswer() }, 10000);
+                $interval(function() { saveLocal() }, 10000);
+                $interval(function() { submitExam(false, 'pending') }, 60000);
                 $scope.$on('$stateChangeStart',
                     function(event, toState, toParams, fromState, fromParams) {
                         if (vm.isExamStarted && !vm.isExamEnded)
@@ -175,10 +193,10 @@
             vm.currentIndex = questionNo;
             vm.currentQuestionIndex = questionNo + 1;
             vm.currentQuestion = vm.exam.questions[questionNo];
-            selectAnswer();
+            saveLocal();
         }
 
-        function selectAnswer() {
+        function saveLocal() {
             //submitExam(false, 'pending');
             console.log(123)
             var data = {

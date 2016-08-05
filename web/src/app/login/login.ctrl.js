@@ -141,6 +141,7 @@
 
         function requestOtp() {
             vm.showResendOtp = false;
+            vm.newUser.otp = "";
             if (vm.newUser.phone) {
                 $http.post(CommonInfo.getAppUrl() + "/api/sendOtp", vm.newUser).then(
                     function(response) {
@@ -171,7 +172,7 @@
 
         function validateOtp() {
             if (vm.newUser.otp && codeStr) {
-                $setTimeout.cancel(otpTimeout);
+                $timeout.cancel(otpTimeout);
                 var data = {
                     code: vm.newUser.otp,
                     secret: codeStr

@@ -3,7 +3,22 @@
 
     angular
         .module('web')
-        .controller('ResetPasswordController', ResetPasswordController);
+        .controller('ResetPasswordController', ResetPasswordController)
+        .directive('loginArea', loginArea);
+
+
+        /** @ngInject */
+    function loginArea($window, resize) {
+        return {
+            restrict: 'A',
+            link: function(scope, elem, attrs) {
+
+                resize(scope).call(function() {
+                    elem.css('height', $window.innerHeight + 'px');
+                });
+            }
+        };
+    }
 
     /** @ngInject */
     function ResetPasswordController($http, CommonInfo, $state, growl, $stateParams) {
