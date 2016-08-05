@@ -10,8 +10,8 @@ var self = {
         req.duration = req.duration ? req.duration * 3600 : '';
         req.startDate = req.startDate ? moment(req.startDate).format('YYYY-MM-DD HH:mm:SS') : '';
         req.endDate = req.endDate ? moment(req.endDate).format('YYYY-MM-DD HH:mm:SS') : '';
-        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title=VALUES(title), duration=VALUES(duration), startDate=VALUES(startDate), endDate=VALUES(endDate), marksPerQues=VALUES(marksPerQues), negativeMarks=VALUES(negativeMarks), instantResult=VALUES(instantResult), instantRank=VALUES(instantRank), instruction=VALUES(instruction), questionPaperId=VALUES(questionPaperId)";
-        var queryValues = ["tests", "id", "title", "duration", "startDate", "endDate", "marksPerQues", "negativeMarks", "instantResult", "instantRank", "instruction", "questionPaperId", req.id, req.title, req.duration, req.startDate, req.endDate, req.marksPerQues, req.negativeMarks, req.instantResult, req.instantRank, req.instruction, req.questionPaperId];
+        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title=VALUES(title), duration=VALUES(duration), startDate=VALUES(startDate), endDate=VALUES(endDate), marksPerQues=VALUES(marksPerQues), negativeMarks=VALUES(negativeMarks), instantResult=VALUES(instantResult), instantRank=VALUES(instantRank), instruction=VALUES(instruction), questionPaperId=VALUES(questionPaperId), attachment=VALUES(attachment)";
+        var queryValues = ["tests", "id", "title", "duration", "startDate", "endDate", "marksPerQues", "negativeMarks", "instantResult", "instantRank", "instruction", "questionPaperId", "attachment", req.id, req.title, req.duration, req.startDate, req.endDate, req.marksPerQues, req.negativeMarks, req.instantResult, req.instantRank, req.instruction, req.questionPaperId, req.attachment];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -101,10 +101,9 @@ var self = {
         var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.questionPaperId IS NOT NULL AND subdate(current_date, 1) >= ?? and subdate(current_date, 1) <= ?? GROUP By t.id";
         var queryValues = ["tests", req.userId, "startDate", "endDate"];
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
-            	connection.release();
+                connection.release();
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else if (rows && rows.length > 0) {
@@ -291,17 +290,63 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
+                    if(req.status == 'completed'){
+                        self.instantEvaluation(req, pool);
+                    }
                     callback({ "Error": false, "Message": "Exam submited Successfully" });
                 }
             });
         });
     },
+    instantEvaluation: function(req, pool) {
+        var questions = [],
+            testInfo;
+        if (req.answers && req.answers.length > 0) {
+            query = "SELECT * FROM ?? WHERE id=?";
+            queryValues = ["tests", parseInt(req.testId)];
+            query = mysql.format(query, queryValues);
+            pool.getConnection(function(err, connection) {
+                connection.query(query, function(err, rows) {
+                    if (err) {
+                        connection.release();
+                        console.log(err);
+                    } else if (rows && rows.length > 0) {
+                        testInfo = rows[0];
+                        self.getTestQuestionsOnly(req, pool, function(result) {
+                            questions = result.questions;
+                            var score = 0;
+                            _.forEach(req.answers, function(value) {
+                                var correctAnswer = _.find(questions, { 'id': value.questionId }).correctAnswer;
+                                if (correctAnswer == value.answer) {
+                                    score += testInfo.marksPerQues;
+                                } else if (value.answer && testInfo.negativeMarks) {
+                                    score -= testInfo.negativeMarks;
+                                }
+                            });
+                            console.log(score);
+                            query = "UPDATE ?? SET score = ?, status=? WHERE userId=? AND testId=?";
+                                    queryValues = ["testuserinfo", score, 'evaluated', req.userId, req.testId];
+                            query = mysql.format(query, queryValues);
+                            console.log(query);
+                            connection.query(query, function(err, rows) {
+                                if (err) {
+                                    console.log(err);
+                                }
+                                console.log(req.userId + ' evaluated')
+                            });
+                        });
+                    }
+                });
+            });
+        }
+    },
     testEvaluation: function(req, pool, callback) {
-        var query, queryValues, userList, questions, userAnswer, status = [];
-        if(req.isForced)
-        	status = ["completed", "evaluated"];
+        var query, queryValues, userList, questions, userAnswers, status = [],
+            users;
+        if (req.isForced)
+            status = ["completed", "evaluated"];
         else
-        	status = ["completed"]
+            status = ["completed"]
         query = "SELECT u.*, t.marksPerQues, t.negativeMarks FROM ?? u LEFT JOIN (?? t) ON t.id = u.testId WHERE u.testId=? AND u.status IN (?)";
         queryValues = ["testuserinfo", "tests", req.testId, status];
         query = mysql.format(query, queryValues);
@@ -312,67 +357,96 @@ var self = {
                     callback({ "Error": true, "Message": err });
                 } else if (rows && rows.length > 0) {
                     userList = rows;
+                    users = _.map(rows, 'userId');
                     self.getTestQuestionsOnly(req, pool, function(result) {
                         questions = result.questions;
-                        async.eachSeries(userList, function(user, callback) {
-                                var data = {
-                                    testId: req.testId,
-                                    userId: user.userId
-                                };
-                                self.getTestUserInfo(data, pool, function(result) {
-                                    if (result.Error) {
-                                        connection.release();
-                                        callback(result);
-                                    } else {
-                                        var score = 0;
-                                        _.forEach(result.userTestInfo.answers, function(value) {
-                                            var correctAnswer = _.find(questions, { 'id': value.questionId }).correctAnswer;
-                                            if (correctAnswer == value.answer) {
-                                                score += userList[0].marksPerQues;
-                                            } else if (value.answer && userList[0].negativeMarks) {
-                                                score -= userList[0].negativeMarks;
-                                            }
-                                        });
-                                        query = "UPDATE ?? SET score = ?, status=? WHERE userId=? AND testId=?";
-                                        queryValues = ["testuserinfo", score, 'evaluated', data.userId, data.testId];
-                                        query = mysql.format(query, queryValues);
-                                        connection.query(query, function(err, rows) {
-                                            if (err) {
-                                                callback(err);
-                                            }
-                                            callback(null, rows)
-                                        });
-                                    }
-                                });
-                            },
-                            function(err, rows) {
-                                if (err) {
-                                	connection.release();
-                                    callback({ "Error": true, "Message": err });
-                                } else {
-                                    query = "CALL calculateRank(?)";
-                                    queryValues = [req.testId];
+                        query = "SELECT u.* FROM ?? u WHERE u.testId=? AND u.userId IN (?)";
+                        queryValues = ["test_user_answer", req.testId, users];
+                        query = mysql.format(query, queryValues);
+                        connection.query(query, function(err, rows) {
+                            if (err) {
+                                connection.release();
+                                callback({ "Error": true, "Message": err });
+                            }
+                            userAnswers = rows;
+                            async.eachSeries(userList, function(user, callback) {
+                                    var data = _.filter(userAnswers, { 'userId': user.userId });
+                                    var score = 0;
+                                    _.forEach(data, function(value) {
+                                        var correctAnswer = _.find(questions, { 'id': value.questionId }).correctAnswer;
+                                        if (correctAnswer == value.answer) {
+                                            score += userList[0].marksPerQues;
+                                        } else if (value.answer && userList[0].negativeMarks) {
+                                            score -= userList[0].negativeMarks;
+                                        }
+                                    });
+                                    query = "UPDATE ?? SET score = ?, status=? WHERE userId=? AND testId=?";
+                                    queryValues = ["testuserinfo", score, 'evaluated', user.userId, user.testId];
                                     query = mysql.format(query, queryValues);
                                     connection.query(query, function(err, rows) {
                                         if (err) {
-                                            callback({ "Error": true, "Message": err });
+                                            callback(err);
                                         }
-                                        query = "CALL calculatePercentile(?)";
-	                                    queryValues = [req.testId];
-	                                    query = mysql.format(query, queryValues);
-	                                    connection.query(query, function(err, rows) {
-	                                        if (err) {
-	                                            callback({ "Error": true, "Message": err });
-	                                        }
-	                                        callback({ "Error": false, "Message": "Evaluation completed Successfully" });
-	                                    });
+                                        callback(null, 123)
                                     });
+                                },
+                                function(err, rows) {
+                                    if (err) {
+                                        connection.release();
+                                        callback({ "Error": true, "Message": err });
+                                    } else {
+                                        query = "CALL calculateRank(?)";
+                                        queryValues = [req.testId];
+                                        query = mysql.format(query, queryValues);
+                                        connection.query(query, function(err, rows) {
+                                            if (err) {
+                                                callback({ "Error": true, "Message": err });
+                                            }
+                                            query = "CALL calculatePercentile(?)";
+                                            queryValues = [req.testId];
+                                            query = mysql.format(query, queryValues);
+                                            connection.query(query, function(err, rows) {
+                                                connection.release();
+                                                if (err) {
+                                                    callback({ "Error": true, "Message": err });
+                                                }
+                                                callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+                                            });
+                                        });
+                                    }
                                 }
-                            });
+                            );
+                        });
                     });
                 } else {
                     callback({ "Error": false, "Message": "No recordes found" });
                 }
+            });
+        });
+    },
+    instanttestEvaluation: function(req, pool, callback) {
+        var query, queryValues;
+        query = "CALL calculateRank(?)";
+        queryValues = [req.testId];
+        query = mysql.format(query, queryValues);
+        console.log(query)
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                if (err) {
+                    connection.release();
+                    callback({ "Error": true, "Message": err });
+                }
+                query = "CALL calculatePercentile(?)";
+                queryValues = [req.testId];
+                query = mysql.format(query, queryValues);
+                console.log(query)
+                connection.query(query, function(err, rows) {
+                    connection.release();
+                    if (err) {
+                        callback({ "Error": true, "Message": err });
+                    }
+                    callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+                });
             });
         });
     },
@@ -384,6 +458,7 @@ var self = {
             } else {
                 userAnswer.score = result.userTestInfo.score;
                 userAnswer.rank = result.userTestInfo.rank;
+                userAnswer.percentile = result.userTestInfo.percentile;
                 userAnswer.userInfo = result.userTestInfo.answers || [];
                 req.selectAll = true;
                 self.getTestQuestions(req, pool, function(result) {
@@ -681,38 +756,38 @@ var self = {
         });
     },
     getAllQuestion: function(req, pool, callback) {
-    	var questions = questionPapers = [];
+        var questions = questionPapers = [];
         var query = "SELECT q.*, GROUP_CONCAT(qq.questionPaperId) as questionPaperList FROM ?? q LEFT JOIN (question_questionpaper qq) ON q.id = qq.questionId WHERE q.isDeleted=false and q.parentQuestionId IS NULL GROUP BY q.id";
         var queryValues = ["questions"];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 if (err) {
-                	connection.release();
+                    connection.release();
                     callback({ "Error": true, "Message": err });
                 } else {
-                	questions = rows;
-                	query = "SELECT * FROM ?? WHERE isDeleted=false";
-                	queryValues = ["questionpapers"];
-                	query = mysql.format(query, queryValues);
-                	connection.query(query, function(err, rows) {
-                		connection.release();
-		                if (err) {
-		                    callback({ "Error": false, "Message": "Successfully", "questions": questions });
-		                } else {
-		                	questionPapers = rows;
-		                	_.forEach(questions, function(value){
-		                		value.questionPapers = [];
-		                		if(value.questionPaperList){
-		                			_.forEach(value.questionPaperList.split(','), function(childValue){
-		                				var questionPaper = _.find(questionPapers, { 'id': parseInt(childValue) });
-		                				if(questionPaper)
-		                					value.questionPapers.push({ questionPaperId: questionPaper.id, name: questionPaper.name});
-		                			});
-		                		}
-		                	});
-                    		callback({ "Error": false, "Message": "Successfully", "questions": questions });
-                    	}
+                    questions = rows;
+                    query = "SELECT * FROM ?? WHERE isDeleted=false";
+                    queryValues = ["questionpapers"];
+                    query = mysql.format(query, queryValues);
+                    connection.query(query, function(err, rows) {
+                        connection.release();
+                        if (err) {
+                            callback({ "Error": false, "Message": "Successfully", "questions": questions });
+                        } else {
+                            questionPapers = rows;
+                            _.forEach(questions, function(value) {
+                                value.questionPapers = [];
+                                if (value.questionPaperList) {
+                                    _.forEach(value.questionPaperList.split(','), function(childValue) {
+                                        var questionPaper = _.find(questionPapers, { 'id': parseInt(childValue) });
+                                        if (questionPaper)
+                                            value.questionPapers.push({ questionPaperId: questionPaper.id, name: questionPaper.name });
+                                    });
+                                }
+                            });
+                            callback({ "Error": false, "Message": "Successfully", "questions": questions });
+                        }
                     });
                 }
             });

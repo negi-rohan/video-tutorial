@@ -118,7 +118,7 @@
         }
 
         function evaluation(testId) {
-            $http.post(CommonInfo.getAppUrl() + '/api/exam/evaluation', { 'testId': testId }).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/exam/instantEvaluation', { 'testId': testId }).then(function(response) {
                 if (response && response.data && !response.data.Error) {
                     growl.success('Test evaluation successfully');
                     //getAllTests();

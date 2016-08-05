@@ -16,7 +16,7 @@
         growlProvider.globalDisableIcons(true);
 
         //block-ui
-        blockUIConfig.delay = 1000;
+        blockUIConfig.delay = 0;
     }
 
 })();

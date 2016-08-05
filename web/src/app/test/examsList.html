@@ -12,6 +12,7 @@
                             <th>Score</th>
                             <th>Rank</th>
                             <th>Percentile</th>
+                            <th>Files</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -24,6 +25,11 @@
                             <td ng-bind="exam.score"></td>
                             <td ng-bind="exam.rank"></td>
                             <td ng-bind="exam.percentile"></td>
+                            <td>
+                                <a ng-if="exam.attachment" target="_self" href="{{exam.attachment}}" download="file">
+                                    <i class="fa fa-files-o" aria-hidden="true"></i>
+                                </a>
+                            </td>
                             <td>
                                 <button type="button" class="btn btn-primary btn-xs" ng-click="vm.startExam(exam)" ng-if="!exam.status">
                                     <i class="fa fa-play fa-fw" aria-hidden="true"></i> Start Exam

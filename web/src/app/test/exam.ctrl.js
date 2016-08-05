@@ -7,23 +7,7 @@
         .directive('instructionBoard', instructionBoard)
         .directive('questionArea', questionArea)
         .directive('navigationArea', navigationArea);
-        //.directive('confirmOnExit', confirmOnExit);
 
-    /** @ngInject */
-    // function confirmOnExit() {
-    //     return {
-    //         link: function($scope, elem, attrs) {
-    //             window.onbeforeunload = function() {
-    //                 return "The form is dirty, do you want to stay on the page?";
-    //             }
-    //             $scope.$on('$locationChangeStart', function(event, next, current) {
-    //                 if (!confirm("The form is dirty, do you want to stay on the page?")) {
-    //                     event.preventDefault();
-    //                 }
-    //             });
-    //         }
-    //     };
-    // }
 
     /** @ngInject */
     function instructionBoard(resize, $window) {
@@ -67,11 +51,12 @@
     }
 
     /** @ngInject */
-    function ExamController($http, CommonInfo, $state, $scope, growl, $interval) {
+    function ExamController($http, CommonInfo, $state, $scope, growl, $interval, $window) {
         var vm = this;
         var userTime;
         var submitAttempt = 0;
         var userInfoLocalStorage;
+        var localSubmit, serverSubmit;
 
         vm.isExamStarted = false;
         vm.isExamEnded = false;
@@ -179,14 +164,35 @@
             if (vm.exam && vm.exam.questions && vm.exam.questions.length > 0) {
                 vm.isExamStarted = true;
                 showQuestion(0);
-                $interval(function() { saveLocal() }, 10000);
-                $interval(function() { submitExam(false, 'pending') }, 60000);
+                localSubmit = $interval(function() { saveLocal() }, 10000);
+                serverSubmit = $interval(function() { submitExam(false, 'pending') }, 60000);
                 $scope.$on('$stateChangeStart',
                     function(event, toState, toParams, fromState, fromParams) {
                         if (vm.isExamStarted && !vm.isExamEnded)
                             event.preventDefault();
                     });
+                stopNavigation();
             }
+        }
+
+        function stopNavigation() {
+            // var myEvent = $window.attachEvent || $window.addEventListener,
+            //     chkevent = $window.attachEvent ? 'onbeforeunload' : 'beforeunload';
+
+            // myEvent(chkevent, function(e) {
+            //     submitExam(false, 'pending');
+            //     var confirmationMessage = ' ';
+            //     (e || $window.event).returnValue = "Are you sure that you'd like to close the browser?";
+            //     return confirmationMessage;
+            // });
+
+            // $scope.$on('$locationChangeStart', function(event) {
+            //     submitExam(false, 'pending');
+            //     var answer = confirm("Are you sure you want to leave this page?")
+            //     if (!answer) {
+            //         event.preventDefault();
+            //     }
+            // });
         }
 
         function showQuestion(questionNo) {
@@ -227,6 +233,9 @@
                         if (response && response.data) {
                             if (status == 'completed') {
                                 vm.isExamEnded = true;
+                                $interval.cancel(localSubmit);
+                                $interval.cancel(serverSubmit);
+                                localSubmit = serverSubmit = undefined;
                                 growl.success('Your answers saved successfully');
                                 $state.go('main.examsList');
                             } else {

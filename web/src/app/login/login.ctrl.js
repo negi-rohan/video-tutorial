@@ -45,6 +45,7 @@
         vm.isOtp = true;
         vm.isOtpSend = false;
         vm.isOtpValid = false;
+        vm.activeForm = 1;
 
         vm.login = login;
         vm.signup = signup;
@@ -67,7 +68,7 @@
                             CommonInfo.setInfo('user', response.data.result);
                             var profileType = response.data.result.profileType;
                             if (profileType == 'student')
-                                $state.go('main.libary');
+                                $state.go('main.examsList');
                             else if (profileType == 'admin')
                                 $state.go('main.courses');
                         } else if (response && response.data && response.data.Error) {

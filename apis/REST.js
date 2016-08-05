@@ -344,6 +344,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/exam/instantEvaluation", function(req, res) { /// get all tests
+        testQueryHelper.instanttestEvaluation(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/exam/userAnswers", function(req, res) { /// get all tests
         testQueryHelper.getUserAnswers(req.body, pool, function(result) {
             res.json(result);
