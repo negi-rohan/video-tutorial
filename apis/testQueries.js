@@ -325,7 +325,7 @@ var self = {
                             });
                             console.log(score);
                             query = "UPDATE ?? SET score = ?, status=? WHERE userId=? AND testId=?";
-                                    queryValues = ["testuserinfo", score, 'evaluated', req.userId, req.testId];
+                                    queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', req.userId, req.testId];
                             query = mysql.format(query, queryValues);
                             console.log(query);
                             connection.query(query, function(err, rows) {
@@ -381,7 +381,7 @@ var self = {
                                         }
                                     });
                                     query = "UPDATE ?? SET score = ?, status=? WHERE userId=? AND testId=?";
-                                    queryValues = ["testuserinfo", score, 'evaluated', user.userId, user.testId];
+                                    queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', user.userId, user.testId];
                                     query = mysql.format(query, queryValues);
                                     connection.query(query, function(err, rows) {
                                         if (err) {
