@@ -323,11 +323,9 @@ var self = {
                                     score -= testInfo.negativeMarks;
                                 }
                             });
-                            console.log(score);
                             query = "UPDATE ?? SET score = ?, status=? WHERE userId=? AND testId=?";
                                     queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', req.userId, req.testId];
                             query = mysql.format(query, queryValues);
-                            console.log(query);
                             connection.query(query, function(err, rows) {
                                 if (err) {
                                     console.log(err);
@@ -395,26 +393,43 @@ var self = {
                                         connection.release();
                                         callback({ "Error": true, "Message": err });
                                     } else {
-                                        query = "CALL calculateRank(?)";
+                                        query = "CALL calculatePercentile(?)";
                                         queryValues = [req.testId];
                                         query = mysql.format(query, queryValues);
                                         connection.query(query, function(err, rows) {
+                                            connection.release();
                                             if (err) {
                                                 callback({ "Error": true, "Message": err });
                                             }
-                                            query = "CALL calculatePercentile(?)";
-                                            queryValues = [req.testId];
-                                            query = mysql.format(query, queryValues);
-                                            connection.query(query, function(err, rows) {
-                                                connection.release();
-                                                if (err) {
-                                                    callback({ "Error": true, "Message": err });
-                                                }
-                                                callback({ "Error": false, "Message": "Evaluation completed Successfully" });
-                                            });
+                                            callback({ "Error": false, "Message": "Evaluation completed Successfully" });
                                         });
                                     }
                                 }
+                                // function(err, rows) {
+                                //     if (err) {
+                                //         connection.release();
+                                //         callback({ "Error": true, "Message": err });
+                                //     } else {
+                                //         query = "CALL calculateRank(?)";
+                                //         queryValues = [req.testId];
+                                //         query = mysql.format(query, queryValues);
+                                //         connection.query(query, function(err, rows) {
+                                //             if (err) {
+                                //                 callback({ "Error": true, "Message": err });
+                                //             }
+                                //             query = "CALL calculatePercentile(?)";
+                                //             queryValues = [req.testId];
+                                //             query = mysql.format(query, queryValues);
+                                //             connection.query(query, function(err, rows) {
+                                //                 connection.release();
+                                //                 if (err) {
+                                //                     callback({ "Error": true, "Message": err });
+                                //                 }
+                                //                 callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+                                //             });
+                                //         });
+                                //     }
+                                // }
                             );
                         });
                     });
@@ -426,29 +441,42 @@ var self = {
     },
     instanttestEvaluation: function(req, pool, callback) {
         var query, queryValues;
-        query = "CALL calculateRank(?)";
+        query = "CALL calculatePercentile(?)";
         queryValues = [req.testId];
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
+                connection.release();
                 if (err) {
-                    connection.release();
                     callback({ "Error": true, "Message": err });
                 }
-                query = "CALL calculatePercentile(?)";
-                queryValues = [req.testId];
-                query = mysql.format(query, queryValues);
-                console.log(query)
-                connection.query(query, function(err, rows) {
-                    connection.release();
-                    if (err) {
-                        callback({ "Error": true, "Message": err });
-                    }
-                    callback({ "Error": false, "Message": "Evaluation completed Successfully" });
-                });
+                callback({ "Error": false, "Message": "Evaluation completed Successfully" });
             });
         });
+        
+        // query = "CALL calculateRank(?)";
+        // queryValues = [req.testId];
+        // query = mysql.format(query, queryValues);
+        // console.log(query)
+        // pool.getConnection(function(err, connection) {
+        //     connection.query(query, function(err, rows) {
+        //         if (err) {
+        //             connection.release();
+        //             callback({ "Error": true, "Message": err });
+        //         }
+        //         query = "CALL calculatePercentile(?)";
+        //         queryValues = [req.testId];
+        //         query = mysql.format(query, queryValues);
+        //         console.log(query)
+        //         connection.query(query, function(err, rows) {
+        //             connection.release();
+        //             if (err) {
+        //                 callback({ "Error": true, "Message": err });
+        //             }
+        //             callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+        //         });
+        //     });
+        // });
     },
     getUserAnswers: function(req, pool, callback) {
         var userAnswer = {};
@@ -590,7 +618,6 @@ var self = {
                 console.log(err)
                 callback({ "Error": true, "Message": err });
             }
-            console.log(rows);
             callback({ "Error": false, "Message": "Question added Successfully", "counts": rows });
         });
     },
