@@ -376,7 +376,7 @@ var self = {
                 var code = speakeasy.totp({
                     secret: secret,
                     encoding: 'base32',
-                    step: 120
+                    step: 180
                 });
                 //callback({ "Error": false, "secret": secret, "code": code });
                 msg91.send(request.phone, "Your OTP:" + code, function(err, response) {
