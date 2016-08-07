@@ -404,7 +404,7 @@ var self = {
             secret: request.secret,
             encoding: 'base32',
             token: request.code,
-            step: 120
+            step: 180
         });
         if (status)
             callback({ "Error": false, "Message": "Correct code" });
