@@ -16,6 +16,7 @@
     function TestController($http, CommonInfo, $state, growl, $uibModal, Upload, _, $window) {
         var vm = this;
         var selectedQuestionGrid = [];
+        var inProcess = false;
 
         vm.objMode;
         vm.selectedTab = 0;
@@ -29,6 +30,7 @@
             ['html', 'insertImage', 'insertLink', 'insertVideo']
         ];
         vm.questionType = ['MCQ', "Passage"];
+        vm.currentPage = 1;
         vm.keyCode = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'];
 
         vm.getAllTests = getAllTests;
@@ -38,6 +40,7 @@
         vm.deleteTest = deleteTest;
         vm.evaluation = evaluation;
         vm.evaluationAll = evaluationAll;
+        vm.recheck = recheck;
         vm.getAllquestionPapers = getAllquestionPapers;
         vm.editQuestionPaper = editQuestionPaper;
         vm.addSubject = addSubject;
@@ -126,10 +129,19 @@
             }, function(response) {});
         }
 
-        function evaluationAll(testId){
+        function evaluationAll(testId) {
             $http.post(CommonInfo.getAppUrl() + '/api/exam/evaluation', { 'testId': testId, 'isForced': true }).then(function(response) {
                 if (response && response.data && !response.data.Error) {
                     growl.success('Test evaluation successfully');
+                    //getAllTests();
+                }
+            }, function(response) {});
+        }
+
+        function recheck(testId) {
+            $http.post(CommonInfo.getAppUrl() + '/api/exam/reCheckAnswers', { 'testId': testId }).then(function(response) {
+                if (response && response.data && !response.data.Error) {
+                    growl.success('Test recheck successfully');
                     //getAllTests();
                 }
             }, function(response) {});
@@ -178,7 +190,7 @@
             }, function(response) {});
         }
 
-        function addSubject(){
+        function addSubject() {
             var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: 'addSubjects.html',
@@ -215,10 +227,13 @@
         }
 
         //////////Question related ////////////////////////////////////////////////////
-        function getAllQuestions() {
-            $http.get(CommonInfo.getAppUrl() + '/api/question/all').then(function(response) {
+        function getAllQuestions(pageNo) {
+            vm.currentPage = pageNo;
+            $http.post(CommonInfo.getAppUrl() + '/api/question/all', { page: pageNo, perPage: 40 }).then(function(response) {
                 if (response && response.data) {
                     vm.questions = response.data.questions;
+                    vm.questionCount = response.data.recordCount;
+                    vm.lastPage = Math.ceil(vm.questionCount/40);
                 }
             }, function(response) {});
         }
@@ -264,7 +279,7 @@
                 $http.post(CommonInfo.getAppUrl() + '/api/question', vm.question).then(function(response) {
                     if (response && response.data && !response.data.Error) {
                         growl.success('Question added successfully');
-                        if(!addNew){
+                        if (!addNew) {
                             $state.go('main.test.home');
                             getAllQuestions();
                         } else {
@@ -305,10 +320,24 @@
         }
 
         function getTestUsers(test) {
+            vm.currentTestUserPage = 1;
             $http.post(CommonInfo.getAppUrl() + '/api/test/users', { 'testId': test.id }).then(function(response) {
                 if (response && response.data && !response.data.Error) {
                     vm.testUsers = response.data.testUsers;
+                    vm.testUserCount = response.data.recordCount;
+                    vm.lastTestUserPage = Math.ceil(vm.testUserCount/40);
                     $state.go('main.test.studentList');
+                }
+            }, function(response) {});
+        }
+
+        function getTestUserPagination(pageNo) {
+            vm.currentTestUserPage = pageNo;
+            $http.post(CommonInfo.getAppUrl() + '/api/test/users', { 'testId': test.id, 'page': pageNo, 'perPage': 40 }).then(function(response) {
+                if (response && response.data && !response.data.Error) {
+                    vm.testUsers = response.data.testUsers;
+                    vm.testUserCount = response.data.recordCount;
+                    vm.lastTestUserPage = Math.ceil(vm.testUserCount/40);
                 }
             }, function(response) {});
         }
@@ -316,7 +345,7 @@
         function showTestPreview(test) {
             test.isPreview = true
             CommonInfo.setInfo('exam', test);
-            $window.open($state.href('main.exam', {isPreview: true}),'_blank');
+            $window.open($state.href('main.exam', { isPreview: true }), '_blank');
         }
 
         function importQuestion(file) {

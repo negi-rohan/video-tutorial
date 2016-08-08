@@ -35,6 +35,10 @@
                         </span>
                     </div>
                 </form>
+                <span class="navbar-form navbar-right">
+                    Hello <span ng-bind="vm.userInfo.fullName"></span>
+                    <div>Roll No. <span ng-bind="vm.userInfo.id"></span></div>
+                </span>
                 <!-- project menu -->
                 <ul class="nav navbar-nav navbar-left">
                     <li ui-sref="main.libary" ui-sref-active="active" ng-if="vm.config.tabs.library">
@@ -49,7 +53,7 @@
                     </li>
                     <li ui-sref="main.courses" ui-sref-active="active" ng-if="vm.config.tabs.allCourses">
                         <a href="javascript:void(0);" ng-click="vm.getAllCourses();">
-                            <i class="fa fa-database fa-fw" aria-hidden="true"></i> Courses
+                            <i class="fa fa-database fa-fw" aria-hidden="true"></i> Course
                         </a>
                     </li>
                     <li ui-sref="main.lessons" ui-sref-active="active" ng-if="vm.config.tabs.allLessons">

@@ -6,7 +6,8 @@
         .factory('CommonInfo', CommonInfo)
         .factory('credentials', credentials)
         .factory('Modal', Modal)
-        .directive('jwplayerjs', jwplayerjs);
+        .directive('jwplayerjs', jwplayerjs)
+        .directive('whenScrollEnds', whenScrollEnds);
 
     /** @ngInject */
     function jwplayerjs($compile) {
@@ -28,6 +29,27 @@
                         element.html(getTemplate(id));
                         $compile(element.contents())(scope);
                         jwplayer(id).setup(scope.setupVars);
+                    }
+                });
+            }
+        };
+    }
+
+    /** @ngInject */
+    function whenScrollEnds($window) {
+        return {
+            restrict: "A",
+            link: function(scope, element, attrs) {
+                var visibleHeight = $window.innerHeight;
+                var threshold = 100;
+
+                element.scroll(function() {
+                    var scrollableHeight = element.prop('scrollHeight');
+                    var hiddenContentHeight = scrollableHeight - visibleHeight;
+
+                    if (hiddenContentHeight - element.scrollTop() <= threshold) {
+                        // Scroll is almost at the bottom. Loading more rows
+                        scope.$apply(attrs.whenScrollEnds);
                     }
                 });
             }

@@ -72,9 +72,9 @@
 
         function activate() {
             vm.exam = CommonInfo.getInfo('exam');
-            vm.isPreview = vm.exam.isPreview ? true : false;
-            vm.user = CommonInfo.getInfo('user');
             if (vm.exam && vm.user) {
+                vm.isPreview = vm.exam.isPreview ? true : false;
+                vm.user = CommonInfo.getInfo('user');
                 vm.timer = vm.exam.duration;
                 getExamQuestions();
             }
@@ -239,16 +239,26 @@
                                 growl.success('Your answers saved successfully');
                                 $state.go('main.examsList');
                             } else {
-                                if (submitAttempt > 3) {
-                                    submitAttempt++;
-                                    submitExam(true);
+                                if (status != 'pending') {
+                                    if (submitAttempt <= 3) {
+                                        submitAttempt++;
+                                        submitExam(true);
+                                    } else {
+                                        growl.info('Unable to submit due to some server error, please try after some time');
+                                        $state.go('main.examsList');
+                                    }
                                 }
                             }
                         }
                     }, function(response) {
-                        if (submitAttempt > 3) {
-                            submitAttempt++;
-                            submitExam(true);
+                        if(status != 'pending') {
+                            if (submitAttempt <= 3) {
+                                submitAttempt++;
+                                submitExam(true);
+                            } else {
+                                growl.info('Unable to submit due to some server error, please try after some time');
+                                $state.go('main.examsList');
+                            }
                         }
                     });
                 }

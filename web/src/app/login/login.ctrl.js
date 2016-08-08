@@ -46,6 +46,7 @@
         vm.isOtpSend = false;
         vm.isOtpValid = false;
         vm.activeForm = 1;
+        vm.showPage = false
 
         vm.login = login;
         vm.signup = signup;
@@ -57,7 +58,15 @@
         activate();
 
         function activate() {
-
+            var user = CommonInfo.getInfo('user');
+            if (user) {
+                if (user.profileType == 'student')
+                    $state.go('main.examsList');
+                else if (user.profileType == 'admin')
+                    $state.go('main.courses');
+            } else {
+                vm.showPage = true;
+            }
         }
 
         function login() {

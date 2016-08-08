@@ -37,7 +37,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="answer in vm.question.answers | filter: { isDeleted: 0 }" ng-init="answer.ansKey = vm.keyCode[$index]">
+                    <tr ng-repeat="answer in vm.question.answers | orderBy: 'ansKey' | filter: { isDeleted: 0 }" ng-init="answer.ansKey = vm.keyCode[$index]">
                         <td scope="row" ng-bind="vm.keyCode[$index]"></td>
                         <td>
                             <text-angular class="test-answer-options" ta-toolbar="vm.toolBar" placeholder="Answer option" ng-model="answer.answerText"></text-angular>

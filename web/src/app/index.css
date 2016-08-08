@@ -1,3 +1,8 @@
+body {
+    font-family: 'Georgia'
+}
+
+
 /*used in Library pannel as round button starts*/
 
 .btn-circle {
@@ -113,6 +118,43 @@
     background-image: url('/assets/images/forumias-academy-image.jpg');
     background-repeat: no-repeat;
     background-size: cover;
-    height:100%;
-    width:100%;
+    height: 100%;
+    width: 100%;
+}
+
+.row.top {
+    margin-right: 4%;
+    margin-top: 10%;
+}
+
+.col-xs-offset-1 .logo-mobile {
+    display: none;
+}
+
+@media screen and (max-width: 480px) {
+    .col-xs-offset-1 {
+        margin-left: 0;
+    }
+    .body-background {
+        background: #1E3A59;
+    }
+    .row.top {
+        margin-right: 0%;
+        margin-top: 5%;
+    }
+    .row {
+        margin-left: 0px;
+    }
+    .col-xs-offset-1 .logo-mobile {
+        background-image: url("/assets/images/forumias-white-small.PNG");
+        background-repeat: no-repeat;
+        color: #fff;
+        display: block;
+        height: 40px;
+        margin-bottom: 7%;
+        margin-left: 14%;
+    }
+    .col-xs-offset-1 {
+        margin-top: 15%;
+    }
 }

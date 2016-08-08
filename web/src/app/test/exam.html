@@ -38,7 +38,7 @@
                 <div ng-bind-html="vm.currentQuestion.question">
                 </div>
                 <ul class="list-group">
-                    <li class="list-group-item" ng-repeat="answer in vm.currentQuestion.answers">
+                    <li class="list-group-item" ng-repeat="answer in vm.currentQuestion.answers | orderBy: 'ansKey'">
                         <label style="margin-bottom:0px;">
                             <input type="radio" name="answerOptions" ng-model="vm.userCurrentQuestion[vm.currentIndex].answer" ng-value="answer.ansKey" ng-click="vm.saveLocal();" /> <span ng-bind-html="answer.answerText" class="options-review" style="display:inline-block;"></span>
                         </label>

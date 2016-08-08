@@ -330,10 +330,31 @@ var self = {
             });
         });
     },
-    getAllUsers: function(type, value, pool, callback) { /// get list all users
-        var query, queryValues;
+    getAllUsers: function(type, req, pool, callback) { /// get list all users
+        var query, queryValues, from = 0, to = 40;
+        if(req.page){
+            from = (req.page - 1) * 40;
+            to = 40;
+        }
         if (type == "byType") {
-            query = "SELECT * from ?? where profileType = ?";
+            query = "SELECT * from ?? where profileType = ? LIMIT ?, ?";
+            queryValues = ["user", req.type, from, to];
+        }
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                connection.release();
+                if (err) {
+                    callback({ "Error": true, "Message": "Error executing MySQL query" });
+                } else {
+                    callback({ "Error": false, "Message": "Success", "users": rows, "recordCount": usersList.length });
+                }
+            });
+        });
+    },
+    getAllUsersName: function (type, value, pool, callback) { /// get list all users name and id
+        if (type == "byType") {
+            query = "SELECT id, fullName from ?? where profileType = ?";
             queryValues = ["user", value];
         }
         query = mysql.format(query, queryValues);
@@ -508,7 +529,6 @@ var self = {
         var query = "INSERT INTO ??(??, ??) VALUES (?, ?)";
         var queryValues = ["course_subscription", "courseId", "userId", request.courseId, request.userId];
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 connection.release();
@@ -673,7 +693,6 @@ var self = {
             queryValues = ["courses", "courseId", "userId", id];
         }
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 connection.release();

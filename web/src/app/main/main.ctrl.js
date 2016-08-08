@@ -85,7 +85,7 @@
         activate();
 
         function activate() {
-            console.log(moment())
+            
             vm.config = credentials.getCredentials();
             vm.userInfo = CommonInfo.getInfo('user');
             if (vm.userInfo && vm.userInfo.profileType == 'student') {
@@ -138,6 +138,8 @@
                     if (lesson && lesson.id)
                         showLessonComments(lesson.id);
                 }
+            } else {
+                $state.go('login');
             }
         }
 
@@ -294,7 +296,7 @@
                     vm.categories = response.data.categories;
                 }
             }, function(response) {});
-            $http.post(CommonInfo.getAppUrl() + '/api/user/byType', { 'type': 'instructor' }).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/user/name', { 'type': 'instructor' }).then(function(response) {
                 if (response && response.data && response.data.users) {
                     vm.users = response.data.users;
                 }
@@ -455,13 +457,22 @@
             }
         }
 
-        function getUsers(type) {
+        function getUsers(type, pageNo) {
             var data = {
                 type: type
             };
+            if(pageNo){
+                data.pageNo = pageNo;
+                data.perPage = 40;
+                vm.usersCurrentPage = pageNo;
+            } else {
+                vm.usersCurrentPage = 1;
+            }
             $http.post(CommonInfo.getAppUrl() + '/api/user/byType', data).then(function(response) {
                 if (response && response.data && response.data.users) {
                     vm.users = response.data.users;
+                    vm.usersRecordCount = response.data.recordCount;
+                    vm.usersLastPage = Math.ceil(vm.usersRecordCount / 40);
                 }
             }, function(response) {});
         }

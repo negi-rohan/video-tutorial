@@ -21,6 +21,7 @@ function REST_ROUTER(router, pool, md5, jwt, imgUpload, fileUpload) {
 // REST_ROUTER.prototype.handleRoutes = function(router, connection, md5, jwt, imgUpload, fileUpload) {
 REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload, fileUpload) {
     queryHelper.initdictionaries(pool);
+    testQueryHelper.initTestDictionaries(pool);
     router.get("/", function(req, res) { /// base route not for use
         res.json({ "Message": "Hello World!" });
     });
@@ -94,7 +95,13 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
     });
 
     router.post("/user/byType", function(req, res) { /// get user by type
-        queryHelper.getAllUsers("byType", req.body.type, pool, function(result) {
+        queryHelper.getAllUsers("byType", req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/user/name", function(req, res) { /// get user by type
+        queryHelper.getAllUsersName("byType", req.body.type, pool, function(result) {
             res.json(result);
         });
     });
@@ -338,6 +345,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/exam/reCheckAnswers", function(req, res) { /// get all tests
+        testQueryHelper.testScore(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/exam/evaluation", function(req, res) { /// get all tests
         testQueryHelper.testEvaluation(req.body, pool, function(result) {
             res.json(result);
@@ -398,7 +411,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
-    router.get("/question/all", function(req, res) { /// get all tests
+    router.post("/question/all", function(req, res) { /// get all tests
         testQueryHelper.getAllQuestion(req.body, pool, function(result) {
             res.json(result);
         });
