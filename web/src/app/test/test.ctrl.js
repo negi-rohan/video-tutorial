@@ -55,6 +55,7 @@
         vm.addToPaper = addToPaper;
         vm.importQuestion = importQuestion;
         vm.getTestUsers = getTestUsers;
+        vm.getTestUserPagination = getTestUserPagination;
         vm.showTestPreview = showTestPreview;
         activate();
 
@@ -234,7 +235,7 @@
                 if (response && response.data) {
                     vm.questions = response.data.questions;
                     vm.questionCount = response.data.recordCount;
-                    vm.lastPage = Math.ceil(vm.questionCount/40);
+                    vm.lastPage = Math.ceil(vm.questionCount/40) || 1;
                 }
             }, function(response) {});
         }
@@ -336,17 +337,18 @@
 
         function getTestUsers(test) {
             vm.currentTestUserPage = 1;
+            vm.selectedTest = test;
             $http.post(CommonInfo.getAppUrl() + '/api/test/users', { 'testId': test.id }).then(function(response) {
                 if (response && response.data && !response.data.Error) {
                     vm.testUsers = response.data.testUsers;
                     vm.testUserCount = response.data.recordCount;
-                    vm.lastTestUserPage = Math.ceil(vm.testUserCount/40);
+                    vm.lastTestUserPage = Math.ceil(vm.testUserCount/40) || 1;
                     $state.go('main.test.studentList');
                 }
             }, function(response) {});
         }
 
-        function getTestUserPagination(pageNo) {
+        function getTestUserPagination(test, pageNo) {
             vm.currentTestUserPage = pageNo;
             $http.post(CommonInfo.getAppUrl() + '/api/test/users', { 'testId': test.id, 'page': pageNo, 'perPage': 40 }).then(function(response) {
                 if (response && response.data && !response.data.Error) {

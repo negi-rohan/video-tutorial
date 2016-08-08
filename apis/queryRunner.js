@@ -331,15 +331,13 @@ var self = {
         });
     },
     getAllUsers: function(type, req, pool, callback) { /// get list all users
-        var query, queryValues, from = 0, to = 40;
-        console.log(req.page)
+        var query, queryValues, from = 0, count = req.perPage || 40;
         if(req.page){
-            from = (req.page - 1) * 40;
-            to = 40;
+            from = (req.page - 1) * count;
         }
         if (type == "byType") {
             query = "SELECT * from ?? where profileType = ? LIMIT ?, ?";
-            queryValues = ["user", req.type, from, to];
+            queryValues = ["user", req.type, from, count];
         }
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {

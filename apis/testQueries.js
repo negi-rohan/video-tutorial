@@ -98,21 +98,38 @@ var self = {
         });
     },
     getTestUsers: function(req, pool, callback) {
-        if (req.withEvaluatedStatus) {
-            query = "SELECT u.id, u.fullName, tu.score, tu.rank, tu.percentile FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status=? ORDER BY tu.rank";
-            queryValues = [req.testId, "evaluated"];
-        } else {
-            query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.rank";
-            queryValues = [req.testId];
+        var query, queryValues, from = 0,
+            count = req.perPage || 40;
+        var userCount = 0;
+        if (req.page) {
+            from = (req.page - 1) * count;
         }
+        query = "SELECT count(*) as userCount FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC";
+        queryValues = [req.testId];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
-                connection.release();
                 if (err) {
+                    connection.release();
                     callback({ "Error": true, "Message": err });
                 } else {
-                    callback({ "Error": false, "Message": "Successfull", "testUsers": rows });
+                    userCount = rows[0].userCount;
+                    if (req.withEvaluatedStatus) {
+                        query = "SELECT u.id, u.fullName, tu.score, tu.rank, tu.percentile FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status=? ORDER BY tu.status, tu.score DESC";
+                        queryValues = [req.testId, "evaluated"];
+                    } else {
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
+                        queryValues = [req.testId, from, count];
+                    }
+                    query = mysql.format(query, queryValues);
+                    connection.query(query, function(err, rows) {
+                        connection.release();
+                        if (err) {
+                            callback({ "Error": true, "Message": err });
+                        } else {
+                            callback({ "Error": false, "Message": "Successfull", "testUsers": rows, "recordCount": userCount });
+                        }
+                    });
                 }
             });
         });
@@ -871,13 +888,12 @@ var self = {
     getAllQuestion: function(req, pool, callback) {
         var questions = questionPapers = [],
             from = 0,
-            to = 40;
-        if (req.page && req.perPage) {
-            from = (req.page - 1) * req.perPage;
-            to = req.perPage;
+            count = req.perPage || 40;
+        if (req.page) {
+            from = (req.page - 1) * count;
         }
         var query = "SELECT q.*, GROUP_CONCAT(qq.questionPaperId) as questionPaperList FROM ?? q LEFT JOIN (question_questionpaper qq) ON q.id = qq.questionId WHERE q.isDeleted=false and q.parentQuestionId IS NULL GROUP BY q.id LIMIT ?, ?";
-        var queryValues = ["questions", from, to];
+        var queryValues = ["questions", from, count];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {

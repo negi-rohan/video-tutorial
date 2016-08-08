@@ -476,7 +476,7 @@
                 if (response && response.data && response.data.users) {
                     vm.users = response.data.users;
                     vm.usersRecordCount = response.data.recordCount;
-                    vm.usersLastPage = Math.ceil(vm.usersRecordCount / 40);
+                    vm.usersLastPage = Math.ceil(vm.usersRecordCount / 40) || 1;
                 }
             }, function(response) {});
         }
