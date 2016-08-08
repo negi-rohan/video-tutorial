@@ -332,6 +332,7 @@ var self = {
     },
     getAllUsers: function(type, req, pool, callback) { /// get list all users
         var query, queryValues, from = 0, to = 40;
+        console.log(req.page)
         if(req.page){
             from = (req.page - 1) * 40;
             to = 40;
@@ -347,7 +348,9 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": "Error executing MySQL query" });
                 } else {
-                    callback({ "Error": false, "Message": "Success", "users": rows, "recordCount": usersList.length });
+                    var typeUser = _.filter(usersList, { 'profileType': req.type });
+                    var count = typeUser ? typeUser.length : 0;
+                    callback({ "Error": false, "Message": "Success", "users": rows, "recordCount": count });
                 }
             });
         });

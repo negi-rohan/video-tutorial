@@ -108,8 +108,10 @@
                 } else if ($state.is('main.lessons')) {
                     getAllLessons();
                 } else if ($state.is('main.instructors')) {
+                    vm.userType = 'instructor';
                     getUsers('instructor');
                 } else if ($state.is('main.students')) {
+                    vm.userType = 'student';
                     getUsers('student');
                 } else if ($state.is('main.createCourse')) {
                     editCourse('insert');
@@ -458,11 +460,13 @@
         }
 
         function getUsers(type, pageNo) {
+            vm.usersRecordCount = 0;
+            vm.userType = type;
             var data = {
                 type: type
             };
             if(pageNo){
-                data.pageNo = pageNo;
+                data.page = pageNo;
                 data.perPage = 40;
                 vm.usersCurrentPage = pageNo;
             } else {

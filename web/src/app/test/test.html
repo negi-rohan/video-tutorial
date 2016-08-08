@@ -103,6 +103,7 @@
                 </uib-tab>
                 <uib-tab index="2" heading="Questions" select="vm.getAllQuestions(1);vm.selectedTab=2;" style="border:1px solid #ddd;border-radius:4px;">
                     <nav aria-label="Page navigation">
+                        <div class="pull-left" style="margin:9px 12px;">Total: <span ng-bind="vm.questionCount"></span></div>
                         <ul class="pagination pull-right" style="margin:4px 2px;">
                             <li>
                                 <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getAllQuestions(1)">
@@ -110,13 +111,13 @@
                                 </a>
                             </li>
                             <li ng-class="{'disabled': vm.currentPage == 1}">
-                                <a href="javascript:void(0);" ng-click="vm.getAllQuestions(vm.currentPage - 1)">Previous</a>
+                                <a href="javascript:void(0);" ng-click="vm.currentPage != 1 && vm.getAllQuestions(vm.currentPage - 1)">Previous</a>
                             </li>
                             <li class="active">
                                 <a href="javascript:void(0);" ng-bind="vm.currentPage"></a>
                             </li>
                             <li ng-class="{'disabled': vm.currentPage == vm.lastPage}">
-                                <a href="javascript:void(0);" ng-click="vm.getAllQuestions(vm.currentPage + 1)">Next</a>
+                                <a href="javascript:void(0);" ng-click="vm.currentPage != vm.lastPage && vm.getAllQuestions(vm.currentPage + 1)">Next</a>
                             </li>
                             <li>
                                 <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getAllQuestions(vm.lastPage)">
@@ -166,13 +167,13 @@
                                 </a>
                             </li>
                             <li ng-class="{'disabled': vm.currentPage == 1}">
-                                <a href="javascript:void(0);" ng-click="vm.getAllQuestions(vm.currentPage - 1)">Previous</a>
+                                <a href="javascript:void(0);" ng-click="vm.currentPage != 1 && vm.getAllQuestions(vm.currentPage - 1)">Previous</a>
                             </li>
                             <li class="active">
                                 <a href="javascript:void(0);" ng-bind="vm.currentPage"></a>
                             </li>
                             <li ng-class="{'disabled': vm.currentPage == vm.lastPage}">
-                                <a href="javascript:void(0);" ng-click="vm.getAllQuestions(vm.currentPage + 1)">Next</a>
+                                <a href="javascript:void(0);" ng-click="vm.currentPage != vm.lastPage && vm.getAllQuestions(vm.currentPage + 1)">Next</a>
                             </li>
                             <li>
                                 <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getAllQuestions(vm.lastPage)">

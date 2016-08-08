@@ -72,9 +72,9 @@
 
         function activate() {
             vm.exam = CommonInfo.getInfo('exam');
+            vm.user = CommonInfo.getInfo('user');
             if (vm.exam && vm.user) {
                 vm.isPreview = vm.exam.isPreview ? true : false;
-                vm.user = CommonInfo.getInfo('user');
                 vm.timer = vm.exam.duration;
                 getExamQuestions();
             }

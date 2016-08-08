@@ -14,23 +14,24 @@
     </div> -->
                 <div class="table-responsive">
                     <nav aria-label="Page navigation">
+                        <div class="pull-left" style="margin:9px 12px;">Total: <span ng-bind="vm.usersRecordCount"></span></div>
                         <ul class="pagination pull-right" style="margin:4px 2px;">
                             <li>
-                                <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getUsers(1)">
+                                <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getUsers(vm.userType, 1)">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
                             <li ng-class="{'disabled': vm.usersCurrentPage == 1}">
-                                <a href="javascript:void(0);" ng-click="vm.getUsers(vm.usersCurrentPage - 1)">Previous</a>
+                                <a href="javascript:void(0);" ng-click="vm.usersCurrentPage != 1 && vm.getUsers(vm.userType, vm.usersCurrentPage - 1)">Previous</a>
                             </li>
                             <li class="active">
                                 <a href="javascript:void(0);" ng-bind="vm.usersCurrentPage"></a>
                             </li>
                             <li ng-class="{'disabled': vm.usersCurrentPage == vm.usersLastPage}">
-                                <a href="javascript:void(0);" ng-click="vm.getUsers(vm.usersCurrentPage + 1)">Next</a>
+                                <a href="javascript:void(0);" ng-click="vm.usersCurrentPage != vm.usersLastPage && vm.getUsers(vm.userType, vm.usersCurrentPage + 1)">Next</a>
                             </li>
                             <li>
-                                <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getUsers(vm.usersLastPage)">
+                                <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getUsers(vm.userType, vm.usersLastPage)">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -63,21 +64,21 @@
                     <nav aria-label="Page navigation">
                     <ul class="pagination pull-right" style="margin:4px 2px;">
                         <li>
-                            <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getUsers(1)">
+                            <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getUsers(vm.userType, 1)">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
                         <li ng-class="{'disabled': vm.usersCurrentPage == 1}">
-                            <a href="javascript:void(0);" ng-click="vm.getUsers(vm.usersCurrentPage - 1)">Previous</a>
+                            <a href="javascript:void(0);" ng-click="vm.usersCurrentPage != 1 && vm.getUsers(vm.userType, vm.usersCurrentPage - 1)">Previous</a>
                         </li>
                         <li class="active">
                             <a href="javascript:void(0);" ng-bind="vm.usersCurrentPage"></a>
                         </li>
                         <li ng-class="{'disabled': vm.usersCurrentPage == vm.usersLastPage}">
-                            <a href="javascript:void(0);" ng-click="vm.getUsers(vm.usersCurrentPage + 1)">Next</a>
+                            <a href="javascript:void(0);" ng-click="vm.usersCurrentPage != vm.usersLastPage && vm.getUsers(vm.userType, vm.usersCurrentPage + 1)">Next</a>
                         </li>
                         <li>
-                            <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getUsers(vm.usersLastPage)">
+                            <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getUsers(vm.userType, vm.usersLastPage)">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>

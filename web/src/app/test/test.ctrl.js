@@ -49,6 +49,7 @@
         vm.questionSelection = questionSelection;
         vm.getQuestionById = getQuestionById;
         vm.editQuestion = editQuestion;
+        vm.addChildQuestion = addChildQuestion;
         vm.updateQuestion = updateQuestion;
         vm.deleteQuestion = deleteQuestion;
         vm.addToPaper = addToPaper;
@@ -264,14 +265,28 @@
             vm.objMode = mode;
             vm.question = question || {};
             vm.question.correctAnswer = vm.question.correctAnswer || '';
-            vm.question.answers = vm.question.answers || [{ answerText: '', isDeleted: 0 }];
-            vm.question.childQuestions = vm.question.childQuestions || '';
-            vm.question.childQuestions = vm.question.childQuestions || [{ question: '', isDeleted: 0, answers: [{ answerText: '' }] }];
+            if(!vm.question.answers){
+                vm.question.answers = getNewAnswerSet();
+            }
+            if(!vm.question.childQuestions){
+                vm.question.childQuestions = [{correctAnswer: '', question: '', isDeleted: 0, answers: getNewAnswerSet() }];
+            }
             if (mode == 'edit') {
                 $state.go('main.test.editQuestion');
             } else if (mode == 'insert') {
                 $state.go('main.test.createQuestion');
             }
+        }
+
+        function addChildQuestion (){
+            vm.question.childQuestions.push({correctAnswer: '', question: '', isDeleted: 0, answers: getNewAnswerSet() });
+        }
+
+        function getNewAnswerSet(){
+            var answers = [];
+            for(var i = 0; i < 4; i++)
+                answers.push({ answerText: '', isDeleted: 0 });
+            return answers;
         }
 
         function updateQuestion(addNew) {
@@ -284,8 +299,8 @@
                             getAllQuestions();
                         } else {
                             vm.question = {
-                                answers: [{ answerText: '', isDeleted: 0 }],
-                                childQuestions: [{ question: '', isDeleted: 0, answers: [{ answerText: '' }] }]
+                                answers: getNewAnswerSet(),
+                                childQuestions: [{ question: '', isDeleted: 0, answers: getNewAnswerSet() }]
                             };
                         }
                     }
