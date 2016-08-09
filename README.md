@@ -9,7 +9,6 @@ Web to provide video tutorials
 5. url for postman eg: "http://localhost:3000/api/login"
 
 
-
 ##Install & Run (web)
 1. Open bash command prompt.
 2. Goto root directory ie "/web".
