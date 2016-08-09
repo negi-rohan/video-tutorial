@@ -44,6 +44,7 @@
                                 <th>Name</th>
                                 <th>Phone</th>
                                 <th>Email</th>
+                                <th>Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -53,6 +54,7 @@
                                 <td ng-bind="user.fullName"></td>
                                 <td ng-bind="user.phone"></td>
                                 <td ng-bind="user.email"></td>
+                                <td ng-bind="user.joinDate | date : 'medium'""></td>
                                 <td>
                                     <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getUserById(user.id)" style="vertical-align:-4px;"></i>
                                     <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteUser(user)"></i>

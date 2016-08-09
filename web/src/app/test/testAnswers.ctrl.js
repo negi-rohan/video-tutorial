@@ -27,9 +27,9 @@
             $http.post(CommonInfo.getAppUrl() + '/api/exam/userAnswers', data).then(function(response) {
                 if (response && response.data && !response.data.Error) {
                     vm.userAnswers = response.data.userAnswers;
-                    if(vm.userAnswers.score){
-                        getTestUsers();
-                    }
+                    // if(vm.userAnswers.score){
+                    //     getTestUsers();
+                    // }
                     vm.userAnswers.totalCorrect = 0;
                     vm.userAnswers.totalIncorrect = 0;
                     vm.userAnswers.totalUnanswered = 0;

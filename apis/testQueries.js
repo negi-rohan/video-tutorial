@@ -892,7 +892,7 @@ var self = {
         if (req.page) {
             from = (req.page - 1) * count;
         }
-        var query = "SELECT q.*, GROUP_CONCAT(qq.questionPaperId) as questionPaperList FROM ?? q LEFT JOIN (question_questionpaper qq) ON q.id = qq.questionId WHERE q.isDeleted=false and q.parentQuestionId IS NULL GROUP BY q.id LIMIT ?, ?";
+        var query = "SELECT q.*, GROUP_CONCAT(qq.questionPaperId) as questionPaperList FROM ?? q LEFT JOIN (question_questionpaper qq) ON q.id = qq.questionId WHERE q.isDeleted=false and q.parentQuestionId IS NULL GROUP BY q.id ORDER BY q.id DESC LIMIT ?, ?";
         var queryValues = ["questions", from, count];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {

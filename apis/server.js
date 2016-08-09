@@ -45,7 +45,7 @@ Apis.prototype.configureExpress = function(pool) {
 }
 
 Apis.prototype.startServer = function() {
-    app.listen(80);
+    app.listen(3000);
 }
 
 Apis.prototype.stop = function(err) {

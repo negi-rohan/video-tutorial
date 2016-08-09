@@ -77,7 +77,7 @@
                 $localStorage.$reset();
             },
             getAppUrl: function() {
-                return 'http://52.66.119.248';
+                return 'http://localhost:3000';
             }
         };
     }
