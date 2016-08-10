@@ -34,7 +34,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
 
     router.post("/login", function(req, res) { /// user signin route
         req.body.secretString = config.secret;
-        queryHelper.login(req.body, pool, jwt, md5, function(result) {
+        queryHelper.login(req, req.body, pool, jwt, md5, function(result) {
             res.json(result);
         });
     });

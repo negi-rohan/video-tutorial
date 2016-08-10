@@ -206,7 +206,7 @@ var self = {
             }
         });
     },
-    login: function(request, pool, jwt, md5, callback) { /// for login to app
+    login: function(req, request, pool, jwt, md5, callback) { /// for login to app
         var loginIdField = /^\d+$/.test(request.userName) ? 'phone' : 'email';
         var query = "SELECT * FROM ?? WHERE ??=? && ??=?";
         var queryValues = ["user", loginIdField, request.userName, "password", md5(request.password)];
@@ -217,6 +217,15 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else if (rows && rows.length > 0) {
+                    var ip;
+                    if (req.headers['x-forwarded-for']) {
+                        ip = req.headers['x-forwarded-for'].split(",")[0];
+                    } else if (req.connection && req.connection.remoteAddress) {
+                        ip = req.connection.remoteAddress;
+                    } else {
+                        ip = req.ip;
+                    }
+                    console.log("client IP is *********************" + ip);
                     var token = jwt.sign(rows[0], request.secretString, {
                         expiresIn: "1d" // expires in 24 hours
                     });
@@ -332,7 +341,8 @@ var self = {
     },
     getAllUsers: function(type, req, pool, callback) { /// get list all users
         var query, queryValues, from = 0,
-            count = req.perPage || 40, userCount = 0;
+            count = req.perPage || 40,
+            userCount = 0;
         if (req.page) {
             from = (req.page - 1) * count;
         }
