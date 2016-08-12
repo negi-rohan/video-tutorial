@@ -2,8 +2,6 @@ var mysql = require("mysql");
 var _ = require("lodash");
 var moment = require("moment");
 var async = require('async');
-var config = require('./config');
-var fs = require('fs');
 
 var questionList = 0;
 
@@ -104,6 +102,49 @@ var self = {
         if (req.page) {
             from = (req.page - 1) * count;
         }
+        if (req.searchText) {
+            query = "SELECT count(*) as userCount FROM user u JOIN (testuserinfo tu) ON tu.userId = u.id WHERE tu.testId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?)";
+            queryValues = [req.testId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%'];
+        } else {
+            query = "SELECT count(*) as userCount FROM testuserinfo tu WHERE tu.testId=?";
+            queryValues = [req.testId];
+        }
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                if (err) {
+                    connection.release();
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    userCount = rows[0].userCount;
+                    if (req.searchText) {
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?) ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
+                        queryValues = [req.testId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
+                    } else {
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
+                        queryValues = [req.testId, from, count];
+                    }
+                    query = mysql.format(query, queryValues);
+                    console.log(query)
+                    connection.query(query, function(err, rows) {
+                        connection.release();
+                        if (err) {
+                            callback({ "Error": true, "Message": err });
+                        } else {
+                            callback({ "Error": false, "Message": "Successfull", "testUsers": rows, "recordCount": userCount });
+                        }
+                    });
+                }
+            });
+        });
+    },
+    getTestRanking: function(req, pool, callback) {
+        var query, queryValues, from = 0,
+            count = req.perPage || 40;
+        var userCount = 0;
+        if (req.page) {
+            from = (req.page - 1) * count;
+        }
         query = "SELECT count(*) as userCount FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC";
         queryValues = [req.testId];
         query = mysql.format(query, queryValues);
@@ -115,10 +156,10 @@ var self = {
                 } else {
                     userCount = rows[0].userCount;
                     if (req.withEvaluatedStatus) {
-                        query = "SELECT u.id, u.fullName, tu.score, tu.rank, tu.percentile FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status=? ORDER BY tu.status, tu.score DESC";
+                        query = "SELECT u.id, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status=? ORDER BY tu.status, tu.score DESC";
                         queryValues = [req.testId, "evaluated"];
                     } else {
-                        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
                         queryValues = [req.testId, from, count];
                     }
                     query = mysql.format(query, queryValues);
@@ -130,6 +171,22 @@ var self = {
                             callback({ "Error": false, "Message": "Successfull", "testUsers": rows, "recordCount": userCount });
                         }
                     });
+                }
+            });
+        });
+    },
+    exportTestUsersScore: function(req, pool, callback) {
+        var query, queryValues;
+        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC";
+        queryValues = [req.testId];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                connection.release();
+                if (err) {
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Successfull", "testUsers": rows });
                 }
             });
         });
@@ -351,17 +408,21 @@ var self = {
                         testInfo = rows[0];
                         self.getTestQuestionsOnly(req, pool, function(result) {
                             questions = result.questions;
-                            var score = 0;
+                            var score = correct = incorrect = 0;
                             _.forEach(req.answers, function(value) {
                                 var correctAnswer = _.find(questions, { 'id': value.questionId }).correctAnswer;
                                 if (correctAnswer == value.answer) {
                                     score += testInfo.marksPerQues;
+                                    correct++;
                                 } else if (value.answer && testInfo.negativeMarks) {
                                     score -= testInfo.negativeMarks;
+                                    incorrect++;
+                                } else if (value.answer) {
+                                    incorrect++;
                                 }
                             });
-                            query = "UPDATE ?? SET score = ?, status=? WHERE userId=? AND testId=?";
-                            queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', req.userId, req.testId];
+                            query = "UPDATE ?? SET score = ?, status=?, correctAnswers=?, incorrectAnswers=? WHERE userId=? AND testId=?";
+                            queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', correct, incorrect, req.userId, req.testId];
                             query = mysql.format(query, queryValues);
                             connection.query(query, function(err, rows) {
                                 if (err) {
@@ -403,17 +464,21 @@ var self = {
                             userAnswers = rows;
                             async.eachSeries(userList, function(user, callback) {
                                     var data = _.filter(userAnswers, { 'userId': user.userId });
-                                    var score = 0;
+                                    var score = correct = incorrect = 0;
                                     _.forEach(data, function(value) {
                                         var correctAnswer = _.find(questions, { 'id': value.questionId }).correctAnswer;
                                         if (correctAnswer == value.answer) {
                                             score += userList[0].marksPerQues;
+                                            correct++;
                                         } else if (value.answer && userList[0].negativeMarks) {
                                             score -= userList[0].negativeMarks;
+                                            incorrect++;
+                                        } else if (value.answer) {
+                                            incorrect++;
                                         }
                                     });
-                                    query = "UPDATE ?? SET score = ?, status=? WHERE userId=? AND testId=?";
-                                    queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', user.userId, user.testId];
+                                    query = "UPDATE ?? SET score = ?, status=?, correctAnswers=?, incorrectAnswers=? WHERE userId=? AND testId=?";
+                                    queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', correct, incorrect, user.userId, user.testId];
                                     query = mysql.format(query, queryValues);
                                     connection.query(query, function(err, rows) {
                                         if (err) {
@@ -549,8 +614,9 @@ var self = {
                 connection.release();
                 if (err) {
                     callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Evaluation completed Successfully" });
                 }
-                callback({ "Error": false, "Message": "Evaluation completed Successfully" });
             });
         });
 
@@ -702,25 +768,44 @@ var self = {
     addImportedQuestion: function(req, pool, callback) {
         var query, queryValues, issues = 0,
             added = 0;
-        async.eachSeries(req.questions, function(question, childCallback) {
-            query = "INSERT INTO ??(??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE question=VALUES(question), type=VALUES(type), explanation=VALUES(explanation), correctAnswer=VALUES(correctAnswer)";
-            queryValues = ["questions", "id", "question", "type", "explanation", "correctAnswer", question.id, question.question, question.type, question.explanation, question.correctAnswer];
-            query = mysql.format(query, queryValues);
-            self.addUpdateMcqQuestion(query, question, pool, function(result) {
-                if (result.Error)
-                    issues++;
-                else
-                    added++;
-                childCallback(null, { 'issues': issues, 'added': added });
+        if (req.questions && req.questions.length > 0) {
+            async.eachSeries(req.questions, function(question, childCallback) {
+                query = "INSERT INTO ??(??, ??, ??, ??) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE question=VALUES(question), type=VALUES(type), explanation=VALUES(explanation), correctAnswer=VALUES(correctAnswer)";
+                queryValues = ["questions", "question", "type", "explanation", "correctAnswer", question.question, question.type, question.explanation, question.correctAnswer];
+                query = mysql.format(query, queryValues);
+                self.addUpdateMcqQuestion(query, question, pool, function(result) {
+                    if (result.Error) {
+                        issues++;
+                        childCallback(true, { 'issues': issues, 'added': added });
+                    } else {
+                        added++;
+                        if (req.questionPaperId) {
+                            query = "INSERT INTO ??(??, ??) VALUES (?, ?) ON DUPLICATE KEY UPDATE questionPaperId=VALUES(questionPaperId), questionId=VALUES(questionId)";
+                            queryValues = ["question_questionpaper", "questionPaperId", "questionId", req.questionPaperId, result.questionId];
+                            query = mysql.format(query, queryValues);
+                            pool.getConnection(function(err, connection) {
+                                connection.query(query, function(err, rows) {
+                                    connection.release();
+                                    if (err) {
+                                        childCallback(true, { 'issues': issues, 'added': added });
+                                    } else {
+                                        childCallback(null, { 'issues': issues, 'added': added });
+                                    }
+                                });
+                            });
+                        } else {
+                            childCallback(null, { 'issues': issues, 'added': added });
+                        }
+                    }
+                });
+            }, function(err, rows) {
+                if (err) {
+                    callback({ "Error": true, "Message": err, "type": "flow" });
+                } else {
+                    callback({ "Error": false, "Message": "Question added Successfully", "counts": rows });
+                }
             });
-        }, function(err, rows) {
-            if (err) {
-                console.log(err)
-                callback({ "Error": true, "Message": err });
-            }
-            self.getQuestionCount(pool);
-            callback({ "Error": false, "Message": "Question added Successfully", "counts": rows });
-        });
+        }
     },
     addUpdateMcqQuestion: function(query, req, pool, callback) {
         var query = query,
@@ -732,9 +817,10 @@ var self = {
                 }
                 connection.query(query, function(err, rows) {
                     if (err) {
+                        console.log(err)
                         return connection.rollback(function() {
                             connection.release();
-                            callback({ "Error": true, "Message": err });
+                            callback({ "Error": true, "Message": err, "type": "question" });
                         });
                     }
                     var questionId = rows.insertId || req.id;
@@ -750,18 +836,18 @@ var self = {
                         if (err) {
                             return connection.rollback(function() {
                                 connection.release();
-                                callback({ "Error": true, "Message": err });
+                                callback({ "Error": true, "Message": err, "type": "answer" });
                             });
                         }
                         connection.commit(function(err) {
                             connection.release();
                             if (err) {
                                 return connection.rollback(function() {
-                                    callback({ "Error": true, "Message": err });
+                                    callback({ "Error": true, "Message": err, "type": "transaction" });
                                 });
                             }
                             self.getQuestionCount(pool);
-                            callback({ "Error": false, "Message": "Question added Successfully" });
+                            callback({ "Error": false, "Message": "Question added Successfully", "questionId": questionId });
                         });
                     });
                 });
@@ -884,6 +970,43 @@ var self = {
                 }
             });
         });
+    },
+    getAllQuestionsByQPId: function(req, pool, callback) {
+        var questions = [],
+            from = 0,
+            count = req.perPage || 40,
+            recordCount = 0;
+        if (req.page) {
+            from = (req.page - 1) * count;
+        }
+        if (req.questionPaperId) {
+            var query = "SELECT q.* FROM ?? q WHERE q.isDeleted=false AND q.id IN (SELECT qq.questionId from question_questionpaper qq WHERE qq.questionPaperId = ?) LIMIT ?, ?";
+            var queryValues = ["questions", req.questionPaperId, from, count];
+            query = mysql.format(query, queryValues);
+            pool.getConnection(function(err, connection) {
+                connection.query(query, function(err, rows) {
+                    if (err) {
+                        connection.release();
+                        callback({ "Error": true, "Message": err });
+                    } else {
+                        questions = rows;
+                        query = "SELECT count(*) as recordCount FROM ?? WHERE questionPaperId = ?";
+                        queryValues = ["question_questionpaper", req.questionPaperId];
+                        query = mysql.format(query, queryValues);
+                        console.log(query)
+                        connection.query(query, function(err, rows) {
+                            connection.release();
+                            if(err) {
+                                callback({ "Error": true, "Message": err });
+                            } else {
+                                recordCount = rows[0].recordCount;
+                                callback({ "Error": false, "Message": "Successfully", "questions": questions, "recordCount": recordCount });
+                            }
+                        });
+                    }
+                });
+            });
+        }
     },
     getAllQuestion: function(req, pool, callback) {
         var questions = questionPapers = [],

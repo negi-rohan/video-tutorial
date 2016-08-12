@@ -321,6 +321,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/test/usersExport", function(req, res) {
+        testQueryHelper.exportTestUsersScore(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/exam/all", function(req, res) { /// get all tests
         testQueryHelper.getAllExams(req.body, pool, function(result) {
             res.json(result);
@@ -417,6 +423,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/question/byQPId", function(req, res) { /// get all questions by question paper id
+        testQueryHelper.getAllQuestionsByQPId(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/question/delete", function(req, res) {
         testQueryHelper.deleteQuestion(req.body, pool, function(result) {
             res.json(result);
@@ -445,19 +457,20 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 }
                 questions = result;
                 _.forEach(questions, function(value) {
-                    value.question = '<p>' + value.question + '</p>'
+                    value.question = '<p>' + value.question.trim() + '</p>';
+                    value.explanation = '<p>' + value.explanation.trim() + '</p>';
                     value.correctAnswer = value.answer;
                     value.answers = [];
                     _.forIn(value, function(childValue, childKey) {
                         if (childKey.length == 1 && childValue) {
                             value.answers.push({
                                 ansKey: childKey,
-                                answerText: '<p>' + childValue + '</p>'
+                                answerText: '<p>' + childValue.trim() + '</p>'
                             });
                         }
                     });
                 });
-                testQueryHelper.addImportedQuestion({ questions: questions }, pool, function(result) {
+                testQueryHelper.addImportedQuestion({ questions: questions, questionPaperId: req.body.questionPaperId }, pool, function(result) {
                     res.json(result);
                 });
             });
