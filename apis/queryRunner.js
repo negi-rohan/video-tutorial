@@ -607,8 +607,8 @@ var self = {
     },
     addUpdateCourse: function(request, pool, callback) { /// update or add course
         var query, queryValues;
-        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo)";
-        queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo];
+        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo), isForever=VALUES(isForever), isPublished=VALUES(isPublished)";
+        queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", "isForever", "isPublished", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo, (request.isForever == 'true'), request.isPublished];
         query = mysql.format(query, queryValues);
         if (request.instructors && request.instructors.length > 0) {
             self.addCourseWithUsers(query, request, pool, function(err, rows, courseId) {
@@ -707,11 +707,14 @@ var self = {
             query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId WHERE c.isDeleted = false GROUP BY c.id";
             queryValues = ["courses"];
         } else if (type == "subscribed") {
-            query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.isDeleted = false AND c.id IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
+            query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.isDeleted = false AND c.id IN (select ?? from course_subscription where ?? = ?) AND c.isPublished = true AND (c.isForever = true OR subdate(current_date, 1) <= c.validTo) GROUP BY c.id";
             queryValues = ["courses", "courseId", "userId", id];
         } else if (type == "unsubscribed") {
             query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.isDeleted = false AND c.id NOT IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
             queryValues = ["courses", "courseId", "userId", id];
+        } else if (type== "courseLibary"){
+            query = "SELECT c.id from ?? c where c.isDeleted = false AND c.isPublished = true AND (c.isForever = true OR subdate(current_date, 1) <= c.validTo)";
+            queryValues = ["courses"];
         }
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
@@ -724,6 +727,7 @@ var self = {
                     _.forEach(rows, function(value, key) {
                         var course = _.find(coursesList, { 'id': value.id });
                         //course.duration = value.courseDuration;
+                        course.isForever = course.isForever ? true : false;
                         result.push(course);
                     });
                     callback({ "Error": false, "Message": "Success", "courses": result });
@@ -817,8 +821,8 @@ var self = {
     },
     addUpdateLesson: function(request, pool, callback) { /// add update lesson
         var query, queryValues;
-        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description), video=VALUES(video), duration=VALUES(duration), isDeleted=VALUES(isDeleted), poster=VALUES(poster)";
-        queryValues = ["lessons", "id", "name", "description", "video", "duration", "isDeleted", "poster", request.id, request.name, request.description, request.video, request.duration, (request.isDeleted == 'true'), request.poster];
+        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description), video=VALUES(video), duration=VALUES(duration), isDeleted=VALUES(isDeleted), poster=VALUES(poster), isCommentingAllowed=VALUES(isCommentingAllowed)";
+        queryValues = ["lessons", "id", "name", "description", "video", "duration", "isDeleted", "poster", "isCommentingAllowed", request.id, request.name, request.description, request.video, request.duration, (request.isDeleted == 'true'), request.poster, (request.isCommentingAllowed == 'true')];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.beginTransaction(function(err) {

@@ -37,7 +37,7 @@
         }
 
         function showAnswers(test) {
-            CommonInfo.setInfo('exam', test);
+            CommonInfo.setInfo('testAnswer', { userId: vm.user.id, testId: test.id });
             $state.go('main.examAnswers');
         }
     }

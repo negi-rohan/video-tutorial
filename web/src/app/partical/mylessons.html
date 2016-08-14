@@ -31,7 +31,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" ng-if="vm.lesson.isCommentingAllowed">
                 <div class="col-md-10">
                     <textarea rows="3" style="width:96%" ng-model="vm.commentMsg"></textarea>
                 </div>
@@ -41,7 +41,7 @@
                     </button>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" ng-if="vm.lesson.isCommentingAllowed">
                 <div class="col-md-12">
                     <div class="media" ng-repeat="comment in vm.lesson.comments">
                         <div class="media-left">

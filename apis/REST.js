@@ -216,6 +216,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
             res.json(result);
         });
     });
+
+    router.post("/course/courseLibary", function(req, res) { /// get unsubscribed courses by user id
+        queryHelper.getAllCourses("courseLibary", req.body.userId, pool, function(result) {
+            res.json(result);
+        });
+    });
     /* Courses related routes ends*/
 
     /* Units related routes start */

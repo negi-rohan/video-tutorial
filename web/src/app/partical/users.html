@@ -15,6 +15,14 @@
                 <div class="table-responsive">
                     <nav aria-label="Page navigation">
                         <div class="pull-left" style="margin:9px 12px;">Total: <span ng-bind="vm.usersRecordCount"></span></div>
+                        <form class="pagination pull-right" role="search">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search courses by name.." ng-model="vm.searchText" />
+                                <span class="input-group-btn">
+                                  <button class="btn btn-default" type="button" ng-click="vm.searchCourse();">Go!</button>
+                                </span>
+                            </div>
+                        </form>
                         <ul class="pagination pull-right" style="margin:4px 2px;">
                             <li>
                                 <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getUsers(vm.userType, 1)">

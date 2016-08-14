@@ -14,15 +14,16 @@
         activate();
 
         function activate() {
-            vm.exam = CommonInfo.getInfo('exam');
-            vm.user = CommonInfo.getInfo('user');
+            // vm.exam = CommonInfo.getInfo('exam');
+            // vm.user = CommonInfo.getInfo('user');
             getUserAnswers();
         }
 
         function getUserAnswers() {
+            var testUser = CommonInfo.getInfo('testAnswer');
             var data = {
-                userId: vm.user.id,
-                testId: vm.exam.id
+                userId: testUser.userId,//vm.user.id,
+                testId: testUser.testId//vm.exam.id
             };
             $http.post(CommonInfo.getAppUrl() + '/api/exam/userAnswers', data).then(function(response) {
                 if (response && response.data && !response.data.Error) {

@@ -61,7 +61,7 @@
             var user = CommonInfo.getInfo('user');
             if (user) {
                 if (user.profileType == 'student')
-                    $state.go('main.examsList');
+                    $state.go('main.libary');
                 else if (user.profileType == 'admin')
                     $state.go('main.courses');
             } else {
@@ -77,7 +77,7 @@
                             CommonInfo.setInfo('user', response.data.result);
                             var profileType = response.data.result.profileType;
                             if (profileType == 'student')
-                                $state.go('main.examsList');
+                                $state.go('main.libary');
                             else if (profileType == 'admin')
                                 $state.go('main.courses');
                         } else if (response && response.data && response.data.Error) {

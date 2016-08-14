@@ -57,6 +57,7 @@
         var submitAttempt = 0;
         var userInfoLocalStorage;
         var localSubmit, serverSubmit;
+        var isInProcess = false;
 
         vm.isExamStarted = false;
         vm.isExamEnded = false;
@@ -85,9 +86,11 @@
         });
 
         $scope.$on('timer-stopped', function(event, data) {
-            vm.isExamEnded = true;
-            alert('Your exam time is over, press ok to submit exam');
-            submitExam(true);
+            if (!isInProcess) {
+                vm.isExamEnded = true;
+                alert('Your exam time is over, press ok to submit exam');
+                submitExam(true);
+            }
         });
 
         function getExamQuestions() {
@@ -204,7 +207,6 @@
 
         function saveLocal() {
             //submitExam(false, 'pending');
-            console.log(123)
             var data = {
                 userId: vm.user.id,
                 testId: vm.exam.id,
@@ -217,7 +219,6 @@
         }
 
         function submitExam(isForced, status) {
-            var confirmation = false;
             status = status || 'completed';
             var data = {
                 userId: vm.user.id,
@@ -227,15 +228,18 @@
                 status: status,
                 timestamp: moment()
             };
-            if (!vm.isPreview) {
+            if (!vm.isPreview && !isInProcess) {
+                if (status == 'completed'){
+                    isInProcess = true;
+                    vm.isExamEnded = true;
+                    $interval.cancel(localSubmit);
+                    $interval.cancel(serverSubmit);
+                    localSubmit = serverSubmit = undefined;
+                }
                 if (isForced || status == 'pending' || confirm('Are you sure, you want to submit(final) your answers')) {
                     $http.post(CommonInfo.getAppUrl() + '/api/exam/submit', data).then(function(response) {
                         if (response && response.data) {
                             if (status == 'completed') {
-                                vm.isExamEnded = true;
-                                $interval.cancel(localSubmit);
-                                $interval.cancel(serverSubmit);
-                                localSubmit = serverSubmit = undefined;
                                 growl.success('Your answers saved successfully');
                                 $state.go('main.examsList');
                             } else {
@@ -251,7 +255,7 @@
                             }
                         }
                     }, function(response) {
-                        if(status != 'pending') {
+                        if (status != 'pending') {
                             if (submitAttempt <= 3) {
                                 submitAttempt++;
                                 submitExam(true);

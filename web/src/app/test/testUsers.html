@@ -3,23 +3,31 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <nav aria-label="Page navigation">
+                    <form class="form-inline pull-left" role="search" style="margin:4px 2px;">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search..." ng-model="vm.searchText" />
+                            <span class="input-group-btn">
+                              <button class="btn btn-default" type="button" ng-click="vm.searchStudent();">Go!</button>
+                            </span>
+                        </div>
+                    </form>
                     <ul class="pagination pull-right" style="margin:4px 2px;">
                         <li>
-                            <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getTestUserPagination(vm.selectedTest, 1)">
+                            <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getTestUsers(1)">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
                         <li ng-class="{'disabled': vm.currentTestUserPage == 1}">
-                            <a href="javascript:void(0);" ng-click="vm.currentTestUserPage != 1 && vm.getTestUserPagination(vm.selectedTest, vm.currentTestUserPage - 1)">Previous</a>
+                            <a href="javascript:void(0);" ng-click="vm.currentTestUserPage != 1 && vm.getTestUsers(vm.currentTestUserPage - 1)">Previous</a>
                         </li>
                         <li class="active">
                             <a href="javascript:void(0);" ng-bind="vm.currentTestUserPage"></a>
                         </li>
                         <li ng-class="{'disabled': vm.currentTestUserPage == vm.lastTestUserPage}">
-                            <a href="javascript:void(0);" ng-click="vm.currentTestUserPage != vm.lastTestUserPage && vm.getTestUserPagination(vm.selectedTest, vm.currentTestUserPage + 1)">Next</a>
+                            <a href="javascript:void(0);" ng-click="vm.currentTestUserPage != vm.lastTestUserPage && vm.getTestUsers(vm.currentTestUserPage + 1)">Next</a>
                         </li>
                         <li>
-                            <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getTestUserPagination(vm.selectedTest, vm.lastTestUserPage)">
+                            <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getTestUsers(vm.lastTestUserPage)">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>
@@ -33,9 +41,12 @@
                         	<th>Email</th>
                         	<th>Phone</th>
                         	<th>Status</th>
+                            <th>Correct</th>
+                            <th>Incorrect</th>
                         	<th>Score</th>
                         	<!-- <th>Rank</th> -->
                             <th>Percentile</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -45,30 +56,37 @@
                     		<td ng-bind="user.email"></td>
                     		<td ng-bind="user.phone"></td>
                     		<td ng-bind="user.status"></td>
+                            <td ng-bind="user.correctAnswers"></td>
+                            <td ng-bind="user.incorrectAnswers"></td>
                     		<td ng-bind="user.score"></td>
                     		<!-- <td ng-bind="user.rank"></td> -->
                             <td ng-bind="user.percentile"></td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.showAnswers(user.id)">
+                                    <i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i> Review Result
+                                </button>
+                            </td>
                     	</tr>
                     </tbody>
                 </table>
                 <nav aria-label="Page navigation">
                     <ul class="pagination pull-right" style="margin:4px 2px;">
                         <li>
-                            <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getTestUserPagination(vm.selectedTest, 1)">
+                            <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getTestUsers(1)">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
                         <li ng-class="{'disabled': vm.currentTestUserPage == 1}">
-                            <a href="javascript:void(0);" ng-click="vm.currentTestUserPage != 1 && vm.getTestUserPagination(vm.selectedTest, vm.currentTestUserPage - 1)">Previous</a>
+                            <a href="javascript:void(0);" ng-click="vm.currentTestUserPage != 1 && vm.getTestUsers(vm.currentTestUserPage - 1)">Previous</a>
                         </li>
                         <li class="active">
                             <a href="javascript:void(0);" ng-bind="vm.currentTestUserPage"></a>
                         </li>
                         <li ng-class="{'disabled': vm.currentTestUserPage == vm.lastTestUserPage}">
-                            <a href="javascript:void(0);" ng-click="vm.currentTestUserPage != vm.lastTestUserPage && vm.getTestUserPagination(vm.selectedTest, vm.currentTestUserPage + 1)">Next</a>
+                            <a href="javascript:void(0);" ng-click="vm.currentTestUserPage != vm.lastTestUserPage && vm.getTestUsers(vm.currentTestUserPage + 1)">Next</a>
                         </li>
                         <li>
-                            <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getTestUserPagination(vm.selectedTest, vm.lastTestUserPage)">
+                            <a href="javascript:void(0);" aria-label="Next" ng-click="vm.getTestUsers(vm.lastTestUserPage)">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>

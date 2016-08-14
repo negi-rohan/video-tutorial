@@ -112,9 +112,9 @@
                     case 'student':
                         config = {
                             tabs: {
-                                library: false,
+                                library: true,
                                 allCourses: false,
-                                myCourses: false,
+                                myCourses: true,
                                 allLessons: false,
                                 instructor: false,
                                 students: false,

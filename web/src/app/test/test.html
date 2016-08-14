@@ -23,9 +23,6 @@
                                 </li>
                             </ul>
                         </div>
-                        <button ng-if="vm.selectedTab == 2" class="btn btn-default" type="button" ngf-select="vm.importQuestion($file)" ng-model="vm.question.file" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB">
-                            <i class="fa fa-upload" aria-hidden="true"></i> Import Questions
-                        </button>
                     </span>
                     <span class="pull-right" ng-if="vm.isQuestionSelected">
                         <span uib-dropdown>
@@ -69,6 +66,7 @@
                                     <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getTestById(test.id); " style="vertical-align:-4px;"></i>
                                     <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteTest(test.id)"></i>
                                     <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" ng-if="test.userCount" title="Show User" ng-click="vm.getTestUsers(test);"></i>
+                                    <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" ng-if="test.userCount" title="Export User" ng-click="vm.exportTestUsers(test);"></i>
                                     <i class="fa fa-check-square-o fa-lg fa-fw" title="Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.recheck(test.id)" style="color:blue;"></i>
                                     <i class="fa fa-check-square-o fa-lg fa-fw" title="Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluation(test.id)"></i>
                                     <i class="fa fa-check-square-o fa-lg fa-fw" title="Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluationAll(test.id)" style="color:red;"></i>
@@ -91,11 +89,15 @@
                         <tbody>
                             <tr ng-repeat="quesPaper in vm.questionPapers">
                                 <th scope="row" ng-bind="$index + 1"></th>
-                                <td ng-bind="quesPaper.name"></td>
+                                <td ng-bind="quesPaper.name" ng-click="vm.showQuestions(quesPaper);"></td>
                                 <td ng-bind="quesPaper.questionCount"></td>
                                 <td>
                                     <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.editQuestionPaper('edit', quesPaper); " style="vertical-align:-4px;"></i>
                                     <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteQuestionPaper(quesPaper.id)"></i>
+                                    <i class="fa fa-upload fa-lg fa-fw" title="Import Question" style="cursor:pointer;" aria-hidden="true" ngf-select="vm.importQuestion($file, quesPaper.id)" ng-model="vm.question.file" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB"></i>
+                                    <!-- <button class="btn btn-default" type="button" ngf-select="vm.importQuestion($file)" ng-model="vm.question.file" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB">
+                                        <i class="fa fa-upload" aria-hidden="true"></i> Import Questions
+                                    </button> -->
                                 </td>
                             </tr>
                         </tbody>

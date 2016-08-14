@@ -45,6 +45,7 @@
         vm.editQuestionPaper = editQuestionPaper;
         vm.addSubject = addSubject;
         vm.deleteQuestionPaper = deleteQuestionPaper;
+        vm.showQuestions = showQuestions;
         vm.getAllQuestions = getAllQuestions;
         vm.questionSelection = questionSelection;
         vm.getQuestionById = getQuestionById;
@@ -55,6 +56,7 @@
         vm.addToPaper = addToPaper;
         vm.importQuestion = importQuestion;
         vm.getTestUsers = getTestUsers;
+        vm.exportTestUsers = exportTestUsers;
         vm.getTestUserPagination = getTestUserPagination;
         vm.showTestPreview = showTestPreview;
         activate();
@@ -228,6 +230,13 @@
             }
         }
 
+        function showQuestions(questionPaper) {
+            if(questionPaper){
+                CommonInfo.setInfo('selectedQuestionPaper', questionPaper);
+                $state.go('main.test.questionList');
+            }
+        }
+
         //////////Question related ////////////////////////////////////////////////////
         function getAllQuestions(pageNo) {
             vm.currentPage = pageNo;
@@ -235,7 +244,7 @@
                 if (response && response.data) {
                     vm.questions = response.data.questions;
                     vm.questionCount = response.data.recordCount;
-                    vm.lastPage = Math.ceil(vm.questionCount/40) || 1;
+                    vm.lastPage = Math.ceil(vm.questionCount / 40) || 1;
                 }
             }, function(response) {});
         }
@@ -266,11 +275,11 @@
             vm.objMode = mode;
             vm.question = question || {};
             vm.question.correctAnswer = vm.question.correctAnswer || '';
-            if(!vm.question.answers){
+            if (!vm.question.answers) {
                 vm.question.answers = getNewAnswerSet();
             }
-            if(!vm.question.childQuestions){
-                vm.question.childQuestions = [{correctAnswer: '', question: '', isDeleted: 0, answers: getNewAnswerSet() }];
+            if (!vm.question.childQuestions) {
+                vm.question.childQuestions = [{ correctAnswer: '', question: '', isDeleted: 0, answers: getNewAnswerSet() }];
             }
             if (mode == 'edit') {
                 $state.go('main.test.editQuestion');
@@ -279,13 +288,13 @@
             }
         }
 
-        function addChildQuestion (){
-            vm.question.childQuestions.push({correctAnswer: '', question: '', isDeleted: 0, answers: getNewAnswerSet() });
+        function addChildQuestion() {
+            vm.question.childQuestions.push({ correctAnswer: '', question: '', isDeleted: 0, answers: getNewAnswerSet() });
         }
 
-        function getNewAnswerSet(){
+        function getNewAnswerSet() {
             var answers = [];
-            for(var i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
                 answers.push({ answerText: '', isDeleted: 0 });
             return answers;
         }
@@ -335,17 +344,32 @@
             }
         }
 
-        function getTestUsers(test) {
-            vm.currentTestUserPage = 1;
-            vm.selectedTest = test;
-            $http.post(CommonInfo.getAppUrl() + '/api/test/users', { 'testId': test.id }).then(function(response) {
-                if (response && response.data && !response.data.Error) {
-                    vm.testUsers = response.data.testUsers;
-                    vm.testUserCount = response.data.recordCount;
-                    vm.lastTestUserPage = Math.ceil(vm.testUserCount/40) || 1;
-                    $state.go('main.test.studentList');
+        function exportTestUsers(test) {
+            // $http.post(CommonInfo.getAppUrl() + '/api/test/usersExport', { 'testId': test.id }).then(function (response) {
+            //     var blob = new Blob([response.data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+            //     var objectUrl = URL.createObjectURL(blob);
+            //     window.open(objectUrl);
+            // }, function(response) {});
+            $http.post(CommonInfo.getAppUrl() + '/api/test/usersExport', { 'testId': test.id }).then(function (response) {
+                if(response && response.data && response.data.testUsers && response.data.testUsers.lenght > 0){
+
                 }
             }, function(response) {});
+        }
+
+        function getTestUsers(test) {
+            CommonInfo.setInfo('testResultList', test);
+            $state.go('main.test.studentList');
+            // vm.currentTestUserPage = 1;
+            // vm.selectedTest = test;
+            // $http.post(CommonInfo.getAppUrl() + '/api/test/users', { 'testId': test.id }).then(function(response) {
+            //     if (response && response.data && !response.data.Error) {
+            //         vm.testUsers = response.data.testUsers;
+            //         vm.testUserCount = response.data.recordCount;
+            //         vm.lastTestUserPage = Math.ceil(vm.testUserCount / 40) || 1;
+            //         $state.go('main.test.studentList');
+            //     }
+            // }, function(response) {});
         }
 
         function getTestUserPagination(test, pageNo) {
@@ -354,7 +378,7 @@
                 if (response && response.data && !response.data.Error) {
                     vm.testUsers = response.data.testUsers;
                     vm.testUserCount = response.data.recordCount;
-                    vm.lastTestUserPage = Math.ceil(vm.testUserCount/40);
+                    vm.lastTestUserPage = Math.ceil(vm.testUserCount / 40);
                 }
             }, function(response) {});
         }
@@ -365,12 +389,14 @@
             $window.open($state.href('main.exam', { isPreview: true }), '_blank');
         }
 
-        function importQuestion(file) {
+        function importQuestion(file, quesPaperId) {
+            console.log(vm.question.file)
             if (vm.question.file) {
                 Upload.upload({
                     url: CommonInfo.getAppUrl() + '/api/question/import',
                     data: {
                         file: vm.question.file,
+                        questionPaperId: quesPaperId
                     }
                 }).then(function(resp) {
                     console.log('Success ' + resp.config.data.file.name + 'uploaded. Response: ' + resp.data);

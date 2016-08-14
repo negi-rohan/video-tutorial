@@ -116,7 +116,15 @@
             })
             .state('main.test.studentList', {
                 url: '/studentList',
-                templateUrl: 'app/test/testUsers.html'
+                templateUrl: 'app/test/testUsers.html',
+                controller: 'StudentListController',
+                controllerAs: 'vm'
+            })
+            .state('main.test.questionList', {
+                url: '/questionList',
+                templateUrl: 'app/test/questionList.html',
+                controller: 'QuestionListController',
+                controllerAs: 'vm'
             })
             .state('main.examsList', {
                 url: '/examsList',

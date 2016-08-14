@@ -40,6 +40,7 @@
                             <td>
                                 <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getCourseById(course.id); " style="vertical-align:-4px;"></i>
                                 <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteCourse(course)"></i>
+                                <i class="fa fa-check-square-o fa-lg fa-fw" ng-style="course.isPublished && {'color' :'green' }" title="Publish" aria-hidden="true" ng-click="vm.publishCourse(course)"></i>
                             </td>
                         </tr>
                     </tbody>

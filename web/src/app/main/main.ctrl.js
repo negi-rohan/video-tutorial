@@ -32,23 +32,15 @@
         vm.user = {};
         vm.course = { // object used while (create/edit) course
             units: [],
-            instructors: []
+            instructors: [],
+            isForever: false
         };
         vm.objMode; // hold the current mode for entity(edit/insert)
-        vm.dateOptions = {
-            formatYear: 'yy',
-            startingDay: 1
-        };
         vm.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
         vm.format = 'dd-MMMM-yyyy';
-        vm.toolBar = [
-            ['h1', 'h2', 'h3', 'bold', 'italics', 'underline'],
-            ['ol', 'ul'],
-            ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
-            ['html', 'insertImage', 'insertLink', 'insertVideo']
-        ];
 
         vm.getAllCourses = getAllCourses;
+        vm.courseLibary = courseLibary;
         vm.subscribeCourse = subscribeCourse;
         vm.getMyCourses = getMyCourses;
         vm.selectCourse = selectCourse;
@@ -68,6 +60,7 @@
         vm.addUserToCourse = addUserToCourse;
         vm.updateCourse = updateCourse;
         vm.deleteCourse = deleteCourse;
+        vm.publishCourse = publishCourse;
         vm.getAllLessons = getAllLessons;
         vm.getLessonById = getLessonById;
         vm.editLesson = editLesson;
@@ -90,7 +83,7 @@
             vm.userInfo = CommonInfo.getInfo('user');
             if (vm.userInfo && vm.userInfo.profileType == 'student') {
                 if ($state.is('main.libary')) {
-                    getAllCourses();
+                    courseLibary();
                 } else if ($state.is('main.myCourses')) {
                     getMyCourses();
                 } else if ($state.is('main.myLessons')) {
@@ -153,6 +146,14 @@
             }, function(response) {});
         }
 
+        function courseLibary() {
+            $http.post(CommonInfo.getAppUrl() + '/api/course/courseLibary').then(function(response) {
+                if (response && response.data) {
+                    vm.courses = response.data.courses;
+                }
+            }, function(response) {});
+        }
+
         function searchCourse() {
             if (vm.searchText) {
                 var data = {
@@ -181,7 +182,7 @@
                 $http.post(CommonInfo.getAppUrl() + '/api/course/subscribe', data).then(function(response) {
                     if (response && response.data && !response.data.Error) {
                         if (response.data.url) {
-                            window.open(response.data.url + '?embed=form');
+                            window.open(response.data.url + '?embed=form','_blank', 'toolbar=yes,scrollbars=yes,resizable=yes,top=500,left=500,width=400,height=400');
                         } else if (response.data.code) {
                             growl.success('Course subscribed successfully');
                         }
@@ -311,7 +312,8 @@
             } else if (mode == 'insert') {
                 vm.course = {
                     units: [],
-                    instructors: []
+                    instructors: [],
+                    isForever: true
                 };
                 $state.go('main.createCourse');
             }
@@ -366,6 +368,23 @@
             }
         }
 
+        function publishCourse(course) {
+            if(course){
+                var status = course.isPublished ? "unpublished" : "publish"
+                if (course && confirm('Are you sure you want to ' + status + ' ' + course.name)) {
+                    var data = {
+                        course: course
+                    };
+                    data.course.isPublished = !data.course.isPublished;
+                    $http.post(CommonInfo.getAppUrl() + '/api/course', data).then(function(response) {
+                        if (response && response.data && !response.data.Error) {
+                            growl.success('Course '+ status + ' successfully');
+                        }
+                    }, function(response) {});
+                }
+            }
+        }
+
         function getLessonById(lessonId) {
             $http.post(CommonInfo.getAppUrl() + '/api/lesson/byId', { 'lessonId': lessonId }).then(function(response) {
                 if (response && response.data && response.data.lesson) {
@@ -377,7 +396,7 @@
 
         function editLesson(mode, lesson) {
             vm.objMode = mode;
-            vm.lesson = lesson || { courses: [] };
+            vm.lesson = lesson || { courses: [], isCommentingAllowed: false };
             vm.lesson.newFiles = [];
             $http.get(CommonInfo.getAppUrl() + '/api/course/courseAndUnits').then(function(response) {
                 if (response && response.data && response.data.courses) {
@@ -564,7 +583,7 @@
                         type: 'hls',
                         androidhls: 'true',
                         width: '100%',
-                        player: 'html5',
+                        player: 'flash',
                         aspectratio: '16:9'
                     };
                 },

@@ -125,7 +125,6 @@ var self = {
                         queryValues = [req.testId, from, count];
                     }
                     query = mysql.format(query, queryValues);
-                    console.log(query)
                     connection.query(query, function(err, rows) {
                         connection.release();
                         if (err) {
@@ -993,7 +992,6 @@ var self = {
                         query = "SELECT count(*) as recordCount FROM ?? WHERE questionPaperId = ?";
                         queryValues = ["question_questionpaper", req.questionPaperId];
                         query = mysql.format(query, queryValues);
-                        console.log(query)
                         connection.query(query, function(err, rows) {
                             connection.release();
                             if(err) {
