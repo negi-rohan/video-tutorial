@@ -156,6 +156,46 @@ var self = {
             });
         });
     },
+    sendMailForNewLesson: function (request, pool) {
+    	if(request && request.courses && request.courses[0].courseId) {
+            var course = _.find(coursesList, { 'id': parseInt(request.courses[0].courseId) });
+            if(course && course.isSendMail){
+        		var query = "SELECT u.email FROM user u WHERE u.id in (SELECT c.userId FROM course_subscription c WHERE c.courseId = ?)";
+        		var queryValues = [request.courses[0].courseId];
+        		query = mysql.format(query, queryValues);
+        		pool.getConnection(function(err, connection) {
+    	            connection.query(query, function(err, rows) {
+    	                connection.release();
+    	                if (rows && rows.length > 0) {
+    	                	var transporter = nodemailer.createTransport({
+    		                    service: 'Gmail',
+    		                    auth: {
+    		                        user: 'care@forumias.com', // Your email id
+    		                        pass: '123@academy' // Your password
+    		                    }
+    		                });
+    	                    _.forEach(rows, function(value) {
+    			                var mailOptions = {
+    			                    from: 'care@forumias.com', // sender address
+    			                    to: value.email, // list of receivers
+    			                    subject: 'Info: New lesson added', // Subject line
+    			                    text: 'This mail is to inform you that new lesson: ' + request.name + ' has been added in course: ' + request.courses[0].courseName + ' \n'
+    			                };
+    			                transporter.sendMail(mailOptions, function(err, info) {
+    			                    if (err) {
+    			                        console.log(err);
+    			                    } else {
+    			                        console.log(value.email + " message sent");
+    			                    };
+    			                });
+    	                    });
+    	                }
+    	            });
+    	        });
+            }
+    	}
+
+    },
     findUser: function(request, pool, callback) {
         request.email = request.email || null;
         request.phone = request.phone || null;
@@ -346,9 +386,15 @@ var self = {
         if (req.page) {
             from = (req.page - 1) * count;
         }
-        query = "SELECT count(*) as userCount from ?? where profileType = ?";
-        queryValues = ["user", req.type];
+        if(req.searchText){
+            query = "SELECT count(*) as userCount from ?? where profileType = ? AND (fullName like ? OR email like ? OR phone like ?)";
+            queryValues = ["user", req.type, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%'];
+        } else {
+            query = "SELECT count(*) as userCount from ?? where profileType = ?";
+            queryValues = ["user", req.type];
+        }
         query = mysql.format(query, queryValues);
+        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 if (err) {
@@ -356,11 +402,15 @@ var self = {
                     callback({ "Error": true, "Message": "Error executing MySQL query" });
                 } else {
                     userCount = rows[0].userCount;
-                    if (type == "byType") {
+                    if (req.searchText){
+                        query = "SELECT * from ?? where profileType = ? AND (fullName like ? OR email like ? OR phone like ?) LIMIT ?, ?";
+                        queryValues = ["user", req.type, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
+                    } else {
                         query = "SELECT * from ?? where profileType = ? LIMIT ?, ?";
                         queryValues = ["user", req.type, from, count];
                     }
                     query = mysql.format(query, queryValues);
+                    console.log(query)
                     connection.query(query, function(err, rows) {
                         connection.release();
                         if (err) {
@@ -390,9 +440,15 @@ var self = {
             });
         });
     },
-    updateUser: function(request, pool, callback) { /// update user profile
-        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE email=VALUES(email), phone=VALUES(phone), fullName=VALUES(fullName), about=VALUES(about), billingAddress=VALUES(billingAddress), profilePhoto=VALUES(profilePhoto), status=VALUES(status)";
-        var queryValues = ["user", "id", "email", "phone", "fullName", "about", "billingAddress", "profilePhoto", "status", "profileType", request.id, request.email, request.phone, request.fullName, request.about, request.billingAddress, request.profilePhoto, request.status, request.profileType];
+    updateUser: function(request, pool, md5, callback) { /// update user profile
+        var query, queryValues;
+        if(request.sendMail){
+            query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            queryValues = ["user", "email", "phone", "fullName", "about", "billingAddress", "profilePhoto", "status", "profileType", "password", request.user.email, request.user.phone, request.user.fullName, request.user.about, request.user.billingAddress, request.user.profilePhoto, request.user.status, request.user.profileType, md5(request.user.password)];
+        } else {
+            query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE email=VALUES(email), phone=VALUES(phone), fullName=VALUES(fullName), about=VALUES(about), billingAddress=VALUES(billingAddress), profilePhoto=VALUES(profilePhoto), status=VALUES(status)";
+            queryValues = ["user", "id", "email", "phone", "fullName", "about", "billingAddress", "profilePhoto", "status", "profileType", request.user.id, request.user.email, request.user.phone, request.user.fullName, request.user.about, request.user.billingAddress, request.user.profilePhoto, request.user.status, request.user.profileType];
+        }
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -400,7 +456,35 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
-                    callback({ "Error": false, "Message": "User Updated", 'user': request });
+                    if(request.sendMail){
+                       var transporter = nodemailer.createTransport({
+                            service: 'Gmail',
+                            auth: {
+                                user: 'care@forumias.com', // Your email id
+                                pass: '123@academy' // Your password
+                            }
+                        });
+                        var mailOptions = {
+                            from: 'care@forumias.com', // sender address
+                            to: request.user.email, // list of receivers
+                            subject: 'ForumIAS: Login credential', // Subject line
+                            text: 'Your account have been created and activated on forumias.academy .\n\n' +
+                                'Login with below mentioned credential:\n\n' +
+                                'Username: ' + request.user.email + ' Or ' + request.user.phone + '\n\n' +
+                                'Password: ' + request.user.password + '\n\n' +
+                                '\n'
+                        };
+                        transporter.sendMail(mailOptions, function(err, info) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                console.log("message sent");
+                            };
+                        }); 
+                        callback({ "Error": false, "Message": "User Updated", 'user': request });
+                    } else {
+                        callback({ "Error": false, "Message": "User Updated", 'user': request });
+                    }
                 }
             });
         });
@@ -547,8 +631,8 @@ var self = {
         });
     },
     subscribeCourse: function(request, pool, callback) {
-        var query = "INSERT INTO ??(??, ??) VALUES (?, ?)";
-        var queryValues = ["course_subscription", "courseId", "userId", request.courseId, request.userId];
+        var query = "INSERT INTO ??(??, ??, ??) VALUES (?, ?, ?)";
+        var queryValues = ["course_subscription", "courseId", "userId", "mode", request.courseId, request.userId, request.mode];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -559,6 +643,31 @@ var self = {
                 callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
             });
         });
+    },
+    subscribeManual: function(request, pool, callback) {
+        var values = [],
+            query, queryValues = [];
+        if (request.users && request.users.length > 0) {
+            query = "INSERT INTO ??(??, ??, ??) VALUES ?";
+            queryValues = ["course_subscription", "courseId", "userId", "mode"]; //, request.courseId, request.userId, request.mode];
+            for (var i = 0; i < request.users.length; i++) {
+                values.push([request.courseId, request.users[i], 'manual']);
+            }
+            queryValues.push(values);
+            query = mysql.format(query, queryValues);
+            pool.getConnection(function(err, connection) {
+                connection.query(query, function(err, rows) {
+                    connection.release();
+                    if (err) {
+                        callback({ "Error": true, "Message": err });
+                    } else {
+	                    callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
+	                }
+                });
+            });
+        } else {
+            callback({ "Error": true, "Message": "No student to subscribe course" });
+        }
     },
     addCourseWithUsers: function(query, request, pool, callback) { /// to add users to course
         var query = query,
@@ -607,9 +716,10 @@ var self = {
     },
     addUpdateCourse: function(request, pool, callback) { /// update or add course
         var query, queryValues;
-        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo), isForever=VALUES(isForever), isPublished=VALUES(isPublished)";
-        queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", "isForever", "isPublished", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo, (request.isForever == 'true'), request.isPublished];
+        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo), isForever=VALUES(isForever), isPublished=VALUES(isPublished), isSendMail=VALUES(isSendMail)";
+        queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", "isForever", "isPublished", "isSendMail", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo, (request.isForever == 'true'), request.isPublished, (request.isSendMail == 'true')];
         query = mysql.format(query, queryValues);
+        console.log(query)
         if (request.instructors && request.instructors.length > 0) {
             self.addCourseWithUsers(query, request, pool, function(err, rows, courseId) {
                 if (err) {
@@ -669,7 +779,7 @@ var self = {
                     callback({ "Error": true, "Message": err });
                 } else {
                     var result = _.find(coursesList, { 'id': request.courseId });
-                    result.duration = _.sum(_.map(rows, 'unitDuration'));
+                    //result.duration = _.sum(_.map(rows, 'unitDuration'));
                     result.units = rows;
                     callback({ "Error": false, "Message": "Success", "course": result });
                 }
@@ -712,8 +822,11 @@ var self = {
         } else if (type == "unsubscribed") {
             query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.isDeleted = false AND c.id NOT IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
             queryValues = ["courses", "courseId", "userId", id];
-        } else if (type== "courseLibary"){
+        } else if (type == "courseLibary") {
             query = "SELECT c.id from ?? c where c.isDeleted = false AND c.isPublished = true AND (c.isForever = true OR subdate(current_date, 1) <= c.validTo)";
+            queryValues = ["courses"];
+        } else if (type == "nameList") {
+            query = "SELECT c.id, c.name from ?? c WHERE c.isDeleted = false";
             queryValues = ["courses"];
         }
         query = mysql.format(query, queryValues);
@@ -724,12 +837,17 @@ var self = {
                     callback({ "Error": true, "Message": err });
                 } else {
                     var result = [];
-                    _.forEach(rows, function(value, key) {
-                        var course = _.find(coursesList, { 'id': value.id });
-                        //course.duration = value.courseDuration;
-                        course.isForever = course.isForever ? true : false;
-                        result.push(course);
-                    });
+                    if (type == "nameList") {
+                        result = rows;
+                    } else {
+                        _.forEach(rows, function(value, key) {
+                            var course = _.find(coursesList, { 'id': value.id });
+                            //course.duration = value.courseDuration;
+                            course.isForever = course.isForever ? true : false;
+                            course.isSendMail = course.isSendMail ? true : false;
+                            result.push(course);
+                        });
+                    }
                     callback({ "Error": false, "Message": "Success", "courses": result });
                 }
             });
@@ -854,9 +972,11 @@ var self = {
                                         connection.release();
                                         callback({ "Error": true, "Message": err });
                                     });
-                                }
-                                self.getLessonsList(pool);
-                                callback({ "Error": false, "Message": "Lesson added", "lessonId": lessonId });
+                                } else {
+	                                self.getLessonsList(pool);
+	                                self.sendMailForNewLesson(request, pool);
+	                                callback({ "Error": false, "Message": "Lesson added", "lessonId": lessonId });
+	                            }
                             });
                         });
                     } else {

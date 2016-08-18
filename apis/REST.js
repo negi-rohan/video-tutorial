@@ -109,7 +109,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
     router.put("/user", imgUpload, function(req, res) { /// user update router
         if (req && req.files && req.files.file && req.files.file.path)
             req.body.user.profilePhoto = req.protocol + '://' + req.get('host') + '/' + req.files.file.path.substring(req.files.file.path.indexOf('\/'));
-        queryHelper.updateUser(req.body.user, pool, function(result) {
+        queryHelper.updateUser(req.body, pool, md5, function(result) {
             res.json(result);
         });
     });
@@ -142,9 +142,9 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 amount: req.body.amt,
                 phone: req.body.phone,
                 buyer_name: req.body.fullName,
-                redirect_url: 'http://52.66.78.88/#/main/libary',
+                redirect_url: 'http://52.66.110.111/#/main/libary',
                 send_email: false,
-                webhook: 'http://52.66.82.252/api/course/payment',
+                webhook: 'http://52.66.119.248/api/course/payment',
                 send_sms: false,
                 email: req.body.email,
                 allow_repeated_payments: false
@@ -163,6 +163,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 }
             });
         } else {
+            req.body.mode = 'free';
             queryHelper.subscribeCourse(req.body, pool, function(result) {
                 res.json(result);
             });
@@ -172,6 +173,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
     router.post("/course/payment", function(req, res) {
         queryHelper.savePaymentStatus(req.body, pool, function(result) {
             res.send('done');
+        });
+    });
+
+    router.post("/course/subscribeManual", function(req, res) {
+        queryHelper.subscribeManual(req.body, pool, function(result) {
+            res.json(result);
         });
     });
 
@@ -219,6 +226,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
 
     router.post("/course/courseLibary", function(req, res) { /// get unsubscribed courses by user id
         queryHelper.getAllCourses("courseLibary", req.body.userId, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/course/nameList", function(req, res) { /// get all courses name and id
+        queryHelper.getAllCourses("nameList", 0, pool, function(result) {
             res.json(result);
         });
     });
