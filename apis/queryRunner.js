@@ -442,7 +442,7 @@ var self = {
     },
     updateUser: function(request, pool, md5, callback) { /// update user profile
         var query, queryValues;
-        if(request.sendMail){
+        if(request.sendMail == 'true'){
             query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             queryValues = ["user", "email", "phone", "fullName", "about", "billingAddress", "profilePhoto", "status", "profileType", "password", request.user.email, request.user.phone, request.user.fullName, request.user.about, request.user.billingAddress, request.user.profilePhoto, request.user.status, request.user.profileType, md5(request.user.password)];
         } else {
@@ -456,7 +456,7 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
-                    if(request.sendMail){
+                    if(request.sendMail == 'true'){
                        var transporter = nodemailer.createTransport({
                             service: 'Gmail',
                             auth: {
