@@ -100,6 +100,7 @@ var self = {
                 if (err) {
                     console.log(err);
                 } else {
+                    lessonsList = [];
                     lessonsList = rows;
                     self.getLessonsComments(pool);
                     self.getLessonsFiles(pool);
@@ -394,7 +395,6 @@ var self = {
             queryValues = ["user", req.type];
         }
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 if (err) {
@@ -410,7 +410,6 @@ var self = {
                         queryValues = ["user", req.type, from, count];
                     }
                     query = mysql.format(query, queryValues);
-                    console.log(query)
                     connection.query(query, function(err, rows) {
                         connection.release();
                         if (err) {
@@ -719,7 +718,6 @@ var self = {
         query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo), isForever=VALUES(isForever), isPublished=VALUES(isPublished), isSendMail=VALUES(isSendMail)";
         queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", "isForever", "isPublished", "isSendMail", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo, (request.isForever == 'true'), request.isPublished, (request.isSendMail == 'true')];
         query = mysql.format(query, queryValues);
-        console.log(query)
         if (request.instructors && request.instructors.length > 0) {
             self.addCourseWithUsers(query, request, pool, function(err, rows, courseId) {
                 if (err) {
@@ -1010,7 +1008,7 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
-                    self.getLessonsFiles(pool);
+                    //self.getLessonsFiles(pool);
                     callback({ "Error": false, "Message": "Success" });
                 }
             });
