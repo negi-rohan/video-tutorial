@@ -7,6 +7,7 @@ var jwt = require('jsonwebtoken');
 var cors = require('cors');
 var config = require('./config.js');
 var rest = require("./REST.js");
+var path = require('path');
 var app = express();
 var multiparty = require('connect-multiparty'),
     imgUpload = multiparty({ uploadDir: './public/imagesPath' }),
@@ -36,7 +37,7 @@ Apis.prototype.configureExpress = function(pool) {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     app.use(cors());
-    app.use(express.static('public'));
+    app.use(express.static(path.join(__dirname,'public')));
     var router = express.Router();
     app.use('/api', router);
     // var rest_router = new rest(router, connection, md5, jwt, imgUpload, fileUpload);

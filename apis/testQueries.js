@@ -2,6 +2,9 @@ var mysql = require("mysql");
 var _ = require("lodash");
 var moment = require("moment");
 var async = require('async');
+var json2xls = require('json2xls');
+var fs = require('fs');
+var path = require('path');
 
 var questionList = 0;
 
@@ -174,7 +177,7 @@ var self = {
             });
         });
     },
-    exportTestUsersScore: function(req, pool, callback) {
+    exportTestUsersScore: function(req, request, pool, callback) {
         var query, queryValues;
         query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC";
         queryValues = [req.testId];
@@ -185,7 +188,12 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
-                    callback({ "Error": false, "Message": "Successfull", "testUsers": rows });
+                    if(rows && rows.length > 0){
+                        var xls = json2xls(rows);
+
+                        fs.writeFileSync(path.join(__dirname, 'public/userTestInfo.xlsx'), xls, 'binary');
+                        callback({ "Error": false, "Message": "Successfull", "url": request.protocol + '://' + request.get('host') + '/userTestInfo.xlsx' });
+                    }
                 }
             });
         });

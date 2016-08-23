@@ -230,6 +230,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/course/userList", function(req, res) { /// get unsubscribed courses by user id
+        queryHelper.getAllCourseUser(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/course/nameList", function(req, res) { /// get all courses name and id
         queryHelper.getAllCourses("nameList", 0, pool, function(result) {
             res.json(result);
@@ -341,7 +347,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
     });
 
     router.post("/test/usersExport", function(req, res) {
-        testQueryHelper.exportTestUsersScore(req.body, pool, function(result) {
+        testQueryHelper.exportTestUsersScore(req.body, req, pool, function(result) {
             res.json(result);
         });
     });

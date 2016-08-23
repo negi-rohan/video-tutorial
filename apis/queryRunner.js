@@ -157,44 +157,43 @@ var self = {
             });
         });
     },
-    sendMailForNewLesson: function (request, pool) {
-    	if(request && request.courses && request.courses[0].courseId) {
+    sendMailForNewLesson: function(request, pool) {
+        if (request && request.courses && request.courses[0].courseId) {
             var course = _.find(coursesList, { 'id': parseInt(request.courses[0].courseId) });
-            if(course && course.isSendMail){
-        		var query = "SELECT u.email FROM user u WHERE u.id in (SELECT c.userId FROM course_subscription c WHERE c.courseId = ?)";
-        		var queryValues = [request.courses[0].courseId];
-        		query = mysql.format(query, queryValues);
-        		pool.getConnection(function(err, connection) {
-    	            connection.query(query, function(err, rows) {
-    	                connection.release();
-    	                if (rows && rows.length > 0) {
-    	                	var transporter = nodemailer.createTransport({
-    		                    service: 'Gmail',
-    		                    auth: {
-    		                        user: 'care@forumias.com', // Your email id
-    		                        pass: '123@academy' // Your password
-    		                    }
-    		                });
-    	                    _.forEach(rows, function(value) {
-    			                var mailOptions = {
-    			                    from: 'care@forumias.com', // sender address
-    			                    to: value.email, // list of receivers
-    			                    subject: 'Info: New lesson added', // Subject line
-    			                    text: 'This mail is to inform you that new lesson: ' + request.name + ' has been added in course: ' + request.courses[0].courseName + ' \n'
-    			                };
-    			                transporter.sendMail(mailOptions, function(err, info) {
-    			                    if (err) {
-    			                        console.log(err);
-    			                    } else {
-    			                        console.log(value.email + " message sent");
-    			                    };
-    			                });
-    	                    });
-    	                }
-    	            });
-    	        });
+            if (course && course.isSendMail) {
+                var query = "SELECT u.email FROM user u WHERE u.id in (SELECT c.userId FROM course_subscription c WHERE c.courseId = ?)";
+                var queryValues = [request.courses[0].courseId];
+                query = mysql.format(query, queryValues);
+                pool.getConnection(function(err, connection) {
+                    connection.query(query, function(err, rows) {
+                        connection.release();
+                        if (rows && rows.length > 0) {
+                            var mailList = _.map(rows, 'email');
+                            var transporter = nodemailer.createTransport({
+                                service: 'Gmail',
+                                auth: {
+                                    user: 'care@forumias.com', // Your email id
+                                    pass: '123@academy' // Your password
+                                }
+                            });
+                            var mailOptions = {
+                                from: 'care@forumias.com', // sender address
+                                bcc: mailList, // list of receivers
+                                subject: 'Info: New lesson added', // Subject line
+                                text: 'This mail is to inform you that new lesson: ' + request.name + ' has been added in course: ' + request.courses[0].courseName + ' \n'
+                            };
+                            transporter.sendMail(mailOptions, function(err, info) {
+                                if (err) {
+                                    console.log(err);
+                                } else {
+                                    console.log("message sent");
+                                };
+                            });
+                        }
+                    });
+                });
             }
-    	}
+        }
 
     },
     findUser: function(request, pool, callback) {
@@ -387,7 +386,7 @@ var self = {
         if (req.page) {
             from = (req.page - 1) * count;
         }
-        if(req.searchText){
+        if (req.searchText) {
             query = "SELECT count(*) as userCount from ?? where profileType = ? AND (fullName like ? OR email like ? OR phone like ?)";
             queryValues = ["user", req.type, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%'];
         } else {
@@ -402,7 +401,7 @@ var self = {
                     callback({ "Error": true, "Message": "Error executing MySQL query" });
                 } else {
                     userCount = rows[0].userCount;
-                    if (req.searchText){
+                    if (req.searchText) {
                         query = "SELECT * from ?? where profileType = ? AND (fullName like ? OR email like ? OR phone like ?) LIMIT ?, ?";
                         queryValues = ["user", req.type, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
                     } else {
@@ -441,7 +440,7 @@ var self = {
     },
     updateUser: function(request, pool, md5, callback) { /// update user profile
         var query, queryValues;
-        if(request.sendMail == 'true'){
+        if (request.sendMail == 'true') {
             query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             queryValues = ["user", "email", "phone", "fullName", "about", "billingAddress", "profilePhoto", "status", "profileType", "password", request.user.email, request.user.phone, request.user.fullName, request.user.about, request.user.billingAddress, request.user.profilePhoto, request.user.status, request.user.profileType, md5(request.user.password)];
         } else {
@@ -455,8 +454,8 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
-                    if(request.sendMail == 'true'){
-                       var transporter = nodemailer.createTransport({
+                    if (request.sendMail == 'true') {
+                        var transporter = nodemailer.createTransport({
                             service: 'Gmail',
                             auth: {
                                 user: 'care@forumias.com', // Your email id
@@ -479,7 +478,7 @@ var self = {
                             } else {
                                 console.log("message sent");
                             };
-                        }); 
+                        });
                         callback({ "Error": false, "Message": "User Updated", 'user': request });
                     } else {
                         callback({ "Error": false, "Message": "User Updated", 'user': request });
@@ -660,8 +659,8 @@ var self = {
                     if (err) {
                         callback({ "Error": true, "Message": err });
                     } else {
-	                    callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
-	                }
+                        callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
+                    }
                 });
             });
         } else {
@@ -715,8 +714,8 @@ var self = {
     },
     addUpdateCourse: function(request, pool, callback) { /// update or add course
         var query, queryValues;
-        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo), isForever=VALUES(isForever), isPublished=VALUES(isPublished), isSendMail=VALUES(isSendMail)";
-        queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", "isForever", "isPublished", "isSendMail", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo, (request.isForever == 'true'), request.isPublished, (request.isSendMail == 'true')];
+        query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE isDeleted=VALUES(isDeleted), name=VALUES(name), description=VALUES(description), demoVideo=VALUES(demoVideo), demoPoster=VALUES(demoPoster), subscriptionFee=VALUES(subscriptionFee), categoryId=VALUES(categoryId), filePath=VALUES(filePath), fileName=VALUES(fileName), validTo=VALUES(validTo), isForever=VALUES(isForever), isPublished=VALUES(isPublished), isSendMail=VALUES(isSendMail), shortDescription=VALUES(shortDescription)";
+        queryValues = ["courses", "id", "name", "description", "demoVideo", "demoPoster", "filePath", "fileName", "subscriptionFee", "categoryId", "isDeleted", "validTo", "isForever", "isPublished", "isSendMail", "shortDescription", request.id, request.name, request.description, request.demoVideo, request.demoPoster, request.filePath, request.fileName, request.subscriptionFee, request.categoryId, (request.isDeleted == 'true'), request.validTo, (request.isForever == 'true'), request.isPublished, (request.isSendMail == 'true'), request.shortDescription];
         query = mysql.format(query, queryValues);
         if (request.instructors && request.instructors.length > 0) {
             self.addCourseWithUsers(query, request, pool, function(err, rows, courseId) {
@@ -821,8 +820,8 @@ var self = {
             query = "SELECT c.id, sum(l.duration) as courseDuration from ?? c LEFT JOIN (course_unit_lesson_r cul, lessons l) ON cul.courseId = c.id and l.id = cul.lessonId where c.isDeleted = false AND c.id NOT IN (select ?? from course_subscription where ?? = ?) GROUP BY c.id";
             queryValues = ["courses", "courseId", "userId", id];
         } else if (type == "courseLibary") {
-            query = "SELECT c.id from ?? c where c.isDeleted = false AND c.isPublished = true AND (c.isForever = true OR subdate(current_date, 1) <= c.validTo)";
-            queryValues = ["courses"];
+            query = "SELECT c.id, IF(uc.id IS NULL, false, true) as isSubscribed from ?? c LEFT JOIN (course_subscription uc) ON c.id = uc.courseId and uc.userId = ? where c.isDeleted = false AND c.isPublished = true AND (c.isForever = true OR subdate(current_date, 1) <= c.validTo)";
+            queryValues = ["courses", id];
         } else if (type == "nameList") {
             query = "SELECT c.id, c.name from ?? c WHERE c.isDeleted = false";
             queryValues = ["courses"];
@@ -843,10 +842,53 @@ var self = {
                             //course.duration = value.courseDuration;
                             course.isForever = course.isForever ? true : false;
                             course.isSendMail = course.isSendMail ? true : false;
+                            course.isSubscribed = value.isSubscribed ? true : false;
                             result.push(course);
                         });
                     }
                     callback({ "Error": false, "Message": "Success", "courses": result });
+                }
+            });
+        });
+    },
+    getAllCourseUser: function(req, pool, callback) {
+        var query, queryValues, from = 0,
+            count = req.perPage || 40;
+        var userCount = 0;
+        if (req.page) {
+            from = (req.page - 1) * count;
+        }
+        if (req.searchText) {
+            query = "SELECT count(*) as userCount FROM user u JOIN (course_subscription uc) ON uc.userId = u.id WHERE uc.courseId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?)";
+            queryValues = [req.courseId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%'];
+        } else {
+            query = "SELECT count(*) as userCount FROM course_subscription uc WHERE uc.courseId=?";
+            queryValues = [req.courseId];
+        }
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                if (err) {
+                    connection.release();
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    userCount = rows[0].userCount;
+                    if (req.searchText) {
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, uc.mode FROM course_subscription uc JOIN (user u) ON uc.userId = u.id WHERE uc.courseId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?) LIMIT ?, ?";
+                        queryValues = [req.courseId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
+                    } else {
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, uc.mode FROM course_subscription uc JOIN (user u) ON uc.userId = u.id WHERE uc.courseId=? LIMIT ?, ?";
+                        queryValues = [req.courseId, from, count];
+                    }
+                    query = mysql.format(query, queryValues);
+                    connection.query(query, function(err, rows) {
+                        connection.release();
+                        if (err) {
+                            callback({ "Error": true, "Message": err });
+                        } else {
+                            callback({ "Error": false, "Message": "Successfull", "courseUsers": rows, "recordCount": userCount });
+                        }
+                    });
                 }
             });
         });
@@ -971,10 +1013,11 @@ var self = {
                                         callback({ "Error": true, "Message": err });
                                     });
                                 } else {
-	                                self.getLessonsList(pool);
-	                                self.sendMailForNewLesson(request, pool);
-	                                callback({ "Error": false, "Message": "Lesson added", "lessonId": lessonId });
-	                            }
+                                    self.getLessonsList(pool);
+                                    if(!request.id)
+                                        self.sendMailForNewLesson(request, pool);
+                                    callback({ "Error": false, "Message": "Lesson added", "lessonId": lessonId });
+                                }
                             });
                         });
                     } else {
@@ -1026,6 +1069,7 @@ var self = {
                 } else {
                     var result = _.cloneDeep(_.find(lessonsList, { 'id': request.lessonId }));
                     if (result) {
+                        result.isCommentingAllowed = result.isCommentingAllowed ? true : false;
                         result.courses = [];
                         if (rows && rows.length > 0) {
                             _.forEach(rows, function(value, key) {

@@ -15,5 +15,10 @@ module.exports = {
     'msgSms': {
         authKey: '118471AWlmRlrKskG577b846a',
         sender: 'FRMIAS'
+    },
+    'mail': {
+        service: 'Gmail',
+        email: 'care@forumias.com',
+        password: '123@academy'
     }
 };
