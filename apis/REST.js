@@ -312,9 +312,73 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
             res.json(result);
         });
     });
+
     /* Category related routes ends*/
 
+    /* Batch related routes starts */
+
+    router.post("/batch", function(req, res){
+        queryHelper.addBatch(req.body, pool, function(result){
+            res.json(result);
+        });
+    });
+
+    router.get("/batch/all", function(req, res){
+        queryHelper.getAllBatches(req.body, pool, function(result){
+            res.json(result);
+        });
+    });
+
+    /* Batch related routes ends */
+
     /* Test related routes starts*/
+    router.post("/testSeries", function(req, res) { /// add update tests
+        testQueryHelper.addTestSeries(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/testSeries/update", function(req, res) { /// add update tests
+        testQueryHelper.updateTestSeries(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/testSeries/byId", function(req, res) { /// add update tests
+        testQueryHelper.getTestSeriesById(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.get("/testSeries/all", function(req, res) { /// add update tests
+        testQueryHelper.getAllTestSeries('all', req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/testSeries/byUser", function(req, res) { /// add update tests
+        testQueryHelper.getAllTestSeries('byUser', req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.get("/testSeries/nameList", function(req, res) { /// add update tests
+        testQueryHelper.getAllTestSeries('nameList', req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/testSeries/addTest", function(req, res) { /// add update tests
+        testQueryHelper.addTestToTestSeries(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/testSeries/addUsers", function(req, res) { /// add update tests
+        testQueryHelper.addUsersToTestSeries(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
 
     router.post("/test", function(req, res) { /// add update tests
         testQueryHelper.addUpdateTest(req.body, pool, function(result) {
@@ -480,20 +544,24 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 if (err) {
                     console.log(err);
                 }
-                questions = result;
-                _.forEach(questions, function(value) {
-                    value.question = '<p>' + value.question.trim() + '</p>';
-                    value.explanation = '<p>' + value.explanation.trim() + '</p>';
-                    value.correctAnswer = value.answer;
-                    value.answers = [];
+                //questions = result;
+                _.forEach(result, function(value) {
+                    var question = {};
+                    question.question = '<p>' + value.question.trim() + '</p>';
+                    question.explanation = '<p>' + value.explanation.trim() + '</p>';
+                    question.correctAnswer = value.answer;
+                    question.answers = [];
                     _.forIn(value, function(childValue, childKey) {
                         if (childKey.length == 1 && childValue) {
-                            value.answers.push({
+                            question.answers.push({
                                 ansKey: childKey,
                                 answerText: '<p>' + childValue.trim() + '</p>'
                             });
                         }
                     });
+                    question.type = value.type;
+                    question.subject = value.subject;
+                    questions.push(question);
                 });
                 testQueryHelper.addImportedQuestion({ questions: questions, questionPaperId: req.body.questionPaperId }, pool, function(result) {
                     res.json(result);

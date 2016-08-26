@@ -1118,8 +1118,8 @@ var self = {
     getAllCategories: function(type, id, pool, callback) { /// get list of all category
         var query, queryValues;
         if (type = "all") {
-            query = "SELECT ct.*, count(c.id) as coursesCount FROM ?? ct LEFT JOIN (courses c) ON c.categoryId = ct.id GROUP BY ct.id";
-            queryValues = ["categories"];
+            query = "SELECT ct.*, count(c.id) as coursesCount FROM ?? ct LEFT JOIN (courses c) ON c.categoryId = ct.id WHERE ct.type=? GROUP BY ct.id";
+            queryValues = ["catalog", "category"];
         }
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
@@ -1144,6 +1144,36 @@ var self = {
                     callback({ "Error": true, "Message": err });
                 } else {
                     callback({ "Error": false, "Message": "Success" });
+                }
+            });
+        });
+    },
+    addBatch: function(req, pool, callback) {
+        var query = "INSERT INTO ??(??, ??, ??) VALUES (?, ?, ?)";
+        var queryValues = ["batches", "name", "description", "createdBy", req.name, req.description, req.createdBy];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection){
+            connection.query(query, function(err, rows){
+                connection.release();
+                if(err){
+                    callback({"Error": true, "Message": err});
+                } else {
+                    callback({ "Error": false, "Message": "Batch added successfully"});
+                }
+            });
+        });
+    },
+    getAllBatches: function(req, pool, callback) {
+        var query = "SELECT * FROM ??";
+        var queryValues = ["batches"];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                connection.release();
+                if(err){
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "successfully", "batches": rows });
                 }
             });
         });

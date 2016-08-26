@@ -6,11 +6,12 @@ var json2xls = require('json2xls');
 var fs = require('fs');
 var path = require('path');
 
-var questionList = 0;
+var questionList = 0, subjectList = [];
 
 var self = {
     initTestDictionaries: function(pool) {
         self.getQuestionCount(pool);
+        self.getAllSubjects(pool);
     },
     getQuestionCount: function(pool) {
         var query = "SELECT * from ?? WHERE isDeleted=false AND parentQuestionId IS NULL";
@@ -26,6 +27,132 @@ var self = {
                 }
             });
         });
+    },
+    getAllSubjects: function(pool) {
+        var query = "SELECT * FROM ??";
+        var queryValues = ["subjects"];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection){
+            connection.query(query, function(err, rows){
+                if(err) {
+                    console.log(err);
+                } else {
+                    subjectList = rows;
+                }
+            });
+        });
+    },
+    addTestSeries: function(req, pool, callback){
+        var query = "INSERT INTO ??(??, ??, ??) VALUES (?, ?, ?)";
+        var queryValues = ["testSeries", "name", "description", "createdBy", req.name, req.description, req.createdBy];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection){
+            connection.query(query, function(err, rows){
+                connection.release();
+                if(err) {
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Test series added Successfully" });
+                }
+            });
+        });
+    },
+    updateTestSeries: function(req, pool, callback) {
+        var query = "UPDATE ?? SET description = ?, testPlan = ?, modifiedBy = ? WHERE id = ?";
+        var queryValues = ["testSeries", req.description, req.testPlan, req.modifiedBy, req.id];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection){
+            connection.query(query, function(err, rows){
+                connection.release();
+                if(err) {
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Test series updated Successfully" });
+                }
+            });
+        });
+    },
+    getTestSeriesById: function(req, pool, callback){
+        var query = "SELECT * FROM ?? WHERE id = ?";
+        var queryValues = ["testSeries", req.testSeriesId];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection){
+            connection.query(query, function(err, rows){
+                if(err){
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "successfully", "testSeries": rows[0] });
+                }
+            });
+        });
+    },
+    getAllTestSeries: function(type, req, pool, callback) {
+        var query, queryValues;
+        if(type == 'all'){
+            query = "SELECT ts.*, GROUP_CONCAT(t.title) as testList FROM ?? ts LEFT JOIN (test_testSeries tt, tests t) ON tt.resourceId = ts.id and t.id = tt.testId and t.isDeleted = false WHERE ts.isDeleted = false GROUP BY ts.id";
+            queryValues = ["testseries"];
+        } else if(type == 'nameList'){
+            query = "SELECT id, name FROM ?? WHERE isDeleted = false";
+            queryValues = ["testseries"];
+        } else if(type == 'byUser'){
+            query = "SELECT ts.*, IF(tss.id IS NULL, false, true) as isSubscribed, count(tt.id) as testCount FROM ?? ts LEFT JOIN (testSeries_subscription tss) ON ts.id = tss.testSeriesId and tss.userId = ? LEFT JOIN (test_testSeries tt) ON tt.resourceId = ts.id WHERE ts.isDeleted = false AND ts.isPublished = true";
+            queryValues = ["testseries", req.userId];
+        }
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection){
+            connection.query(query, function(err, rows){
+                connection.release();
+                if(err){
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Successfully", "testSeries": rows });
+                }
+            });
+        });
+    },
+    addTestToTestSeries: function (req, pool, callback) {
+        var values = [];
+        var query = "INSERT INTO ??(??, ??) VALUES ?";
+        var queryValues = ["test_testSeries", "resourceId", "testId"];
+        for(var i = 0; i < req.testIds.length; i++){
+            values.push([req.testSeriesId, req.testIds[i]]);
+        }
+        queryValues.push(values);
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection){
+            connection.query(query, function(err, rows){
+                if(err){
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Test added to series Successfully" });
+                }
+            });
+        });
+    },
+    addUsersToTestSeries: function(req, pool, callback) {
+        var values = [],
+            query, queryValues = [];
+        if (req.users && req.users.length > 0) {
+            query = "INSERT INTO ??(??, ??, ??) VALUES ?";
+            queryValues = ["testSeries_subscription", "testSeriesId", "userId", "mode"]; //, request.courseId, request.userId, request.mode];
+            for (var i = 0; i < req.users.length; i++) {
+                values.push([req.testSeriesId, req.users[i], 'manual']);
+            }
+            queryValues.push(values);
+            query = mysql.format(query, queryValues);
+            pool.getConnection(function(err, connection) {
+                connection.query(query, function(err, rows) {
+                    connection.release();
+                    if (err) {
+                        callback({ "Error": true, "Message": err });
+                    } else {
+                        callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
+                    }
+                });
+            });
+        } else {
+            callback({ "Error": true, "Message": "No student to subscribe test series" });
+        }
     },
     addUpdateTest: function(req, pool, callback) {
         req.duration = req.duration ? req.duration * 3600 : '';
@@ -199,8 +326,8 @@ var self = {
         });
     },
     getAllExams: function(req, pool, callback) {
-        var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.questionPaperId IS NOT NULL AND subdate(current_date, 1) >= ?? and subdate(current_date, 1) <= ?? GROUP By t.id";
-        var queryValues = ["tests", req.userId, "startDate", "endDate"];
+        var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.id IN (SELECT tt.testId FROM test_testSeries tt WHERE tt.resourceId = ?) GROUP By t.id";
+        var queryValues = ["tests", req.userId, req.testSeriesId];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -777,8 +904,10 @@ var self = {
             added = 0;
         if (req.questions && req.questions.length > 0) {
             async.eachSeries(req.questions, function(question, childCallback) {
-                query = "INSERT INTO ??(??, ??, ??, ??) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE question=VALUES(question), type=VALUES(type), explanation=VALUES(explanation), correctAnswer=VALUES(correctAnswer)";
-                queryValues = ["questions", "question", "type", "explanation", "correctAnswer", question.question, question.type, question.explanation, question.correctAnswer];
+                var subjectId = _.find(subjectList, { 'name': question.subject });
+                subjectId = subjectId ? _.map([subjectId], 'id')[0] : '';
+                query = "INSERT INTO ??(??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE question=VALUES(question), type=VALUES(type), explanation=VALUES(explanation), correctAnswer=VALUES(correctAnswer), subjectId=VALUES(subjectId)";
+                queryValues = ["questions", "question", "type", "explanation", "correctAnswer", "subjectId", question.question, question.type, question.explanation, question.correctAnswer, subjectId];
                 query = mysql.format(query, queryValues);
                 self.addUpdateMcqQuestion(query, question, pool, function(result) {
                     if (result.Error) {
