@@ -142,9 +142,9 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 amount: req.body.amt,
                 phone: req.body.phone,
                 buyer_name: req.body.fullName,
-                redirect_url: 'http://52.66.110.111/#/main/libary',
+                redirect_url: 'http://52.66.78.88/#/main/libary', //redirect_url: 'http://52.66.110.111/#/main/libary',
                 send_email: false,
-                webhook: 'http://52.66.119.248/api/course/payment',
+                webhook: 'http://52.66.82.252/api/course/payment',//webhook: 'http://52.66.119.248/api/course/payment',
                 send_sms: false,
                 email: req.body.email,
                 allow_repeated_payments: false
@@ -262,7 +262,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 for (var i = 0; i < req.files.file.length; i++) {
                     var file = {
                         fileName: req.files.file[i].name,
-                        filePath: req.protocol + '://' + req.get('host') + req.files.file[i].path.substring(req.files.file[i].path.indexOf('\\'))
+                        filePath: req.protocol + '://' + req.get('host') + '/' + req.files.file[i].path.substring(req.files.file[i].path.indexOf('\\'))
                     };
                     lessonFiles.filesList.push(file);
                 }
