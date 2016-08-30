@@ -784,7 +784,7 @@ var self = {
         });
     },
     getCourseAndUnits: function(pool, callback) {
-        var query = "SELECT c.id, c.name, GROUP_CONCAT(u.id) as unitList from ?? c LEFT JOIN (units u) ON c.id = u.courseId GROUP BY c.id";
+        var query = "SELECT c.id, c.name, GROUP_CONCAT(u.id) as unitList from ?? c LEFT JOIN (units u) ON c.id = u.courseId and u.isDelete=false GROUP BY c.id";
         var queryValues = ["courses"];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
@@ -874,10 +874,10 @@ var self = {
                 } else {
                     userCount = rows[0].userCount;
                     if (req.searchText) {
-                        query = "SELECT u.id, u.fullName, u.email, u.phone, uc.mode FROM course_subscription uc JOIN (user u) ON uc.userId = u.id WHERE uc.courseId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?) LIMIT ?, ?";
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, uc.mode FROM course_subscription uc JOIN (user u) ON uc.userId = u.id WHERE uc.courseId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?) ORDER BY u.id LIMIT ?, ?";
                         queryValues = [req.courseId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
                     } else {
-                        query = "SELECT u.id, u.fullName, u.email, u.phone, uc.mode FROM course_subscription uc JOIN (user u) ON uc.userId = u.id WHERE uc.courseId=? LIMIT ?, ?";
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, uc.mode FROM course_subscription uc JOIN (user u) ON uc.userId = u.id WHERE uc.courseId=? ORDER BY u.id LIMIT ?, ?";
                         queryValues = [req.courseId, from, count];
                     }
                     query = mysql.format(query, queryValues);

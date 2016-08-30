@@ -44,7 +44,7 @@ var self = {
     },
     addTestSeries: function(req, pool, callback){
         var query = "INSERT INTO ??(??, ??, ??) VALUES (?, ?, ?)";
-        var queryValues = ["testSeries", "name", "description", "createdBy", req.name, req.description, req.createdBy];
+        var queryValues = ["testseries", "name", "description", "createdBy", req.name, req.description, req.createdBy];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection){
             connection.query(query, function(err, rows){
@@ -59,7 +59,7 @@ var self = {
     },
     updateTestSeries: function(req, pool, callback) {
         var query = "UPDATE ?? SET description = ?, testPlan = ?, modifiedBy = ? WHERE id = ?";
-        var queryValues = ["testSeries", req.description, req.testPlan, req.modifiedBy, req.id];
+        var queryValues = ["testseries", req.description, req.testPlan, req.modifiedBy, req.id];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection){
             connection.query(query, function(err, rows){
@@ -74,7 +74,7 @@ var self = {
     },
     getTestSeriesById: function(req, pool, callback){
         var query = "SELECT * FROM ?? WHERE id = ?";
-        var queryValues = ["testSeries", req.testSeriesId];
+        var queryValues = ["testseries", req.testSeriesId];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection){
             connection.query(query, function(err, rows){
@@ -89,13 +89,13 @@ var self = {
     getAllTestSeries: function(type, req, pool, callback) {
         var query, queryValues;
         if(type == 'all'){
-            query = "SELECT ts.*, GROUP_CONCAT(t.title) as testList FROM ?? ts LEFT JOIN (test_testSeries tt, tests t) ON tt.resourceId = ts.id and t.id = tt.testId and t.isDeleted = false WHERE ts.isDeleted = false GROUP BY ts.id";
+            query = "SELECT ts.*, GROUP_CONCAT(t.title) as testList FROM ?? ts LEFT JOIN (test_testseries tt, tests t) ON tt.resourceId = ts.id and t.id = tt.testId and t.isDeleted = false WHERE ts.isDeleted = false GROUP BY ts.id";
             queryValues = ["testseries"];
         } else if(type == 'nameList'){
             query = "SELECT id, name FROM ?? WHERE isDeleted = false";
             queryValues = ["testseries"];
         } else if(type == 'byUser'){
-            query = "SELECT ts.*, IF(tss.id IS NULL, false, true) as isSubscribed, count(tt.id) as testCount FROM ?? ts LEFT JOIN (testSeries_subscription tss) ON ts.id = tss.testSeriesId and tss.userId = ? LEFT JOIN (test_testSeries tt) ON tt.resourceId = ts.id WHERE ts.isDeleted = false AND ts.isPublished = true";
+            query = "SELECT ts.*, IF(tss.id IS NULL, false, true) as isSubscribed, count(tt.id) as testCount FROM ?? ts LEFT JOIN (testseries_subscription tss) ON ts.id = tss.testSeriesId and tss.userId = ? LEFT JOIN (test_testseries tt) ON tt.resourceId = ts.id WHERE ts.isDeleted = false AND ts.isPublished = true";
             queryValues = ["testseries", req.userId];
         }
         query = mysql.format(query, queryValues);
@@ -113,7 +113,7 @@ var self = {
     addTestToTestSeries: function (req, pool, callback) {
         var values = [];
         var query = "INSERT INTO ??(??, ??) VALUES ?";
-        var queryValues = ["test_testSeries", "resourceId", "testId"];
+        var queryValues = ["test_testseries", "resourceId", "testId"];
         for(var i = 0; i < req.testIds.length; i++){
             values.push([req.testSeriesId, req.testIds[i]]);
         }
@@ -134,7 +134,7 @@ var self = {
             query, queryValues = [];
         if (req.users && req.users.length > 0) {
             query = "INSERT INTO ??(??, ??, ??) VALUES ?";
-            queryValues = ["testSeries_subscription", "testSeriesId", "userId", "mode"]; //, request.courseId, request.userId, request.mode];
+            queryValues = ["testseries_subscription", "testSeriesId", "userId", "mode"]; //, request.courseId, request.userId, request.mode];
             for (var i = 0; i < req.users.length; i++) {
                 values.push([req.testSeriesId, req.users[i], 'manual']);
             }
@@ -326,7 +326,7 @@ var self = {
         });
     },
     getAllExams: function(req, pool, callback) {
-        var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.id IN (SELECT tt.testId FROM test_testSeries tt WHERE tt.resourceId = ?) GROUP By t.id";
+        var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.id IN (SELECT tt.testId FROM test_testseries tt WHERE tt.resourceId = ?) GROUP By t.id";
         var queryValues = ["tests", req.userId, req.testSeriesId];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
