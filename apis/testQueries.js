@@ -58,8 +58,8 @@ var self = {
         });
     },
     updateTestSeries: function(req, pool, callback) {
-        var query = "UPDATE ?? SET description = ?, testPlan = ?, modifiedBy = ? WHERE id = ?";
-        var queryValues = ["testseries", req.description, req.testPlan, req.modifiedBy, req.id];
+        var query = "UPDATE ?? SET description = ?, testPlan = ?, modifiedBy = ?, isPublished=? WHERE id = ?";
+        var queryValues = ["testseries", req.description, req.testPlan, req.modifiedBy, req.isPublished, req.id];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection){
             connection.query(query, function(err, rows){
@@ -99,13 +99,15 @@ var self = {
             queryValues = ["testseries", req.userId];
         }
         query = mysql.format(query, queryValues);
+        console.log(query)
         pool.getConnection(function(err, connection){
             connection.query(query, function(err, rows){
                 connection.release();
                 if(err){
                     callback({ "Error": true, "Message": err });
                 } else {
-                    callback({ "Error": false, "Message": "Successfully", "testSeries": rows });
+                    var testSeries = _.reject(rows, function(o) { return !o.id; });
+                    callback({ "Error": false, "Message": "Successfully", "testSeries": testSeries });
                 }
             });
         });
