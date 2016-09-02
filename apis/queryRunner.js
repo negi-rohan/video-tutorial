@@ -784,7 +784,7 @@ var self = {
         });
     },
     getCourseAndUnits: function(pool, callback) {
-        var query = "SELECT c.id, c.name, GROUP_CONCAT(u.id) as unitList from ?? c LEFT JOIN (units u) ON c.id = u.courseId and u.isDelete=false GROUP BY c.id";
+        var query = "SELECT c.id, c.name, GROUP_CONCAT(u.id) as unitList from ?? c LEFT JOIN (units u) ON c.id = u.courseId and u.isDeleted=false GROUP BY c.id";
         var queryValues = ["courses"];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {

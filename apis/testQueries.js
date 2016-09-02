@@ -95,11 +95,10 @@ var self = {
             query = "SELECT id, name FROM ?? WHERE isDeleted = false";
             queryValues = ["testseries"];
         } else if(type == 'byUser'){
-            query = "SELECT ts.*, IF(tss.id IS NULL, false, true) as isSubscribed, count(tt.id) as testCount FROM ?? ts LEFT JOIN (testseries_subscription tss) ON ts.id = tss.testSeriesId and tss.userId = ? LEFT JOIN (test_testseries tt) ON tt.resourceId = ts.id WHERE ts.isDeleted = false AND ts.isPublished = true";
+            query = "SELECT ts.*, IF(tss.id IS NULL, false, true) as isSubscribed FROM ?? ts LEFT JOIN (testseries_subscription tss) ON ts.id = tss.testSeriesId and tss.userId = ? WHERE ts.isDeleted = false AND ts.isPublished = true";
             queryValues = ["testseries", req.userId];
         }
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection){
             connection.query(query, function(err, rows){
                 connection.release();
@@ -156,12 +155,54 @@ var self = {
             callback({ "Error": true, "Message": "No student to subscribe test series" });
         }
     },
+    getSeriesUser: function(req, pool, callback) {
+        var query, queryValues, from = 0,
+            count = req.perPage || 40;
+        var userCount = 0;
+        if (req.page) {
+            from = (req.page - 1) * count;
+        }
+        if (req.searchText) {
+            query = "SELECT count(*) as userCount FROM user u JOIN (testseries_subscription uts) ON uts.userId = u.id WHERE uts.testSeriesId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?)";
+            queryValues = [req.testSeriesId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%'];
+        } else {
+            query = "SELECT count(*) as userCount FROM testseries_subscription uts WHERE uts.testSeriesId=?";
+            queryValues = [req.testSeriesId];
+        }
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                if (err) {
+                    connection.release();
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    userCount = rows[0].userCount;
+                    if (req.searchText) {
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, uts.mode FROM testseries_subscription uts JOIN (user u) ON uts.userId = u.id WHERE uts.testSeriesId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?) ORDER BY u.id LIMIT ?, ?";
+                        queryValues = [req.testSeriesId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
+                    } else {
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, uts.mode FROM testseries_subscription uts JOIN (user u) ON uts.userId = u.id WHERE uts.testSeriesId=? ORDER BY u.id LIMIT ?, ?";
+                        queryValues = [req.testSeriesId, from, count];
+                    }
+                    query = mysql.format(query, queryValues);
+                    connection.query(query, function(err, rows) {
+                        connection.release();
+                        if (err) {
+                            callback({ "Error": true, "Message": err });
+                        } else {
+                            callback({ "Error": false, "Message": "Successfull", "students": rows, "recordCount": userCount });
+                        }
+                    });
+                }
+            });
+        });
+    },
     addUpdateTest: function(req, pool, callback) {
         req.duration = req.duration ? req.duration * 3600 : '';
         req.startDate = req.startDate ? moment(req.startDate).format('YYYY-MM-DD HH:mm:SS') : '';
         req.endDate = req.endDate ? moment(req.endDate).format('YYYY-MM-DD HH:mm:SS') : '';
-        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title=VALUES(title), duration=VALUES(duration), startDate=VALUES(startDate), endDate=VALUES(endDate), marksPerQues=VALUES(marksPerQues), negativeMarks=VALUES(negativeMarks), instantResult=VALUES(instantResult), instantRank=VALUES(instantRank), instruction=VALUES(instruction), questionPaperId=VALUES(questionPaperId), attachment=VALUES(attachment)";
-        var queryValues = ["tests", "id", "title", "duration", "startDate", "endDate", "marksPerQues", "negativeMarks", "instantResult", "instantRank", "instruction", "questionPaperId", "attachment", req.id, req.title, req.duration, req.startDate, req.endDate, req.marksPerQues, req.negativeMarks, req.instantResult, req.instantRank, req.instruction, req.questionPaperId, req.attachment];
+        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title=VALUES(title), duration=VALUES(duration), startDate=VALUES(startDate), endDate=VALUES(endDate), marksPerQues=VALUES(marksPerQues), negativeMarks=VALUES(negativeMarks), instantResult=VALUES(instantResult), instantRank=VALUES(instantRank), instruction=VALUES(instruction), questionPaperId=VALUES(questionPaperId), attachment=VALUES(attachment), file=VALUES(file)";
+        var queryValues = ["tests", "id", "title", "duration", "startDate", "endDate", "marksPerQues", "negativeMarks", "instantResult", "instantRank", "instruction", "questionPaperId", "attachment", "file", req.id, req.title, req.duration, req.startDate, req.endDate, req.marksPerQues, req.negativeMarks, req.instantResult, req.instantRank, req.instruction, req.questionPaperId, req.attachment, req.file];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -250,10 +291,10 @@ var self = {
                 } else {
                     userCount = rows[0].userCount;
                     if (req.searchText) {
-                        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?) ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?) ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
                         queryValues = [req.testId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
                     } else {
-                        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
+                        query = "SELECT u.id, u.fullName, u.email, u.phone, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
                         queryValues = [req.testId, from, count];
                     }
                     query = mysql.format(query, queryValues);
@@ -328,7 +369,7 @@ var self = {
         });
     },
     getAllExams: function(req, pool, callback) {
-        var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.id IN (SELECT tt.testId FROM test_testseries tt WHERE tt.resourceId = ?) GROUP By t.id";
+        var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.id IN (SELECT tt.testId FROM test_testseries tt WHERE tt.resourceId = ?) GROUP By t.id ORDER BY t.startDate";
         var queryValues = ["tests", req.userId, req.testSeriesId];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
@@ -544,7 +585,7 @@ var self = {
                         testInfo = rows[0];
                         self.getTestQuestionsOnly(req, pool, function(result) {
                             questions = result.questions;
-                            var score = correct = incorrect = 0;
+                            var score = correct = incorrect = timeSpent = 0;
                             _.forEach(req.answers, function(value) {
                                 var correctAnswer = _.find(questions, { 'id': value.questionId }).correctAnswer;
                                 if (correctAnswer == value.answer) {
@@ -557,8 +598,9 @@ var self = {
                                     incorrect++;
                                 }
                             });
-                            query = "UPDATE ?? SET score = ?, status=?, correctAnswers=?, incorrectAnswers=? WHERE userId=? AND testId=?";
-                            queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', correct, incorrect, req.userId, req.testId];
+                            timeSpent = testInfo.duration - req.timeRemaining;
+                            query = "UPDATE ?? SET score = ?, status=?, correctAnswers=?, incorrectAnswers=?, timeSpent=? WHERE userId=? AND testId=?";
+                            queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', correct, incorrect, timeSpent, req.userId, req.testId];
                             query = mysql.format(query, queryValues);
                             connection.query(query, function(err, rows) {
                                 if (err) {
@@ -576,7 +618,7 @@ var self = {
         var query, queryValues, userList, questions, userAnswers, status = [],
             users;
         status = ["completed", "evaluated"];
-        query = "SELECT u.*, t.marksPerQues, t.negativeMarks FROM ?? u LEFT JOIN (?? t) ON t.id = u.testId WHERE u.testId=? AND u.status IN (?)";
+        query = "SELECT u.*, t.marksPerQues, t.negativeMarks, t.duration FROM ?? u LEFT JOIN (?? t) ON t.id = u.testId WHERE u.testId=? AND u.status IN (?)";
         queryValues = ["testuserinfo", "tests", req.testId, status];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
@@ -600,7 +642,7 @@ var self = {
                             userAnswers = rows;
                             async.eachSeries(userList, function(user, callback) {
                                     var data = _.filter(userAnswers, { 'userId': user.userId });
-                                    var score = correct = incorrect = 0;
+                                    var score = correct = incorrect = timeSpent = 0;
                                     _.forEach(data, function(value) {
                                         var correctAnswer = _.find(questions, { 'id': value.questionId }).correctAnswer;
                                         if (correctAnswer == value.answer) {
@@ -613,22 +655,25 @@ var self = {
                                             incorrect++;
                                         }
                                     });
-                                    query = "UPDATE ?? SET score = ?, status=?, correctAnswers=?, incorrectAnswers=? WHERE userId=? AND testId=?";
-                                    queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', correct, incorrect, user.userId, user.testId];
+                                    timeSpent = user.duration - user.timeRemaining;
+                                    query = "UPDATE ?? SET score = ?, status=?, correctAnswers=?, incorrectAnswers=?, timeSpent=? WHERE userId=? AND testId=?";
+                                    queryValues = ["testuserinfo", _.round(score, 2), 'evaluated', correct, incorrect, timeSpent, user.userId, user.testId];
                                     query = mysql.format(query, queryValues);
                                     connection.query(query, function(err, rows) {
                                         if (err) {
                                             callback(err);
+                                        } else {
+                                            callback(null, 123)
                                         }
-                                        callback(null, 123)
                                     });
                                 },
                                 function(err, rows) {
                                     connection.release();
                                     if (err) {
                                         callback({ "Error": true, "Message": err });
+                                    } else {
+                                        callback({ "Error": false, "Message": "Evaluation completed Successfully" });
                                     }
-                                    callback({ "Error": false, "Message": "Evaluation completed Successfully" });
                                 }
                             );
                         });
@@ -871,6 +916,7 @@ var self = {
                 if (err) {
                     callback({ "Error": true, "Message": err });
                 } else {
+                    self.getAllSubjects();
                     callback({ "Error": false, "Message": "Subject added Successfully" });
                 }
             });

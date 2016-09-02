@@ -380,6 +380,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/testSeries/userList", function(req, res) { /// add update tests
+        testQueryHelper.getSeriesUser(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/test", function(req, res) { /// add update tests
         testQueryHelper.addUpdateTest(req.body, pool, function(result) {
             res.json(result);
