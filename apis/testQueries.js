@@ -296,6 +296,10 @@ var self = {
                     if (req.searchText) {
                         query = "SELECT u.id, u.fullName, u.email, u.phone, u.profileType, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?) ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
                         queryValues = [req.testId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
+                    } else if(req.withEvaluatedStatus){
+                        query = "SELECT u.id, u.fullName, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status = 'evaluated' ORDER BY tu.status, tu.score DESC";
+                        queryValues = [req.testId];
+                        console.log(123);
                     } else {
                         query = "SELECT u.id, u.fullName, u.email, u.phone, u.profileType, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
                         queryValues = [req.testId, from, count];
@@ -397,6 +401,7 @@ var self = {
         query = "SELECT questionId FROM ?? WHERE isDeleted = false AND questionPaperId = (SELECT questionPaperId FROM ?? WHERE id = ?)";
         queryValues = ["question_questionpaper", "tests", req.testId];
         query = mysql.format(query, queryValues);
+        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 if (err) {
@@ -407,12 +412,13 @@ var self = {
                     if (req.selectAll) {
                         query = "SELECT q.*, s.name as subjectName, qs.totalAttempt, qs.correct FROM ?? q LEFT JOIN (subjects s) ON s.id = q.subjectId LEFT JOIN (questions_stats qs) ON qs.questionId = q.id WHERE q.isDeleted=false AND (q.id IN (?) OR q.parentQuestionId IN (?))";
                     } else {
-                        query = "SELECT q.id, q.question, q.type, q.parentQuestionId, q.questionText, qs.totalAttempt, qs.correct FROM ?? q LEFT JOIN (questions_stats qs) ON qs.questionId = q.id WHERE isDeleted=false AND (id IN (?) OR parentQuestionId IN (?))";
+                        query = "SELECT q.id, q.question, q.type, q.parentQuestionId, q.questionText, qs.totalAttempt, qs.correct FROM ?? q LEFT JOIN (questions_stats qs) ON qs.questionId = q.id WHERE isDeleted=false AND (q.id IN (?) OR q.parentQuestionId IN (?))";
                     }
                     //
                     //query = "SELECT id, question, type, parentQuestionId FROM ?? WHERE isDeleted=false AND (id IN (?) OR parentQuestionId IN (?))";
                     queryValues = ["questions", questionIds, questionIds];
                     query = mysql.format(query, queryValues);
+                    console.log(query)
                     connection.query(query, function(err, rows) {
                         result = rows;
                         if (err) {
@@ -424,6 +430,7 @@ var self = {
                                     query = "SELECT id, answerText, ansKey, ansText FROM ?? WHERE isDeleted=false AND questionId=?";
                                     queryValues = ["answers", question.id];
                                     query = mysql.format(query, queryValues);
+                                    console.log(query)
                                     connection.query(query, function(err, rows) {
                                         if (err) {
                                             callback(err);
@@ -745,7 +752,7 @@ var self = {
                                         connection.release();
                                         callback({ "Error": true, "Message": err });
                                     } else {
-                                        query = "CALL calculatePercentile(?)";
+                                        query = "CALL calculateRank(?)";
                                         queryValues = [req.testId];
                                         query = mysql.format(query, queryValues);
                                         connection.query(query, function(err, rows) {
@@ -757,6 +764,23 @@ var self = {
                                         });
                                     }
                                 }
+                                // function(err, rows) {
+                                //     if (err) {
+                                //         connection.release();
+                                //         callback({ "Error": true, "Message": err });
+                                //     } else {
+                                //         query = "CALL calculatePercentile(?)";
+                                //         queryValues = [req.testId];
+                                //         query = mysql.format(query, queryValues);
+                                //         connection.query(query, function(err, rows) {
+                                //             connection.release();
+                                //             if (err) {
+                                //                 callback({ "Error": true, "Message": err });
+                                //             }
+                                //             callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+                                //         });
+                                //     }
+                                // }
                                 // function(err, rows) {
                                 //     if (err) {
                                 //         connection.release();
@@ -793,7 +817,7 @@ var self = {
     },
     instanttestEvaluation: function(req, pool, callback) {
         var query, queryValues;
-        query = "CALL calculatePercentile(?)";
+        query = "CALL calculateRank(?)";
         queryValues = [req.testId];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
@@ -806,6 +830,21 @@ var self = {
                 }
             });
         });
+
+        // var query, queryValues;
+        // query = "CALL calculatePercentile(?)";
+        // queryValues = [req.testId];
+        // query = mysql.format(query, queryValues);
+        // pool.getConnection(function(err, connection) {
+        //     connection.query(query, function(err, rows) {
+        //         connection.release();
+        //         if (err) {
+        //             callback({ "Error": true, "Message": err });
+        //         } else {
+        //             callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+        //         }
+        //     });
+        // });
 
         // query = "CALL calculateRank(?)";
         // queryValues = [req.testId];
