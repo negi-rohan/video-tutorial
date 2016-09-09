@@ -5,7 +5,6 @@ var async = require('async');
 var json2xls = require('json2xls');
 var fs = require('fs');
 var path = require('path');
-var wkhtmltopdf = require('wkhtmltopdf');
 
 var questionList = 0,
     subjectList = [];
@@ -870,8 +869,8 @@ var self = {
         });
     },
     getUserAnswersPdf: function(req, pool, callback) {
-        wkhtmltopdf(req.html)
-            .pipe(fs.createWriteStream(path.join(__dirname, 'public/out.pdf')));
+        // wkhtmltopdf(req.html)
+        //     .pipe(fs.createWriteStream(path.join(__dirname, 'public/out.pdf')));
         //fs.writeFileSync(path.join(__dirname, 'public/userTestInfo.xlsx'), xls, 'binary');
         callback({ "Error": false, "Message": "Successfull", "url": request.protocol + '://' + request.get('host') + '/out.pdf' });
     },
