@@ -30,6 +30,10 @@
                     <p class="form-control-static" ng-bind="vm.user.phone" ng-if="vm.objMode == 'update'"></p>
                     <input type="text" class="form-control" id="profile.phone" placeholder="Phone" ng-model="vm.user.phone" ng-if="vm.objMode != 'update'" />
                 </div>
+                <div class="form-group" ng-if="vm.objMode == 'insert'">
+                    <label for="profile.password">Password</label>
+                    <input type="text" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" />
+                </div>
                 <div class="form-group">
                     <label for="profile.about">About you</label>
                     <textarea class="form-control" id="profile.about" rows="5" placeholder="About you" ng-model="vm.user.about">

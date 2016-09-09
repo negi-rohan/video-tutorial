@@ -131,6 +131,34 @@ body {
     display: none;
 }
 
+.navbar-default .navbar-collapse,
+.navbar-default .navbar-form {
+    border: none;
+    text-align: center;
+}
+
+.ans-options .btn-default:active,
+.ans-options .btn-default.active,
+.ans-options .open > .dropdown-toggle.btn-default {
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+}
+
+.ans-options .btn-default:active:hover,
+.ans-options .btn-default.active:hover,
+.ans-options .open > .dropdown-toggle.btn-default:hover,
+.ans-options .btn-default:active:focus,
+.ans-options .btn-default.active:focus,
+.ans-options .open > .dropdown-toggle.btn-default:focus,
+.ans-options .btn-default:active.focus,
+.ans-options .btn-default.active.focus,
+.ans-options .open > .dropdown-toggle.btn-default.focus{
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+}
+
 @media screen and (max-width: 480px) {
     .col-xs-offset-1 {
         margin-left: 0;
@@ -141,8 +169,6 @@ body {
     .row.top {
         margin-right: 0%;
         margin-top: 5%;
-    }
-    .row {
         margin-left: 0px;
     }
     .col-xs-offset-1 .logo-mobile {
@@ -156,5 +182,8 @@ body {
     }
     .col-xs-offset-1 {
         margin-top: 15%;
+    }
+    .navigation-btn button {
+        margin: 4px 0px;
     }
 }

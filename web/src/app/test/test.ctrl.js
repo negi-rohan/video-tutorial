@@ -3,23 +3,18 @@
 
     angular
         .module('web')
-        .controller('TestController', TestController)
-        .filter('htmlToPlaintext', htmlToPlaintext);
-
-    function htmlToPlaintext() {
-        return function(text) {
-            return angular.element(text).text();
-        }
-    }
+        .controller('TestController', TestController);
 
     /** @ngInject */
     function TestController($http, CommonInfo, $state, growl, $uibModal, Upload, _, $window) {
         var vm = this;
         var selectedQuestionGrid = [];
+        var selectedTestGrid = [];
         var inProcess = false;
 
+        vm.userInfo;
         vm.objMode;
-        vm.selectedTab = 0;
+        vm.selectedTab = 1;
         vm.isQuestionSelected = false;
         vm.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
         vm.format = 'dd-MMMM-yyyy';
@@ -33,6 +28,13 @@
         vm.currentPage = 1;
         vm.keyCode = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'];
 
+        vm.getAllTestSeries = getAllTestSeries;
+        vm.getTestSeriesById = getTestSeriesById;
+        vm.editTestSeries = editTestSeries;
+        vm.addTestSeries = addTestSeries;
+        vm.updateTestSeries = updateTestSeries;
+        vm.publishTestSeries = publishTestSeries;
+        vm.getTestSeriesUsers = getTestSeriesUsers;
         vm.getAllTests = getAllTests;
         vm.getTestById = getTestById;
         vm.editTest = editTest;
@@ -40,6 +42,9 @@
         vm.deleteTest = deleteTest;
         vm.evaluation = evaluation;
         vm.evaluationAll = evaluationAll;
+        vm.offlineScore = offlineScore;
+        vm.removeAllOfflineSores = removeAllOfflineSores;
+        vm.difficultyMetrix = difficultyMetrix;
         vm.recheck = recheck;
         vm.getAllquestionPapers = getAllquestionPapers;
         vm.editQuestionPaper = editQuestionPaper;
@@ -59,16 +64,23 @@
         vm.exportTestUsers = exportTestUsers;
         vm.getTestUserPagination = getTestUserPagination;
         vm.showTestPreview = showTestPreview;
+        vm.testSelection = testSelection;
+        vm.selectAllTest = selectAllTest;
+        vm.testSelection = testSelection;
+        vm.addToTestSeries = addToTestSeries;
+        vm.tabChange = tabChange;
+
         activate();
 
         function activate() {
+            vm.userInfo = CommonInfo.getInfo('user');
             getAllTests();
             getAllSubjects();
         }
 
         //////// Test related ///////////////////////////////////////////////////////////
         function getAllTests() {
-            resetQuestionSelection();
+            //resetQuestionSelection();
             $http.get(CommonInfo.getAppUrl() + '/api/test/all').then(function(response) {
                 if (response && response.data) {
                     vm.tests = response.data.tests;
@@ -95,15 +107,20 @@
                 vm.test = test;
                 vm.test.startDate = vm.test.startDate ? new Date(vm.test.startDate) : "";
                 vm.test.endDate = vm.test.endDate ? new Date(vm.test.endDate) : "";
+                vm.test.attachment = vm.test.attachment ? vm.test.attachment.split(',') : [];
             } else if (mode == 'insert') {
-                vm.test = {};
+                vm.test = {
+                    attachment: []
+                };
                 $state.go('main.test.createTest');
             }
         }
 
         function updateTest() {
             if (vm.test) {
-                $http.post(CommonInfo.getAppUrl() + '/api/test', vm.test).then(function(response) {
+                var test = angular.copy(vm.test);
+                test.attachment = test.attachment.join(',');
+                $http.post(CommonInfo.getAppUrl() + '/api/test', test).then(function(response) {
                     if (response && response.data && !response.data.Error) {
                         growl.success('Test added successfully');
                         $state.go('main.test.home');
@@ -137,7 +154,71 @@
             $http.post(CommonInfo.getAppUrl() + '/api/exam/evaluation', { 'testId': testId, 'isForced': true }).then(function(response) {
                 if (response && response.data && !response.data.Error) {
                     growl.success('Test evaluation successfully');
-                    //getAllTests();
+                }
+            }, function(response) {});
+        }
+
+        function offlineScore(file, testId) {
+            console.log(vm.tests.offLineScoreFile)
+            if (vm.tests.offLineScoreFile) {
+                Upload.upload({
+                    url: CommonInfo.getAppUrl() + '/api/test/importOfflineScores',
+                    data: {
+                        file: vm.tests.offLineScoreFile,
+                        testId: testId
+                    }
+                }).then(function(resp) {
+                    // console.log('Success ' + resp.config.data.file.name + 'uploaded. Response: ' + resp.data);
+                    if (resp && resp.data && resp.data.result && resp.data.result.users && resp.data.result.users.length > 0) {
+                        var modalInstance = $uibModal.open({
+                            animation: true,
+                            templateUrl: 'app/test/addOfflineScores.html',
+                            size: 'lg',
+                            controller: function($scope, item) {
+                                $scope.users = item.users;
+                                $scope.testId = item.testId;
+                                $scope.ok = function() {
+                                    var data = {
+                                        users: $scope.users,
+                                        testId: $scope.testId
+                                    };
+                                    $http.post(CommonInfo.getAppUrl() + '/api/test/addOfflineScores', data).then(function(response) {
+                                        if (response && response.data && !response.data.Error) {
+                                            growl.success('Scores added successfully');
+                                            getAllTests();
+                                        }
+                                    }, function(response) {});
+                                };
+                            },
+                            resolve: {
+                                item: function() {
+                                    return resp.data.result;
+                                }
+                            }
+                        });
+                    }
+                }, function(resp) {
+                    console.log('Error status: ' + resp.status);
+                }, function(evt) {
+                    var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                    console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
+                });
+            }
+        }
+
+        function removeAllOfflineSores(testId) {
+            $http.post(CommonInfo.getAppUrl() + '/api/test/deleteOfflineScores', { 'testId': testId }).then(function(response) {
+                if (response && response.data && !response.data.Error) {
+                    growl.success('Offline scores removed successfully');
+                    getAllTests();
+                }
+            }, function(response) {});
+        }
+
+        function difficultyMetrix() {
+            $http.post(CommonInfo.getAppUrl() + '/api/question/difficulty', {}).then(function(response) {
+                if (response && response.data && !response.data.Error) {
+                    growl.success('Question evaluation successfully');
                 }
             }, function(response) {});
         }
@@ -151,10 +232,87 @@
             }, function(response) {});
         }
 
+        /////////// Test series related //////////////////////////////////////////////////////////
+
+        function getAllTestSeries() {
+            //resetQuestionSelection();
+            $http.get(CommonInfo.getAppUrl() + '/api/testSeries/all').then(function(response) {
+                if (response && response.data) {
+                    vm.testSeries = response.data.testSeries;
+                }
+            }, function(response) {});
+        }
+
+        function getTestSeriesById(testSeriesId) {
+            if (testSeriesId) {
+                $http.post(CommonInfo.getAppUrl() + '/api/testSeries/byId', { 'testSeriesId': testSeriesId }).then(function(response) {
+                    if (response && response.data && !response.data.Error) {
+                        vm.testSeries = response.data.testSeries;
+                        editTestSeries('edit', vm.testSeries);
+                    }
+                }, function(response) {});
+            }
+        }
+
+        function editTestSeries(mode, testSeries) {
+            vm.objMode = mode;
+            vm.testSeries = testSeries || {};
+            //getAllquestionPapers();
+            if (mode == 'edit') {
+                $state.go('main.test.editTestSeries');
+            } else if (mode == 'insert') {
+                $state.go('main.test.createTestSeries');
+            }
+        }
+
+        function addTestSeries() {
+            if (vm.testSeries) {
+                vm.testSeries.createdBy = vm.userInfo.id;
+                $http.post(CommonInfo.getAppUrl() + '/api/testSeries', vm.testSeries).then(function(response) {
+                    if (response && response.data && !response.data.Error) {
+                        growl.success('Test series added successfully');
+                        $state.go('main.test.home');
+                    }
+                }, function(response) {});
+            }
+        }
+
+        function updateTestSeries() {
+            if (vm.testSeries) {
+                vm.testSeries.modifiedBy = vm.userInfo.id;
+                $http.post(CommonInfo.getAppUrl() + '/api/testSeries/update', vm.testSeries).then(function(response) {
+                    if (response && response.data && !response.data.Error) {
+                        growl.success('Test series updates successfully');
+                        $state.go('main.test.home');
+                    }
+                }, function(response) {});
+            }
+        }
+
+        function publishTestSeries(testSeries) {
+            if (testSeries) {
+                var status = testSeries.isPublished ? "unpublished" : "publish"
+                if (testSeries && confirm('Are you sure you want to ' + status + ' ' + testSeries.name)) {
+                    testSeries.isPublished = !testSeries.isPublished;
+                    testSeries.modifiedBy = vm.userInfo.id;
+                    $http.post(CommonInfo.getAppUrl() + '/api/testSeries/update', testSeries).then(function(response) {
+                        if (response && response.data && !response.data.Error) {
+                            growl.success('Test series ' + status + ' successfully');
+                        }
+                    }, function(response) {});
+                }
+            }
+        }
+
+        function getTestSeriesUsers(testSeries) {
+            CommonInfo.setInfo('series', testSeries);
+            $state.go('main.test.testSeriesStudent');
+        }
+
         ////////// Question Paper related ////////////////////////////////////////////////////////
         function getAllquestionPapers(holdSelection) {
-            if (!holdSelection)
-                resetQuestionSelection();
+            // if (!holdSelection)
+            //     resetQuestionSelection();
             $http.get(CommonInfo.getAppUrl() + '/api/questionPaper/all').then(function(response) {
                 if (response && response.data) {
                     vm.questionPapers = response.data.questionPapers;
@@ -231,7 +389,7 @@
         }
 
         function showQuestions(questionPaper) {
-            if(questionPaper){
+            if (questionPaper) {
                 CommonInfo.setInfo('selectedQuestionPaper', questionPaper);
                 $state.go('main.test.questionList');
             }
@@ -338,7 +496,7 @@
                 $http.post(CommonInfo.getAppUrl() + '/api/question/addToPaper', data).then(function(response) {
                     if (response && response.data && !response.data.Error) {
                         growl.success('Question added successfully');
-                        resetQuestionSelection();
+                        clearQuestionSelection();
                     }
                 }, function(response) {});
             }
@@ -350,9 +508,10 @@
             //     var objectUrl = URL.createObjectURL(blob);
             //     window.open(objectUrl);
             // }, function(response) {});
-            $http.post(CommonInfo.getAppUrl() + '/api/test/usersExport', { 'testId': test.id }).then(function (response) {
-                if(response && response.data && response.data.testUsers && response.data.testUsers.lenght > 0){
-
+            $http.post(CommonInfo.getAppUrl() + '/api/test/usersExport', { 'testId': test.id }).then(function(response) {
+                if (response && response.data && response.data.url) {
+                    console.log(response.data.url)
+                    $window.open(response.data.url.toString());
                 }
             }, function(response) {});
         }
@@ -399,7 +558,40 @@
                         questionPaperId: quesPaperId
                     }
                 }).then(function(resp) {
-                    console.log('Success ' + resp.config.data.file.name + 'uploaded. Response: ' + resp.data);
+                    // console.log('Success ' + resp.config.data.file.name + 'uploaded. Response: ' + resp.data);
+                    if (resp && resp.data && resp.data.result && resp.data.result.questions && resp.data.result.questions.length > 0) {
+                        var item = {
+                            subjects: vm.subjectList,
+                            data: resp.data.result
+                        };
+                        var modalInstance = $uibModal.open({
+                            animation: true,
+                            templateUrl: 'app/test/importQuestion.html',
+                            size: 'lg',
+                            controller: function($scope, item) {
+                                $scope.questions = item.data.questions;
+                                $scope.questionPaperId = item.data.questionPaperId;
+                                $scope.subjects = item.subjects;
+                                $scope.ok = function() {
+                                    var data = {
+                                        questions: $scope.questions,
+                                        questionPaperId: $scope.questionPaperId
+                                    };
+                                    $http.post(CommonInfo.getAppUrl() + '/api/question/add', data).then(function(response) {
+                                        if (response && response.data && !response.data.Error) {
+                                            growl.success('Questions added successfully');
+                                            getAllquestionPapers();
+                                        }
+                                    }, function(response) {});
+                                };
+                            },
+                            resolve: {
+                                item: function() {
+                                    return item;
+                                }
+                            }
+                        });
+                    }
                 }, function(resp) {
                     console.log('Error status: ' + resp.status);
                 }, function(evt) {
@@ -409,11 +601,67 @@
             }
         }
 
-        function resetQuestionSelection() {
+        function clearQuestionSelection() {
             _.forEach(vm.questions, function(value) {
                 value.isSelected = false;
             });
             questionSelection();
+        }
+
+        function testSelection() {
+            selectedTestGrid = _.map(_.filter(vm.tests, { 'isSelected': true }), 'id');
+            if (selectedTestGrid && selectedTestGrid.length > 0) {
+                vm.isTestSelected = true;
+                if (!vm.testSeriesList)
+                    getAllTestSeriesName();
+            } else {
+                vm.isTestSelected = false;
+            }
+        }
+
+        function getAllTestSeriesName() {
+            $http.get(CommonInfo.getAppUrl() + '/api/testSeries/nameList').then(function(response) {
+                if (response && response.data && !response.data.Error) {
+                    vm.testSeriesList = response.data.testSeries;
+                }
+            }, function(response) {});
+        }
+
+        function selectAllTest() {
+            if (vm.tests && vm.tests.length > 0) {
+                _.forEach(vm.tests, function(value) {
+                    value.isSelected = vm.isAllTestSelected;
+                });
+                testSelection();
+            }
+        }
+
+        function clearTestSelection() {
+            _.forEach(vm.tests, function(value) {
+                value.isSelected = false;
+            });
+            vm.isAllTestSelected = false;
+            testSelection();
+        }
+
+        function tabChange(tab) {
+            vm.selectedTab = tab;
+            clearTestSelection();
+            clearQuestionSelection();
+        }
+
+        function addToTestSeries(testSeriesId) {
+            if (selectedTestGrid && selectedTestGrid.length > 0) {
+                var data = {
+                    testSeriesId: testSeriesId,
+                    testIds: selectedTestGrid
+                };
+                $http.post(CommonInfo.getAppUrl() + '/api/testSeries/addTest', data).then(function(response) {
+                    if (response && response.data && !response.data.Error) {
+                        growl.success(response.data.Message);
+                    }
+                }, function(response) {});
+            }
         }
     }
 })();

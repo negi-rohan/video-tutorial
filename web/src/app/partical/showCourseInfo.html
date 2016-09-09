@@ -18,7 +18,7 @@
                 <ul class="list-group">
                     <li class="list-group-item" ng-repeat="lesson in unit.lessons">
                         <h5 ng-bind="lesson.name"></h5>
-                        <p ng-bind="lesson.description"></p>
+                        <p ng-bind-html="lesson.description"></p>
                     </li>
                 </ul>
             </uib-accordion-group>

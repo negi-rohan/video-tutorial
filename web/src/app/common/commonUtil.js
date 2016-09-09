@@ -7,7 +7,24 @@
         .factory('credentials', credentials)
         .factory('Modal', Modal)
         .directive('jwplayerjs', jwplayerjs)
-        .directive('whenScrollEnds', whenScrollEnds);
+        .directive('whenScrollEnds', whenScrollEnds)
+        .filter('htmlToPlaintext', htmlToPlaintext)
+        .filter('charCodeToChar', charCodeToChar);
+
+    /** @ngInject */
+    function htmlToPlaintext() {
+        return function(text) {
+            return text ? String(text).replace(/<[^>]+>/gm, '') : '';
+        }
+    }
+
+    /** @ngInject */
+    function charCodeToChar() {
+        return function(code) {
+            //console.log(typeof code);
+            return String.fromCharCode(code);
+        }
+    }
 
     /** @ngInject */
     function jwplayerjs($compile) {
@@ -77,7 +94,7 @@
                 $localStorage.$reset();
             },
             getAppUrl: function() {
-                return 'http://localhost:3000';
+                return 'http://52.66.119.248';
             }
         };
     }

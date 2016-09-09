@@ -45,7 +45,7 @@
         vm.isOtp = true;
         vm.isOtpSend = false;
         vm.isOtpValid = false;
-        vm.activeForm = 1;
+        vm.activeForm = 0;
         vm.showPage = false
 
         vm.login = login;

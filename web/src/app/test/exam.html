@@ -3,8 +3,19 @@
         <div class="col-md-10 col-md-offset-1">
             <div ng-bind-html="vm.exam.instruction" instruction-board style="overflow:auto;"></div>
         </div>
+        <div class="col-md-4 col-md-offset-4 col-xs-12 col-sm-12" ng-if="vm.showLangChoice">
+            <div class="form-group text-center">
+                <label>Select Your Language</label><br />
+                <label class="radio-inline">
+                    <input type="radio" name="languageSelection" ng-model="vm.selectedLang" value="1"> English
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="languageSelection" ng-model="vm.selectedLang" value="2"> Hindi
+                </label>
+            </div>
+        </div>
         <div class="col-md-12">
-            <button type="button" class="btn btn-primary btn-lg center-block" ng-click="vm.startExam();" ng-disabled="!vm.userCurrentQuestion || vm.userCurrentQuestion.length == 0">
+            <button type="button" class="btn btn-primary btn-lg center-block" ng-click="vm.startExam();" ng-disabled="!vm.userCurrentQuestion || vm.userCurrentQuestion.length == 0 || !vm.selectedLang">
                 Start Exam
             </button>
         </div>
@@ -16,8 +27,8 @@
                     <h3 style="margin:3px 0px;">Question: <span ng-bind="vm.currentQuestionIndex"></span></h3>
                 </div>
                 <div class="col-md-8">
-                    <span class="pull-right">
-                        <button type="button" class="btn btn-primary" style="width:110px;" title="Unanswer this question" ng-click="vm.userCurrentQuestion[vm.currentIndex].answer = '';" ng-disabled="!vm.userCurrentQuestion[vm.currentIndex].answer">
+                    <span class="pull-right navigation-btn">
+                        <button type="button" class="btn btn-primary" style="width:110px;" title="Unanswer this question" ng-click="vm.userCurrentQuestion[vm.currentIndex].answer = '';" ng-disabled="!vm.userCurrentQuestion[vm.currentIndex].answer" style="margin:4px 0px">
                             <i class="fa fa-flag" aria-hidden="true"></i> Unanswer
                         </button>
                         <button type="button" class="btn btn-primary" style="width:110px;" title="Mark this question for later review" ng-click="vm.userCurrentQuestion[vm.currentIndex].isMarked = !vm.userCurrentQuestion[vm.currentIndex].isMarked;">
@@ -35,15 +46,24 @@
             <div question-area style="overflow:auto;margin-right:-13px;">
                 <div ng-bind-html="vm.currentQuestion.passage">
                 </div>
-                <div ng-bind-html="vm.currentQuestion.question">
+                <div ng-bind-html="vm.currentQuestion.question" ng-if="vm.selectedLang == 1">
                 </div>
-                <ul class="list-group">
+                <div ng-bind-html="vm.currentQuestion.questionText" ng-if="vm.selectedLang == 2">
+                </div>
+                <!-- <ul class="list-group">
                     <li class="list-group-item" ng-repeat="answer in vm.currentQuestion.answers | orderBy: 'ansKey'">
                         <label style="margin-bottom:0px;">
                             <input type="radio" name="answerOptions" ng-model="vm.userCurrentQuestion[vm.currentIndex].answer" ng-value="answer.ansKey" ng-click="vm.saveLocal();" /> <span ng-bind-html="answer.answerText" class="options-review" style="display:inline-block;"></span>
                         </label>
                     </li>
-                </ul>
+                </ul> -->
+                <div class="btn-group-vertical ans-options" role="group" style="width:98%;">
+                    <label class="btn btn-default" ng-model="vm.userCurrentQuestion[vm.currentIndex].answer" uib-btn-radio="answer.ansKey" ng-repeat="answer in vm.currentQuestion.answers | orderBy: 'ansKey'" style="text-align:left;">
+                        <span ng-bind="($index + 97) | charCodeToChar" class="options-review"></span>)
+                        <span ng-bind-html="answer.answerText" class="options-review" style="display:inline-block;white-space:pre-wrap" ng-if="vm.selectedLang == 1"></span>
+                        <span ng-bind-html="answer.ansText" class="options-review" style="display:inline-block;white-space:pre-wrap" ng-if="vm.selectedLang == 2"></span>
+                    </label>
+                </div>
             </div>
         </div>
         <div class="col-md-2">
@@ -59,12 +79,12 @@
                     <div class="panel-body" navigation-area style="overflow:auto;min-height:120px;padding:12px;">
                         <!-- <div class="row">
                             <div class="col-md-2" ng-repeat="question in vm.exam.questions"> -->
-                            <span ng-repeat="question in vm.exam.questions">
+                        <span ng-repeat="question in vm.exam.questions">
                                 <button type="button" class="btn btn-circle" ng-class="{'btn-default': !vm.userCurrentQuestion[$index].answer, 'btn-success': vm.userCurrentQuestion[$index].answer, 'btn-warning': vm.userCurrentQuestion[$index].isMarked}" ng-click="vm.showQuestion($index);">
                                     <span ng-bind="$index + 1"></span>
-                                </button>
-                            </span>
-                            <!-- </div>
+                        </button>
+                        </span>
+                        <!-- </div>
                         </div> -->
                     </div>
                     <div class="panel-footer" style="display:flex;justify-content:center;">

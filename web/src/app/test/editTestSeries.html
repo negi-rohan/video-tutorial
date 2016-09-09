@@ -1,0 +1,40 @@
+<div class="container-fluid" ng-cloak>
+    <form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="testSeries.name">Series Name</label>
+                    <input type="text" class="form-control" id="testSeries.name" placeholder="Series Name" ng-model="vm.testSeries.name" />
+                </div>
+            </div>
+            <div class="col-md-6 row">
+                <div class="form-group">
+                    <label for="testSeries.description">Description</label>
+                    <input type="text" class="form-control" id="testSeries.description" placeholder="Series Description" ng-model="vm.testSeries.description" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="testSeries.plan">Test Plan</label>
+                    <input type="text" class="form-control" id="testSeries.plan" placeholder="Test Plan link" ng-model="vm.testSeries.testPlan" />
+                </div>
+            </div>
+            <!-- <div class="col-md-6 row">
+                <div class="form-group">
+                    <label for="testSeries.description">Description</label>
+                    <input type="text" class="form-control" id="testSeries.description" placeholder="Series Description" ng-model="vm.testSeries.description" />
+                </div>
+            </div> -->
+        </div>
+        <div class="col-md-12">
+            <button type="button" class="btn btn-default pull-right" ng-click="vm.addTestSeries();" ng-if="vm.objMode == 'insert'">
+                <span>Save</span>
+            </button>
+            <button type="button" class="btn btn-default pull-right" ng-click="vm.updateTestSeries();" ng-if="vm.objMode == 'edit'">
+                <span>Update</span>
+            </button>
+        </div>
+    </form>
+</div>

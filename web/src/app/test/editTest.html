@@ -57,15 +57,25 @@
         </div>
         <div class="row">
             <div class="col-md-6">
-                <div class="form-group">
-                    <label for="test.video">Instant To Students</label>
-                    <div class="form-group">
-                        <label class="checkbox-inline">
-                            <input type="checkbox" ng-model="vm.test.instantResult"> Result
-                        </label>
-                        <label class="checkbox-inline">
-                            <input type="checkbox" ng-model="vm.test.instantRank"> Rank
-                        </label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="test.video">Instant To Students</label>
+                            <div class="form-group">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" ng-model="vm.test.instantResult"> Result
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" ng-model="vm.test.instantRank"> Rank
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="test.file">File</label>
+                            <input type="text" class="form-control" id="test.file" placeholder="File Link" ng-model="vm.test.file" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -81,8 +91,14 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="test.attachment">Attachment</label>
-                    <input type="text" class="form-control" id="test.attachment" placeholder="Attachment Link" ng-model="vm.test.attachment" />
+                    <label for="test.attachment">Link</label>
+                    <input type="text" class="form-control" id="test.attachment" placeholder="Attachment Link" ng-model="vm.test.attachment[0]" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="test.attachment">link</label>
+                    <input type="text" class="form-control" id="test.attachment" placeholder="Attachment Link" ng-model="vm.test.attachment[1]" />
                 </div>
             </div>
         </div>

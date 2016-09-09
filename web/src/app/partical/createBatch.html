@@ -1,0 +1,26 @@
+<div class="container-fluid" ng-cloak>
+    <form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="batch.name">Batch Name</label>
+                    <input type="text" class="form-control" id="batch.name" placeholder="Batch Name" ng-model="vm.batch.name" />
+                </div>
+            </div>
+            <div class="col-md-6 row">
+                <div class="form-group">
+                    <label for="batch.description">Description</label>
+                    <input type="text" class="form-control" id="batch.description" placeholder="Description" ng-model="vm.batch.description" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <button type="button" class="btn btn-default pull-right" ng-click="vm.addBatch();" ng-if="vm.objMode == 'insert'">
+                <span>Save</span>
+            </button>
+            <button type="button" class="btn btn-default pull-right" ng-click="vm.updateBatch();" ng-if="vm.objMode == 'edit'">
+                <span>Update</span>
+            </button>
+        </div>
+    </form>
+</div>

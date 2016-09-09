@@ -25,7 +25,7 @@
                         <tr ng-repeat="lesson in vm.lessons">
                             <th scope="row" ng-bind="$index + 1"></th>
                             <td ng-bind="lesson.name"></td>
-                            <td ng-bind="lesson.description"></td>
+                            <td ng-bind="lesson.description | htmlToPlaintext"></td>
                             <td>
                                 <span ng-repeat="file in lesson.files">
                                     <span ng-bind="file.fileName"></span><span ng-if="!$last">, </span>

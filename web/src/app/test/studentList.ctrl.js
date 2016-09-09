@@ -6,7 +6,7 @@
         .controller('StudentListController', StudentListController);
 
     /** @ngInject */
-    function StudentListController($http, CommonInfo, $state, growl) {
+    function StudentListController($http, CommonInfo, $state, growl, _) {
         var vm = this;
         var perPage = 40;
         var test;
@@ -19,6 +19,7 @@
 
         vm.searchStudent = searchStudent;
         vm.showAnswers = showAnswers;
+        vm.getTestUsers = getTestUsers;
 
         activate();
 
@@ -33,8 +34,12 @@
             $http.post(CommonInfo.getAppUrl() + '/api/test/users', { 'testId': test.id, 'searchText': vm.searchText, 'page': pageNo }).then(function(response) {
                 if (response && response.data && !response.data.Error) {
                     vm.testUsers = response.data.testUsers;
+                    _.forEach(vm.testUsers, function(value) {
+                        value.timeSpent = moment.duration(value.timeSpent, 'seconds').format("HH:mm:ss");
+                    });
                     vm.testUserCount = response.data.recordCount;
                     vm.lastTestUserPage = Math.ceil(vm.testUserCount / perPage) || 1;
+                    vm.currentTestUserPage = pageNo;
                 }
             }, function(response) {});
         }

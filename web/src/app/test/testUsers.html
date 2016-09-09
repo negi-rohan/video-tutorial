@@ -2,15 +2,19 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <nav aria-label="Page navigation">
-                    <form class="form-inline pull-left" role="search" style="margin:4px 2px;">
+                <div class="panel-heading">
+                    <form class="form-inline pull-left" role="search">
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search..." ng-model="vm.searchText" />
+                            <input type="text" class="form-control" placeholder="Search..." ng-model="vm.searchText" ng-keyup="($event.which === 13 || !vm.searchText) && vm.searchStudent();" />
                             <span class="input-group-btn">
                               <button class="btn btn-default" type="button" ng-click="vm.searchStudent();">Go!</button>
                             </span>
                         </div>
                     </form>
+                    <div class="clearfix"></div>
+                </div>
+                <nav aria-label="Page navigation">
+                    <div class="pull-left" style="margin:9px 12px;">Total: <span ng-bind="vm.testUserCount"></span></div>
                     <ul class="pagination pull-right" style="margin:4px 2px;">
                         <li>
                             <a href="javascript:void(0);" aria-label="Previous" ng-click="vm.getTestUsers(1)">
@@ -46,6 +50,7 @@
                         	<th>Score</th>
                         	<!-- <th>Rank</th> -->
                             <th>Percentile</th>
+                            <th>Time Spent</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -61,8 +66,9 @@
                     		<td ng-bind="user.score"></td>
                     		<!-- <td ng-bind="user.rank"></td> -->
                             <td ng-bind="user.percentile"></td>
+                            <td ng-bind="user.timeSpent"></td>
                             <td>
-                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.showAnswers(user.id)">
+                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.showAnswers(user.id)" ng-if="user.profileType == 'student'">
                                     <i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i> Review Result
                                 </button>
                             </td>

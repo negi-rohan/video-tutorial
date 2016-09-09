@@ -3,10 +3,10 @@
         <div class="col-md-12">
             <h3 ng-bind="vm.exam.title"></h3>
         </div>
-        <div class="col-md-12">
+        <div class="col-md-12 row">
             <uib-tabset active="vm.selectedTab" type="pills" justified="true" >
                 <uib-tab index="0" heading="Scorecard" select="" class="row" style="border:1px solid #ddd;border-radius:4px;">
-                    <div class="col-md-4" style="margin-top:10px;">
+                    <div class="col-md-4" style="margin-top:10px;" id="exportthis">
                         <table class="table table-striped" style="border:1px solid #DDD;">
                             <tbody>
                                 <tr>
@@ -40,49 +40,79 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="col-md-8" style="margin-top:10px;">
+                        <table class="table table-striped" style="border:1px solid #DDD;">
+                            <tbody>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Total</th>
+                                    <th>Correct</th>
+                                    <th>Incorrect</th>
+                                    <th>Unanswered</th>
+                                </tr>
+                                <tr ng-repeat="subject in vm.subjectWise">
+                                    <td ng-bind="subject.name"></td>
+                                    <td ng-bind="subject.total"></td>
+                                    <td ng-bind="subject.correct"></td>
+                                    <td ng-bind="subject.incorrect"></td>
+                                    <td ng-bind="subject.unanswered"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </uib-tab>
                 <uib-tab index="1" heading="Solutions" select="" style="border:1px solid #ddd;border-radius:4px;">
-                    <table class="table">
-                        <tbody>
-                            <tr>
-                                <td colspan="2">
-                                    <div class="pull-left">
-                                        <span class="label label-primary">Score: <span ng-bind="vm.userAnswers.score"></span></span>
-                                        <!-- <span class="label label-primary">Rank: <span ng-bind="vm.userAnswers.rank"></span></span> -->
-                                    </div>
-                                    <div class="pull-right">
-                                        <span class="label label-success">Correct: <span ng-bind="vm.userAnswers.totalCorrect"></span></span>
-                                        <span class="label label-danger">Incorrect: <span ng-bind="vm.userAnswers.totalIncorrect"></span></span>
-                                        <span class="label label-warning">Unanswered: <span ng-bind="vm.userAnswers.totalUnanswered"></span>
-                                    </div>
-                                    <!-- <input type="text" ng-model="vm.searchQue.result" /> -->
-                                </td>
-                            </tr>
-                            <tr ng-repeat="question in vm.questions | filter: vm.searchQue : true">
-                                <th scope="row" style="width:2%;">
-                                    <div style="padding:4px;" ng-bind="$index + 1"></div>
-                                </th>
-                                <td>
-                                    <div style="background-color:#F8F8F8;padding:4px;" ng-if="question.passage" ng-bind-html="question.passage"></div>
-                                    <div style="background-color:#F8F8F8;padding:4px;" ng-bind-html="question.question"></div>
-                                    <div>
-                                        <u>Options</u>:
-                                        <p class="options-review" ng-repeat="answer in question.answers | orderBy: 'ansKey'">
-                                            <span class="badge" ng-class="{ 'incorrect-answer' : question.result=='incorrect' && answer.ansKey == question.userAnsKey, 'correct-answer' : answer.ansKey == question.correctAnsKey}" ng-bind="answer.ansKey"></span>
-                                            <span style="display:inline-block;" ng-bind-html="answer.answerText"></span>
-                                        </p>
-                                    </div>
-                                    <u>Selected Option</u>:
-                                    <p class="options-review" ng-bind-html="question.userAnswer"></p>
-                                    <u>Correct Option</u>:
-                                    <p class="options-review" ng-bind-html="question.correctAnswer"></p>
-                                    <span ng-bind-html="question.explanation"></span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div id="">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td colspan="2">
+                                        <div class="pull-left">
+                                            <span class="label label-primary">Score: <span ng-bind="vm.userAnswers.score"></span></span>
+                                            <!-- <span class="label label-primary">Rank: <span ng-bind="vm.userAnswers.rank"></span></span> -->
+                                        </div>
+                                        <div class="pull-right">
+                                            <span class="label label-success">Correct: <span ng-bind="vm.userAnswers.totalCorrect"></span></span>
+                                            <span class="label label-danger">Incorrect: <span ng-bind="vm.userAnswers.totalIncorrect"></span></span>
+                                            <span class="label label-warning">Unanswered: <span ng-bind="vm.userAnswers.totalUnanswered"></span></span>
+                                        </div>
+                                        <!-- <input type="text" ng-model="vm.searchQue.result" /> -->
+                                    </td>
+                                </tr>
+                                <tr ng-repeat="question in vm.questions | filter: vm.searchQue : true">
+                                    <th scope="row" style="width:2%;">
+                                        <div style="padding:4px;" ng-bind="$index + 1"></div>
+                                    </th>
+                                    <td>
+                                        <div style="background-color:#F8F8F8;padding:4px;" ng-if="question.passage" ng-bind-html="question.passage"></div>
+                                        <div style="background-color:#F8F8F8;padding:4px;" ng-bind="question.difficultyMeter" class="text-right"></div>
+                                        <div style="background-color:#F8F8F8;padding:4px;" ng-bind-html="question.question" ng-if="vm.selectedLang == 1"></div>
+                                        <div>
+                                        <div style="background-color:#F8F8F8;padding:4px;" ng-bind-html="question.questionText" ng-if="vm.selectedLang == 2"></div>
+                                        <div>
+                                            <u>Options</u>:
+                                            <p class="options-review" ng-repeat="answer in question.answers | orderBy: 'ansKey'">
+                                                <span class="badge" ng-class="{ 'incorrect-answer' : question.result=='incorrect' && answer.ansKey == question.userAnsKey, 'correct-answer' : answer.ansKey == question.correctAnsKey}" ng-bind="answer.ansKey"></span>
+                                                <span style="display:inline-block;" ng-bind-html="answer.answerText" ng-if="vm.selectedLang == 1"></span>
+                                                <span style="display:inline-block;" ng-bind-html="answer.ansText" ng-if="vm.selectedLang == 2"></span>
+                                            </p>
+                                        </div>
+                                        <div ng-if="question.subjectName">
+                                            <b>Subject:</b> <span ng-bind="question.subjectName"></span>
+                                        </div>
+                                        <u>Selected Option</u>:
+                                        <p class="options-review" ng-bind-html="question.userAnswer"></p>
+                                        <u>Correct Option</u>:
+                                        <p class="options-review" ng-bind-html="question.correctAnswer"></p>
+                                        <span ng-bind-html="question.explanation" ng-if="vm.selectedLang == 1"></span>
+                                        <span ng-bind-html="question.explanationText" ng-if="vm.selectedLang == 2"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </uib-tab>
-                <uib-tab index="2" heading="Ranking" select="" style="border:1px solid #ddd;border-radius:4px;" ng-if="false">
+                <uib-tab index="2" heading="Ranking" select="" style="border:1px solid #ddd;border-radius:4px;">
                     <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;margin-bottom:0px;">
                         <thead>
                             <tr class="success">

@@ -3,46 +3,93 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <span class="pull-right" ng-if="!vm.isQuestionSelected" style="margin-right:35px;">
+                    <span class="pull-right" ng-if="!vm.isQuestionSelected && !vm.isTestSelected" style="margin-right:35px;">
+                        <button type="button" class="btn btn-default">
+                            <i class="fa fa-star-half-o fa-lg fa-fw" title="Question Difficulty Metrix" aria-hidden="true" ng-click="vm.difficultyMetrix()"></i>
+                        </button>
                         <div class="btn-group" uib-dropdown dropdown-append-to-body=true>
                             <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
                                 Add New <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
-                                <li role="menuitem">
-                                    <a href="javascript:void(0);" ng-click="vm.editTest('insert');">Test</a>
-                                </li>
-                                <li role="menuitem">
-                                    <a href="javascript:void(0);" ng-click="vm.editQuestionPaper('insert');">Question Paper</a>
-                                </li>
-                                <li role="menuitem">
-                                    <a href="javascript:void(0)" ng-click="vm.addSubject();">Subject</a>
-                                </li>
-                                <li role="menuitem">
-                                    <a href="javascript:void(0);" ng-click="vm.editQuestion('insert');">Question</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </span>
-                    <span class="pull-right" ng-if="vm.isQuestionSelected">
-                        <span uib-dropdown>
-                            <button id="questionPaperList" type="button" class="btn btn-default" uib-dropdown-toggle>
-                                Add To Question Paper <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="questionPaperList">
-                                <li role="menuitem" ng-click="vm.addToPaper(quesPaper.id);" ng-repeat="quesPaper in vm.questionPapers">
-                                    <a href="javascript:void(0);" ng-bind="quesPaper.name"></a>
-                                </li>
-                            </ul>
-                        </span>
-                    </span>
-                    <div class="clearfix"></div>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                        <li role="menuitem">
+                            <a href="javascript:void(0);" ng-click="vm.editTestSeries('insert');">Test Series</a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="javascript:void(0);" ng-click="vm.editTest('insert');">Test</a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="javascript:void(0);" ng-click="vm.editQuestionPaper('insert');">Question Paper</a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="javascript:void(0)" ng-click="vm.addSubject();">Subject</a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="javascript:void(0);" ng-click="vm.editQuestion('insert');">Question</a>
+                        </li>
+                    </ul>
                 </div>
-                <uib-tabset active="vm.selectedTab" type="pills" justified="true">
-                    <uib-tab index="0" heading="Test" select="vm.getAllTests();vm.selectedTab=0;" style="border:1px solid #ddd;border-radius:4px;">
+                </span>
+                <span class="pull-right" ng-if="vm.isQuestionSelected">
+                    <div class="btn-group" uib-dropdown dropdown-append-to-body=true>
+                        <button id="questionPaperList" type="button" class="btn btn-default" uib-dropdown-toggle>
+                            Add To Question Paper <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="questionPaperList">
+                            <li role="menuitem" ng-click="vm.addToPaper(quesPaper.id);" ng-repeat="quesPaper in vm.questionPapers">
+                                <a href="javascript:void(0);" ng-bind="quesPaper.name"></a>
+                            </li>
+                        </ul>
+                    </div>
+                </span>
+                <span class="pull-right" ng-if="vm.isTestSelected">
+                    <div class="btn-group" uib-dropdown dropdown-append-to-body=true>
+                        <button id="testSeriesList" type="button" class="btn btn-default" uib-dropdown-toggle>
+                            Add To Test Series <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="testSeriesList">
+                            <li role="menuitem" ng-click="vm.addToTestSeries(testSeries.id);" ng-repeat="testSeries in vm.testSeriesList">
+                                <a href="javascript:void(0);" ng-bind="testSeries.name"></a>
+                            </li>
+                        </ul>
+                    </div>
+                </span>
+                <div class="clearfix"></div>
+            </div>
+            <uib-tabset active="vm.selectedTab" type="pills" justified="true">
+                <uib-tab index="0" heading="Test Series" select="vm.getAllTestSeries();vm.tabChange(0);" style="border:1px solid #ddd;border-radius:4px;">
                     <table class="table table-striped table-hover table-valign-middle" style="border:1px solid lightgrey;margin-bottom:0px;">
                         <thead>
                             <tr class="success">
+                                <th>#</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Tests</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="testSeries in vm.testSeries">
+                                <th scope="row" ng-bind="$index + 1"></th>
+                                <td ng-bind="testSeries.name"></td>
+                                <td ng-bind="testSeries.description"></td>
+                                <td ng-bind="testSeries.testList"></td>
+                                <td>
+                                    <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getTestSeriesById(testSeries.id); " style="vertical-align:-4px;"></i>
+                                    <i class="fa fa-check-square-o fa-lg fa-fw" ng-style="testSeries.isPublished && {'color' :'green' }" title="Publish" aria-hidden="true" ng-click="vm.publishTestSeries(testSeries)"></i>
+                                    <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" title="Show User" ng-click="vm.getTestSeriesUsers(testSeries);"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </uib-tab>
+                <uib-tab index="1" heading="Test" select="vm.getAllTests();vm.tabChange(1);" style="border:1px solid #ddd;border-radius:4px;">
+                    <table class="table table-striped table-hover table-valign-middle" style="border:1px solid lightgrey;margin-bottom:0px;">
+                        <thead>
+                            <tr class="success">
+                                <th>
+                                    <input type="checkbox" ng-click="vm.selectAllTest();" ng-model="vm.isAllTestSelected" />
+                                </th>
                                 <th>#</th>
                                 <th>Title</th>
                                 <th>Durations</th>
@@ -55,6 +102,9 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="test in vm.tests">
+                                <td>
+                                    <input type="checkbox" ng-model="test.isSelected" ng-click="vm.testSelection();" />
+                                </td>
                                 <th scope="row" ng-bind="$index + 1"></th>
                                 <td ng-bind="test.title"></td>
                                 <td ng-bind="test.durationInHrs"></td>
@@ -67,16 +117,18 @@
                                     <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteTest(test.id)"></i>
                                     <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" ng-if="test.userCount" title="Show User" ng-click="vm.getTestUsers(test);"></i>
                                     <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" ng-if="test.userCount" title="Export User" ng-click="vm.exportTestUsers(test);"></i>
-                                    <i class="fa fa-check-square-o fa-lg fa-fw" title="Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.recheck(test.id)" style="color:blue;"></i>
+                                    <i class="fa fa-check-square-o fa-lg fa-fw" title="Recheck paper" ng-if="test.userCount" aria-hidden="true" ng-click="vm.recheck(test.id)" style="color:blue;"></i>
                                     <i class="fa fa-check-square-o fa-lg fa-fw" title="Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluation(test.id)"></i>
-                                    <i class="fa fa-check-square-o fa-lg fa-fw" title="Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluationAll(test.id)" style="color:red;"></i>
+                                    <i class="fa fa-check-square-o fa-lg fa-fw" title="Re-Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluationAll(test.id)" style="color:red;"></i>
+                                    <i class="fa fa-upload fa-lg fa-fw" title="Upload Offline Score" style="cursor:pointer;" aria-hidden="true" ngf-select="vm.offlineScore($file, test.id)" ng-model="vm.tests.offLineScoreFile" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB"></i>
+                                    <i class="fa fa-trash fa-lg fa-fw" title="Remove All offline Scores" aria-hidden="true" ng-click="vm.removeAllOfflineSores(test.id)" style="color:red;"></i>
                                     <i class="fa fa-search fa-lg fa-fw" title="Preview" aria-hidden="true" ng-click="vm.showTestPreview(test)"></i>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </uib-tab>
-                <uib-tab index="1" heading="Question Paper" select="vm.getAllquestionPapers();vm.selectedTab=1;" style="border:1px solid #ddd;border-radius:4px;">
+                <uib-tab index="2" heading="Question Paper" select="vm.getAllquestionPapers();vm.tabChange(2);" style="border:1px solid #ddd;border-radius:4px;">
                     <table class="table table-striped table-hover table-valign-middle" style="border:1px solid lightgrey;margin-bottom:0px;">
                         <thead>
                             <tr class="success">
@@ -103,7 +155,7 @@
                         </tbody>
                     </table>
                 </uib-tab>
-                <uib-tab index="2" heading="Questions" select="vm.getAllQuestions(1);vm.selectedTab=2;" style="border:1px solid #ddd;border-radius:4px;">
+                <uib-tab index="3" heading="Questions" select="vm.getAllQuestions(1);vm.tabChange(3);" style="border:1px solid #ddd;border-radius:4px;">
                     <nav aria-label="Page navigation">
                         <div class="pull-left" style="margin:9px 12px;">Total: <span ng-bind="vm.questionCount"></span></div>
                         <ul class="pagination pull-right" style="margin:4px 2px;">

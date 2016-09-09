@@ -17,14 +17,17 @@
         function activate() {
             CommonInfo.setInfo('exam', '');
             vm.user = CommonInfo.getInfo('user');
+            vm.testSeries = CommonInfo.getInfo('testSeries');
             getAllExams();
         }
 
         function getAllExams() {
-            $http.post(CommonInfo.getAppUrl() + '/api/exam/all', { 'userId': vm.user.id }).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/exam/all', { 'userId': vm.user.id, 'testSeriesId': vm.testSeries.id }).then(function(response) {
                 if (response && response.data) {
-                    _.forEach(response.data.tests, function(value){
-                        value.durationInHrs = moment.duration(value.duration, 'seconds').format("HH:mm:ss")
+                    _.forEach(response.data.tests, function(value) {
+                        value.durationInHrs = moment.duration(value.duration, 'seconds').format("HH:mm:ss");
+                        value.isUpcoming = moment().isBefore(value.startDate);
+                        value.attachment = value.attachment ? value.attachment.split(',') : [];
                     });
                     vm.exams = response.data.tests;
                 }
@@ -32,8 +35,10 @@
         }
 
         function startExam(test) {
-            CommonInfo.setInfo('exam', test);
-            $state.go('main.exam');
+            if (!test.status || test.status == 'pending') {
+                CommonInfo.setInfo('exam', test);
+                $state.go('main.exam');
+            }
         }
 
         function showAnswers(test) {

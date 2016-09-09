@@ -17,7 +17,7 @@
             link: function(scope, elem, attrs) {
 
                 resize(scope).call(function() {
-                    elem.css('height', $window.innerHeight - 120 + 'px');
+                    elem.css('height', $window.innerHeight - 220 + 'px');
                 });
             }
         };
@@ -63,6 +63,8 @@
         vm.isExamEnded = false;
         vm.userCurrentQuestion = [];
         vm.timer = 0;
+        vm.selectedLang = 0;
+        vm.showLangChoice = 0;
 
         vm.startExam = startExam;
         vm.showQuestion = showQuestion;
@@ -121,6 +123,11 @@
                             submitExam(true);
                         } else {
                             vm.timer = vm.exam.userInfo.timeRemaining || vm.timer;
+                            vm.showLangChoice = vm.exam.questions[0].questionText ? 1 : 0;
+                            if(vm.showLangChoice)
+                                vm.selectedLang = vm.exam.userInfo.selectedLang ? vm.exam.userInfo.selectedLang : 0;
+                            else
+                                vm.selectedLang = 1;
                             _.forEach(vm.exam.questions, function(value, key) {
                                 vm.userCurrentQuestion[key] = _.find(vm.exam.userInfo.answers, { 'questionId': value.id }) || {
                                     questionId: value.id,
@@ -213,7 +220,8 @@
                 timeRemaining: userTime / 1000,
                 answers: vm.userCurrentQuestion,
                 status: 'pending',
-                timestamp: moment()
+                timestamp: moment(),
+                selectedLang: vm.selectedLang
             };
             CommonInfo.setInfo(vm.user.id + '_' + vm.exam.id, data);
         }
@@ -226,7 +234,8 @@
                 timeRemaining: userTime / 1000,
                 answers: vm.userCurrentQuestion,
                 status: status,
-                timestamp: moment()
+                timestamp: moment(),
+                selectedLang: vm.selectedLang
             };
             if (!vm.isPreview && !isInProcess) {
                 if (status == 'completed'){

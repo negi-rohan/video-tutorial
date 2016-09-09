@@ -470,6 +470,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/exam/userAnswersPdf", function(req, res) { /// get all tests
+        testQueryHelper.getUserAnswersPdf(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/questionPaper", function(req, res) { /// get all tests
         testQueryHelper.addUpdateQuestionPaper(req.body, pool, function(result) {
             res.json(result);
@@ -536,6 +542,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/question/difficulty", function(req, res) {
+        testQueryHelper.calculateQuestionsDifficulty(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/question/import", fileUpload, function(req, res) {
         if (req && req.files && req.files.file && req.files.file.path) {
             var exceltojson = xlsxtojson;
@@ -552,30 +564,95 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 }
                 //questions = result;
                 _.forEach(result, function(value) {
-                    var question = {};
-                    question.question = '<p>' + value.question.trim() + '</p>';
-                    question.explanation = '<p>' + value.explanation.trim() + '</p>';
-                    question.correctAnswer = value.answer;
-                    question.answers = [];
-                    _.forIn(value, function(childValue, childKey) {
-                        if (childKey.length == 1 && childValue) {
-                            question.answers.push({
-                                ansKey: childKey,
-                                answerText: '<p>' + childValue.trim() + '</p>'
-                            });
-                        }
-                    });
-                    question.type = value.type;
-                    question.subject = value.subject;
-                    questions.push(question);
+                    if(value && value.index){
+                        var question = {};
+                        question.question = '<p>' + value.question.trim() + '</p>';
+                        question.questionText = value.questiontext ? '<p>' + value.questiontext.trim() + '</p>' : '';
+                        question.explanation = '<p>' + value.explanation.trim() + '</p>';
+                        question.explanationtext = value.explanationtext ? '<p>' + value.explanationtext.trim() + '</p>' : '';
+                        question.correctAnswer = value.answer;
+                        question.answers = [];
+                        _.forIn(value, function(childValue, childKey) {
+                            if (childKey.length == 1 && childValue) {
+                                question.answers.push({
+                                    ansKey: childKey,
+                                    answerText: '<p>' + childValue.trim() + '</p>',
+                                    ansText: value[childKey + "text"] ? '<p>' + value[childKey + "text"].trim() + '</p>' : ''
+                                });
+                            }
+                        });
+                        question.type = value.type;
+                        question.subject = value.subject;
+                        questions.push(question);
+                    }
                 });
-                testQueryHelper.addImportedQuestion({ questions: questions, questionPaperId: req.body.questionPaperId }, pool, function(result) {
-                    res.json(result);
-                });
+                var result = {
+                    questions: questions,
+                    questionPaperId: req.body.questionPaperId
+                };
+                res.json({ "Error": false, "Message": "success", "result": result });
+                // testQueryHelper.addImportedQuestion({ questions: questions, questionPaperId: req.body.questionPaperId }, pool, function(result) {
+                //     res.json(result);
+                // });
             });
         } else {
             res.json({ "Error": true, "Message": "No file attached" });
         }
+    });
+
+    router.post("/question/add", function(req, res) {
+        testQueryHelper.addImportedQuestion(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/test/importOfflineScores", fileUpload, function(req, res) {
+        if (req && req.files && req.files.file && req.files.file.path) {
+            var exceltojson = xlsxtojson;
+            var users = [];
+            exceltojson({
+                input: req.files.file.path,
+                output: null,
+                lowerCaseHeaders: true,
+                sheet: "Sheet1"
+            }, function(err, result) {
+                if (err) {
+                    console.log(err);
+                }
+                _.forEach(result, function(value) {
+                    if(value && value.name){
+                        var user = {};
+                        user.fullName = value.name;
+                        user.email = value.email;
+                        user.phone = value.phone;
+                        user.totalQuestions = value.questions
+                        user.score = value.score;
+                        user.correctAnswers = value.correct;
+                        user.incorrectAnswers = value.incorrect;
+                        users.push(user);
+                    }
+                });
+                var result = {
+                    users: users,
+                    testId: req.body.testId
+                }
+                res.json({ "Error": false, "Message": "success", "result": result });
+            });
+        } else {
+            res.json({ "Error": true, "Message": "No file attached" });
+        }
+    });
+
+    router.post("/test/addOfflineScores", function(req, res) {
+        testQueryHelper.addOfflineScores(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/test/deleteOfflineScores", function(req, res) {
+        testQueryHelper.deleteOfflineScores(req.body, pool, function(result) {
+            res.json(result);
+        });
     });
     /* Test related routes ends*/
 

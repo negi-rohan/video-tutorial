@@ -1118,8 +1118,8 @@ var self = {
     getAllCategories: function(type, id, pool, callback) { /// get list of all category
         var query, queryValues;
         if (type = "all") {
-            query = "SELECT ct.*, count(c.id) as coursesCount FROM ?? ct LEFT JOIN (courses c) ON c.categoryId = ct.id WHERE ct.type=? GROUP BY ct.id";
-            queryValues = ["catalog", "category"];
+            query = "SELECT ct.*, count(c.id) as coursesCount FROM ?? ct LEFT JOIN (courses c) ON c.categoryId = ct.id GROUP BY ct.id";
+            queryValues = ["categories"];
         }
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {

@@ -55,6 +55,12 @@
                 url: '/courses',
                 templateUrl: 'app/partical/courses.html'
             })
+            .state('main.courseStudent', {
+                url: '/courseStudent',
+                templateUrl: 'app/partical/courseStudent.html',
+                controller: 'CourseStudentController',
+                controllerAs: 'vm'
+            })
             .state('main.lessons', {
                 url: '/lessons',
                 templateUrl: 'app/partical/lessons.html'
@@ -78,6 +84,14 @@
             .state('main.students', {
                 url: '/students',
                 templateUrl: 'app/partical/users.html'
+            })
+            .state('main.createBatch', {
+                url: '/addBatch',
+                templateUrl: 'app/partical/createBatch.html'
+            })
+            .state('main.editBatch', {
+                url: '/updateBatch',
+                templateUrl: 'app/partical/createBatch.html'
             })
             .state('main.createUser', {
                 url: '/addUser',
@@ -106,6 +120,14 @@
                 url: '/editTest',
                 templateUrl: 'app/test/editTest.html'
             })
+            .state('main.test.createTestSeries', {
+                url: '/addTestSeries',
+                templateUrl: 'app/test/editTestSeries.html'
+            })
+            .state('main.test.editTestSeries', {
+                url: '/editTestSeries',
+                templateUrl: 'app/test/editTestSeries.html'
+            })
             .state('main.test.createQuestion', {
                 url: '/addQuestion',
                 templateUrl: 'app/test/editQuestion.html'
@@ -124,6 +146,18 @@
                 url: '/questionList',
                 templateUrl: 'app/test/questionList.html',
                 controller: 'QuestionListController',
+                controllerAs: 'vm'
+            })
+            .state('main.testSeries', {
+                url: '/Series',
+                templateUrl: 'app/test/testSeries.html',
+                controller: 'TestSeriesListController',
+                controllerAs: 'vm'
+            })
+            .state('main.test.testSeriesStudent', {
+                url: '/testSeriesStudent',
+                templateUrl: 'app/test/seriesStudent.html',
+                controller: 'SeriesStudentController',
                 controllerAs: 'vm'
             })
             .state('main.examsList', {

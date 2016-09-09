@@ -9,12 +9,12 @@
                         <span ng-bind="course.duration"></span> hours</span>
                 </div>
                 <div class="panel-body fixedheight">
-                    <div class="body-fixed-height" ng-bind="course.description | truncate"></div>
+                    <div class="body-fixed-height" ng-bind="course.shortDescription"></div>
                     <div class="btn-group bottomright">
                         <button type="button" class="btn btn-default btn-sm" ng-click="vm.showCourseInfo(course.id, course.name, course.description)">
                             <i class="fa fa-info" aria-hidden="true"></i> View More
                         </button>
-                        <a target="_self" href="{{course.filePath}}" download="{{course.fileName}}" title="Download Course Info" class="btn btn-default btn-sm">
+                        <a ng-if="course.filePath && course.filePath != null" target="_self" href="{{course.filePath}}" download="{{course.fileName}}" title="Download Course Info" class="btn btn-default btn-sm">
                             <i class="fa fa-download" aria-hidden="true"></i>
                         </a>
                     </div>
@@ -31,12 +31,17 @@
                                 <!--  Demo -->
                             </button>
                         </div>
-                        <div class="col-md-8 col-xs-8 text-right">
+                        <div class="col-md-8 col-xs-8 text-right" ng-if="!course.isSubscribed">
                             <button type="button" class="btn btn-default btn-sm" ng-click="vm.subscribeCourse(course)">
                                 <i class="fa fa-credit-card" aria-hidden="true" ng-if="course.subscriptionFee"></i> Subscribe Now 
                                 <span ng-if="course.subscriptionFee">@ </span>
                                 <i class="fa fa-inr" aria-hidden="true" ng-if="course.subscriptionFee"></i> 
                                 <span ng-bind="course.subscriptionFee"></span>
+                            </button>
+                        </div>
+                        <div class="col-md-8 col-xs-8 text-right" ng-if="course.isSubscribed">
+                            <button type="button" class="btn btn-default btn-sm" ng-click="vm.selectCourse(course)">
+                                <i class="fa fa-play" aria-hidden="true"></i> Start Now
                             </button>
                         </div>
                     </div>
