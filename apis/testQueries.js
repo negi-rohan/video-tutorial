@@ -116,10 +116,10 @@ var self = {
     },
     addTestToTestSeries: function(req, pool, callback) {
         var values = [];
-        var query = "INSERT INTO ??(??, ??) VALUES ?";
-        var queryValues = ["test_testseries", "resourceId", "testId"];
-        for (var i = 0; i < req.testIds.length; i++) {
-            values.push([req.testSeriesId, req.testIds[i]]);
+        var query = "INSERT INTO ??(??, ??, ??, ??, ??) VALUES ? ON DUPLICATE KEY UPDATE startDate=VALUES(startDate), endDate=VALUES(endDate), resultDate=VALUES(resultDate)";
+        var queryValues = ["test_testseries", "resourceId", "testId", "startDate", "endDate", "resultDate"];
+        for (var i = 0; i < req.tests.length; i++) {
+            values.push([req.testSeriesId, req.tests[i].id, req.tests[i].startDate, req.tests[i].endDate, req.tests[i].resultDate]);
         }
         queryValues.push(values);
         query = mysql.format(query, queryValues);
@@ -129,6 +129,20 @@ var self = {
                     callback({ "Error": true, "Message": err });
                 } else {
                     callback({ "Error": false, "Message": "Test added to series Successfully" });
+                }
+            });
+        });
+    },
+    getSeriesTest: function(req, pool, callback){
+        var query = "SELECT t.id, t.title, ts.startDate, ts.endDate, ts.resultDate FROM ?? ts JOIN (?? t) ON ts.testId = t.id WHERE ts.resourceId = ?";
+        var queryValues = ["test_testseries", "tests", req.testSeriesId];
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                if (err) {
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Successfull", "tests": rows });
                 }
             });
         });
@@ -144,11 +158,15 @@ var self = {
             }
             queryValues.push(values);
             query = mysql.format(query, queryValues);
+            console.log(query)
             pool.getConnection(function(err, connection) {
                 connection.query(query, function(err, rows) {
                     connection.release();
                     if (err) {
-                        callback({ "Error": true, "Message": err });
+                        if(err && err.code && err.code == "ER_DUP_ENTRY")
+                            callback({"Error": true, "Message": "Student already added in test series"});
+                        else
+                            callback({ "Error": true, "Message": err });
                     } else {
                         callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
                     }
@@ -299,7 +317,6 @@ var self = {
                     } else if(req.withEvaluatedStatus){
                         query = "SELECT u.id, u.fullName, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status = 'evaluated' ORDER BY tu.status, tu.score DESC";
                         queryValues = [req.testId];
-                        console.log(123);
                     } else {
                         query = "SELECT u.id, u.fullName, u.email, u.phone, u.profileType, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
                         queryValues = [req.testId, from, count];
@@ -376,8 +393,10 @@ var self = {
         });
     },
     getAllExams: function(req, pool, callback) {
-        var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.id IN (SELECT tt.testId FROM test_testseries tt WHERE tt.resourceId = ?) GROUP By t.id ORDER BY t.startDate";
-        var queryValues = ["tests", req.userId, req.testSeriesId];
+        var query = "SELECT ts.startDate, ts.endDate, ts.resultDate, t.*, u.status, u.score, u.rank, u.percentile FROM ?? ts LEFT JOIN (tests t) ON t.id = ts.testId LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ? WHERE ts.startDate IS NOT NULL AND ts.resourceId = ? GROUP By t.id ORDER BY ts.startDate";
+        var queryValues = ["test_testseries", req.userId, req.testSeriesId];
+        // var query = "SELECT t.*, u.status, u.score, u.rank, u.percentile, count(qq.questionId) as questionCount FROM ?? t LEFT JOIN (testuserinfo u) ON t.id = u.testId and u.userId = ?  LEFT JOIN (question_questionpaper qq) ON qq.questionPaperId = t.questionPaperId WHERE t.isDeleted=false AND t.id IN (SELECT tt.testId FROM test_testseries tt WHERE tt.resourceId = ?) GROUP By t.id ORDER BY t.startDate";
+        // var queryValues = ["tests", req.userId, req.testSeriesId];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -401,7 +420,6 @@ var self = {
         query = "SELECT questionId FROM ?? WHERE isDeleted = false AND questionPaperId = (SELECT questionPaperId FROM ?? WHERE id = ?)";
         queryValues = ["question_questionpaper", "tests", req.testId];
         query = mysql.format(query, queryValues);
-        console.log(query)
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
                 if (err) {
@@ -418,7 +436,6 @@ var self = {
                     //query = "SELECT id, question, type, parentQuestionId FROM ?? WHERE isDeleted=false AND (id IN (?) OR parentQuestionId IN (?))";
                     queryValues = ["questions", questionIds, questionIds];
                     query = mysql.format(query, queryValues);
-                    console.log(query)
                     connection.query(query, function(err, rows) {
                         result = rows;
                         if (err) {
@@ -430,7 +447,6 @@ var self = {
                                     query = "SELECT id, answerText, ansKey, ansText FROM ?? WHERE isDeleted=false AND questionId=?";
                                     queryValues = ["answers", question.id];
                                     query = mysql.format(query, queryValues);
-                                    console.log(query)
                                     connection.query(query, function(err, rows) {
                                         if (err) {
                                             callback(err);
@@ -513,7 +529,7 @@ var self = {
                     callback({ "Error": true, "Message": err });
                 } else if (rows && rows.length > 0) {
                     var userTestInfo = rows[0];
-                    query = "SELECT * FROM ?? WHERE userId=? AND testId=?";
+                    query = "SELECT questionId, answer, isMarked FROM ?? WHERE userId=? AND testId=?";
                     queryValues = ["test_user_answer", req.userId, req.testId];
                     query = mysql.format(query, queryValues);
                     pool.getConnection(function(err, connection) {

@@ -402,10 +402,10 @@ var self = {
                 } else {
                     userCount = rows[0].userCount;
                     if (req.searchText) {
-                        query = "SELECT * from ?? where profileType = ? AND (fullName like ? OR email like ? OR phone like ?) LIMIT ?, ?";
+                        query = "SELECT u.*, IF(tss.id IS NULL, false, true) as isTSSubscribed from ?? u LEFT JOIN (testseries_subscription tss) ON tss.userId = u.id where profileType = ? AND (fullName like ? OR email like ? OR phone like ?) GROUP BY u.id LIMIT ?, ?";
                         queryValues = ["user", req.type, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
                     } else {
-                        query = "SELECT * from ?? where profileType = ? LIMIT ?, ?";
+                        query = "SELECT u.*, IF(tss.id IS NULL, false, true) as isTSSubscribed from ?? u LEFT JOIN (testseries_subscription tss) ON tss.userId = u.id where profileType = ? GROUP BY u.id LIMIT ?, ?";
                         queryValues = ["user", req.type, from, count];
                     }
                     query = mysql.format(query, queryValues);

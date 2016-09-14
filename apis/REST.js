@@ -6,6 +6,9 @@ var request = require('request');
 var _ = require("lodash");
 var xlsxtojson = require("xlsx-to-json-lc");
 var fs = require('fs');
+var AdmZip = require('adm-zip');
+var htmlToJson = require("html-to-json");
+var mammoth = require("mammoth");
 
 
 // function REST_ROUTER(router, connection, md5, jwt, imgUpload, fileUpload) {
@@ -317,14 +320,14 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
 
     /* Batch related routes starts */
 
-    router.post("/batch", function(req, res){
-        queryHelper.addBatch(req.body, pool, function(result){
+    router.post("/batch", function(req, res) {
+        queryHelper.addBatch(req.body, pool, function(result) {
             res.json(result);
         });
     });
 
-    router.get("/batch/all", function(req, res){
-        queryHelper.getAllBatches(req.body, pool, function(result){
+    router.get("/batch/all", function(req, res) {
+        queryHelper.getAllBatches(req.body, pool, function(result) {
             res.json(result);
         });
     });
@@ -370,6 +373,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
 
     router.post("/testSeries/addTest", function(req, res) { /// add update tests
         testQueryHelper.addTestToTestSeries(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
+    router.post("/testSeries/getTests", function(req, res) { /// add update tests
+        testQueryHelper.getSeriesTest(req.body, pool, function(result) {
             res.json(result);
         });
     });
@@ -564,7 +573,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 }
                 //questions = result;
                 _.forEach(result, function(value) {
-                    if(value && value.index){
+                    if (value && value.index) {
                         var question = {};
                         question.question = '<p>' + value.question.trim() + '</p>';
                         question.questionText = value.questiontext ? '<p>' + value.questiontext.trim() + '</p>' : '';
@@ -606,6 +615,150 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/question/importDoc", fileUpload, function(req, res) {
+        if (req && req.files && req.files.file && req.files.file.path) {
+            // var zip = new AdmZip(req.files.file.path);
+            var html;
+            var targetDir = './public/question/' + req.body.questionPaperId + '/';
+            if (!fs.existsSync(targetDir)) {
+                fs.mkdirSync(targetDir);
+            }
+
+            mammoth.convertToHtml({ path: req.files.file.path })
+                .then(function(result) {
+                    html = result.value; // The generated HTML
+                    var messages = result.messages; // Any messages, such as warnings during conversion
+                    var promise = htmlToJson.parse(html, {
+                        sections: htmlToJson.createParser(['p, ol', {
+                            'html': function($section) {
+                                return $section.html();
+                            },
+                            'text': function($section) {
+                                return $section.text();
+                            },
+                            'img': function($section) {
+                                return $section.find('img').length > 0;
+                            }
+                        }])
+                    }, function(err, results) {
+                        if (results && results.sections && results.sections.filter && results.sections.filter.length > 0) {
+                            var questions = [];
+                            var question = {};
+                            var currently = 'question';
+                            _.forEach(results.sections.filter, function(value, key) {
+                                if (value.img) {
+                                        //_.replace(value.html, 'src="', 'src="' +req.protocol + '://' + req.get('host') + '/question/'  + req.body.questionPaperId + '/');
+                                    value.html = value.html.replace(/src="/g, 'src="' + req.protocol + '://' + req.get('host') + '/question/' + req.body.questionPaperId + '/')
+                                }
+                                if (_.startsWith(value.text, 'Q.')) {
+                                    if (question && question.question)
+                                        questions.push(question);
+                                    question = {};
+                                    question.question = '<p>' + value.html.trim() + '</p>';
+                                    currently = 'question'
+                                } else if (value.text.indexOf(")") == 1) {
+                                    question.answers = question.answers || [];
+                                    var answer = {
+                                        ansKey: value.text.charAt(0),
+                                        answerText: value.html
+                                    };
+                                    question.answers.push(answer);
+                                    currently = 'answer'
+                                } else if (value.text && question && question.question) {
+                                    if (currently == 'question') {
+                                        question.question = question.question + value.html;
+                                    }
+                                    if (currently == 'answer' && question.answers && question.answers.length > 0) {
+                                        question.answers[question.answers.length - 1].answerText = question.answers[question.answers.length - 1].answerText + value.html;
+                                    }
+                                }
+                                if (key == results.sections.filter.length - 1)
+                                    questions.push(question);
+                            });
+                            var result = {
+                                questions: questions,
+                                questionPaperId: req.body.questionPaperId
+                            };
+                            res.json({ "Error": true, "Message": "Success", "results": results, "result": result });
+                        }
+                    });
+                })
+                .done();
+            // var zipEntries = zip.getEntries();
+            // zipEntries.forEach(function(zipEntry) {
+            //     console.log(zipEntry.toString());
+            //     if (zipEntry.entryName.indexOf(".htm") > -1) {
+            //         console.log(zipEntry.toString());
+            //     }
+            // });
+
+
+            //zip.extractAllTo(targetDir);
+
+            // fs.readFile(targetDir + '/Polity L 1 Test 1 V1.html', function(err, data) {
+            //     if (err) throw err;
+            //     console.log(data.toString());
+            //     var promise = htmlToJson.parse(data.toString(), {
+            //         sections: htmlToJson.createParser(['p', {
+            //             'html': function($section) {
+            //                 return $section.html();
+            //             },
+            //             'text': function($section) {
+            //                 return $section.text();
+            //             },
+            //             'img': function($section) {
+            //                 return $section.find('img').length > 0;
+            //             }
+            //         }])
+            //     }, function(err, results) {
+            //         if (results && results.sections && results.sections.filter && results.sections.filter.length > 0) {
+            //             var questions = [];
+            //             var question = {};
+            //             var currently = 'question';
+            //             _.forEach(results.sections.filter, function(value, key) {
+            //                 if (value.img) {
+            //                     console.log(typeof value.html)
+            //                         //_.replace(value.html, 'src="', 'src="' +req.protocol + '://' + req.get('host') + '/question/'  + req.body.questionPaperId + '/');
+            //                     value.html = value.html.replace(/src="/g, 'src="' + req.protocol + '://' + req.get('host') + '/question/' + req.body.questionPaperId + '/')
+            //                 }
+            //                 if (_.startsWith(value.text, 'Q.')) {
+            //                     if (question && question.question)
+            //                         questions.push(question);
+            //                     question = {};
+            //                     question.question = '<p>' + value.html.trim() + '</p>';
+            //                     currently = 'question'
+            //                 } else if (value.text.indexOf(")") == 1) {
+            //                     question.answers = question.answers || [];
+            //                     var answer = {
+            //                         ansKey: value.text.charAt(0),
+            //                         answerText: value.html
+            //                     };
+            //                     question.answers.push(answer);
+            //                     currently = 'answer'
+            //                 } else if (value.text && question && question.question) {
+            //                     if (currently == 'question') {
+            //                         question.question = question.question + value.html;
+            //                     }
+            //                     if (currently == 'answer' && question.answers && question.answers.length > 0) {
+            //                         question.answers[question.answers.length - 1].answerText = question.answers[question.answers.length - 1].answerText + value.html;
+            //                     }
+            //                 }
+            //                 if (key == results.sections.filter.length - 1)
+            //                     questions.push(question);
+            //             });
+            //             var result = {
+            //                 questions: questions,
+            //                 questionPaperId: req.body.questionPaperId
+            //             };
+            //             res.json({ "Error": true, "Message": "Success", "results": results, "result": result });
+            //         }
+            //     });
+            // });
+        } else {
+            res.json({ "Error": true, "Message": "No file attached" });
+        }
+    });
+
     router.post("/test/importOfflineScores", fileUpload, function(req, res) {
         if (req && req.files && req.files.file && req.files.file.path) {
             var exceltojson = xlsxtojson;
@@ -620,7 +773,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                     console.log(err);
                 }
                 _.forEach(result, function(value) {
-                    if(value && value.name){
+                    if (value && value.name) {
                         var user = {};
                         user.fullName = value.name;
                         user.email = value.email;
