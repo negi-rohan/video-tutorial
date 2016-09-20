@@ -4,7 +4,7 @@ module.exports = {
         connectionLimit: 200,
         host: 'localhost',
         user: 'root',
-        password: 'data',
+        password: 'forumias@555',
         database: 'tutorialsdb',
         debug: false
     },
