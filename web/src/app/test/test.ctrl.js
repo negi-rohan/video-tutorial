@@ -35,6 +35,7 @@
         vm.updateTestSeries = updateTestSeries;
         vm.publishTestSeries = publishTestSeries;
         vm.getTestSeriesUsers = getTestSeriesUsers;
+        vm.getSeriesTests = getSeriesTests
         vm.getAllTests = getAllTests;
         vm.getTestById = getTestById;
         vm.editTest = editTest;
@@ -60,6 +61,7 @@
         vm.deleteQuestion = deleteQuestion;
         vm.addToPaper = addToPaper;
         vm.importQuestion = importQuestion;
+        vm.importQuestionDoc = importQuestionDoc;
         vm.getTestUsers = getTestUsers;
         vm.exportTestUsers = exportTestUsers;
         vm.getTestUserPagination = getTestUserPagination;
@@ -307,6 +309,11 @@
         function getTestSeriesUsers(testSeries) {
             CommonInfo.setInfo('series', testSeries);
             $state.go('main.test.testSeriesStudent');
+        }
+
+        function getSeriesTests(testSeries) {
+            CommonInfo.setInfo('series', testSeries);
+            $state.go('main.test.testSeriesTest');
         }
 
         ////////// Question Paper related ////////////////////////////////////////////////////////
@@ -572,6 +579,70 @@
                                 $scope.questions = item.data.questions;
                                 $scope.questionPaperId = item.data.questionPaperId;
                                 $scope.subjects = item.subjects;
+                                $scope.toolBar = [
+                                    ['h1', 'h2', 'h3', 'bold', 'italics', 'underline'],
+                                    ['ol', 'ul'],
+                                    ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+                                    ['html', 'insertImage', 'insertLink', 'insertVideo']
+                                ];
+                                $scope.ok = function() {
+                                    var data = {
+                                        questions: $scope.questions,
+                                        questionPaperId: $scope.questionPaperId
+                                    };
+                                    $http.post(CommonInfo.getAppUrl() + '/api/question/add', data).then(function(response) {
+                                        if (response && response.data && !response.data.Error) {
+                                            growl.success('Questions added successfully');
+                                            getAllquestionPapers();
+                                        }
+                                    }, function(response) {});
+                                };
+                            },
+                            resolve: {
+                                item: function() {
+                                    return item;
+                                }
+                            }
+                        });
+                    }
+                }, function(resp) {
+                    console.log('Error status: ' + resp.status);
+                }, function(evt) {
+                    var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                    console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
+                });
+            }
+        }
+
+        function importQuestionDoc(file, quesPaperId) {
+            console.log(vm.question.file)
+            if (vm.question.file) {
+                Upload.upload({
+                    url: CommonInfo.getAppUrl() + '/api/question/importDoc',
+                    data: {
+                        file: vm.question.file,
+                        questionPaperId: quesPaperId
+                    }
+                }).then(function(resp) {
+                    if (resp && resp.data && resp.data.result && resp.data.result.questions && resp.data.result.questions.length > 0) {
+                        var item = {
+                            subjects: vm.subjectList,
+                            data: resp.data.result
+                        };
+                        var modalInstance = $uibModal.open({
+                            animation: true,
+                            templateUrl: 'app/test/importQuestion.html',
+                            size: 'lg',
+                            controller: function($scope, item) {
+                                $scope.questions = item.data.questions;
+                                $scope.questionPaperId = item.data.questionPaperId;
+                                $scope.subjects = item.subjects;
+                                $scope.toolBar = [
+                                    ['h1', 'h2', 'h3', 'bold', 'italics', 'underline'],
+                                    ['ol', 'ul'],
+                                    ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+                                    ['html', 'insertImage', 'insertLink', 'insertVideo']
+                                ];
                                 $scope.ok = function() {
                                     var data = {
                                         questions: $scope.questions,
@@ -650,17 +721,51 @@
             clearQuestionSelection();
         }
 
-        function addToTestSeries(testSeriesId) {
+        function addToTestSeries(testSeries) {
             if (selectedTestGrid && selectedTestGrid.length > 0) {
                 var data = {
-                    testSeriesId: testSeriesId,
-                    testIds: selectedTestGrid
+                    testSeries: testSeries,
+                    tests: _.filter(vm.tests, { 'isSelected': true })
                 };
-                $http.post(CommonInfo.getAppUrl() + '/api/testSeries/addTest', data).then(function(response) {
-                    if (response && response.data && !response.data.Error) {
-                        growl.success(response.data.Message);
+                var modalInstance = $uibModal.open({
+                    animation: true,
+                    templateUrl: 'app/test/addTestToSeries.html',
+                    size: 'lg',
+                    controller: function($scope, item) {
+                        $scope.data = item;
+                        $scope.ok = function() {
+                            var values = {
+                                testSeriesId: data.testSeries.id,
+                                tests: []
+                            };
+                            _.forEach(data.tests, function(value) {
+                                values.tests.push({
+                                    id: value.id,
+                                    startDate: value.startDate ? moment(value.startDate).format('YYYY-MM-DD HH:mm:SS') : null, //moment(value.startDate).format('YYYY-MM-DD HH:mm:SS')
+                                    endDate: value.endDate ? moment(value.endDate).format('YYYY-MM-DD HH:mm:SS') : null,
+                                    resultDate: value.resultDate ? moment(value.resultDate).format('YYYY-MM-DD HH:mm:SS') : null
+                                });
+                            });
+                            $http.post(CommonInfo.getAppUrl() + '/api/testSeries/addTest', values).then(function(response) {
+                                if (response && response.data && !response.data.Error) {
+                                    growl.success(response.data.Message);
+                                }
+                            }, function(response) {});
+                        }
+                    },
+                    resolve: {
+                        item: function() {
+                            return data;
+                        }
                     }
-                }, function(response) {});
+                });
+
+
+                // $http.post(CommonInfo.getAppUrl() + '/api/testSeries/addTest', data).then(function(response) {
+                //     if (response && response.data && !response.data.Error) {
+                //         growl.success(response.data.Message);
+                //     }
+                // }, function(response) {});
             }
         }
     }

@@ -315,7 +315,7 @@ var self = {
                         query = "SELECT u.id, u.fullName, u.email, u.phone, u.profileType, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND (u.fullName like ? OR u.email like ? OR u.phone like ?) ORDER BY tu.status, tu.score DESC LIMIT ?, ?";
                         queryValues = [req.testId, '%' + req.searchText + '%', '%' + req.searchText + '%', '%' + req.searchText + '%', from, count];
                     } else if(req.withEvaluatedStatus){
-                        query = "SELECT u.id, u.fullName, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status = 'evaluated' ORDER BY tu.status, tu.score DESC";
+                        query = "SELECT u.id, u.fullName, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? AND tu.status = 'evaluated' AND tu.rank IS NOT NULL ORDER BY tu.score DESC";
                         queryValues = [req.testId];
                     } else {
                         query = "SELECT u.id, u.fullName, u.email, u.phone, u.profileType, tu.status, tu.score, tu.rank, tu.percentile, tu.correctAnswers, tu.incorrectAnswers, tu.timeSpent FROM testuserinfo tu JOIN (user u) ON tu.userId = u.id WHERE tu.testId=? ORDER BY tu.status, tu.score DESC LIMIT ?, ?";

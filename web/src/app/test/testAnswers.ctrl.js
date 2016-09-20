@@ -13,23 +13,19 @@
             rangeFrom: 0,
             rangeTill: 21,
             text: 'Extremely Difficult'
-        },
-        {
+        }, {
             rangeFrom: 21,
             rangeTill: 36,
             text: 'Difficult'
-        },
-        {
+        }, {
             rangeFrom: 36,
             rangeTill: 51,
             text: 'Average'
-        },
-        {
+        }, {
             rangeFrom: 51,
             rangeTill: 71,
             text: 'Easy'
-        },
-        {
+        }, {
             rangeFrom: 71,
             rangeTill: 101,
             text: 'Very Easy'
@@ -59,7 +55,7 @@
                 if (response && response.data && !response.data.Error) {
                     vm.userAnswers = response.data.userAnswers;
                     vm.selectedLang = vm.userAnswers.selectedLang;
-                    if(vm.userAnswers.score){
+                    if (vm.userAnswers.score) {
                         getTestUsers();
                     }
                     vm.userAnswers.totalCorrect = 0;
@@ -105,9 +101,10 @@
                                     }
                                     if (value.totalAttempt) {
                                         var difficultyMeter = _.round((value.correct / value.totalAttempt) * 100);
-                                        value.difficultyMeter = _.find(difficultyRange, function(value){
+                                        value.difficultyMeterText = _.find(difficultyRange, function(value) {
                                             return _.inRange(difficultyMeter, value.rangeFrom, value.rangeTill);
                                         }).text;
+                                        value.difficultyMeterPercent = difficultyMeter;
                                     }
                                 }
                             });
@@ -136,37 +133,30 @@
         }
 
         function getHtml() {
-            // var html = angular.element(document.getElementById('solution')).html()
-            // $http.post(CommonInfo.getAppUrl() + '/api/exam/userAnswersPdf', { html: html }).then(function(response) {
-            //     if(response && response.data && !response.data.Error) {
-            //         console.log(response.data.url)
-            //     }
+            vm.html = angular.element(document.getElementById('exportthis')).html()
+                //window.open('http://api.pdflayer.com/api/convert?access_key=107c1f80174a598cc874954ba28e72d8&document_url=' + 'https://www.google.co.in/', "_blank")
+
+            // $http.post('http://api.html2pdfrocket.com/pdf?apikey=49b117f1-e0ad-4dab-a598-37ed668b3f96&value=' + encodeURIComponent(vm.html), {}).then(function(response){
+            //     window.open(response, "_blank");
             // }, function(response) {});
 
-            if (vm.allowed) {
-                html2canvas(document.getElementById('exportthis'), {
-                    onrendered: function(canvas) {
-                        var data = canvas.toDataURL();
-                        var docDefinition = {
-                            content: [{
-                                image: data,
-                                width: 500
-                            }]
-                        };
-                        pdfMake.createPdf(docDefinition).download("Score_Details.pdf");
-                    }
-                });
+            var fileName = "test.pdf";
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            $http({
+                url: 'http://api.html2pdfrocket.com/pdf?apikey=49b117f1-e0ad-4dab-a598-37ed668b3f96&value=' + encodeURIComponent(vm.html),
+                method: "POST",
+                headers: {'Content-type': 'application/x-www-form-urlencoded'},
+                responseType: "blob"
 
-                // var html = angular.element(document.getElementById('exportthis')).html()
-                // $http.post(CommonInfo.getAppUrl() + '/api/exam/userAnswersPdf', { html: html }).then(function(response) {
-                //     if(response && response.data && !response.data.Error) {
-                //         console.log(response.data.url)
-                //         window.open(response.data.url, "_blank")
-                //     }
-                // }, function(response) {});
-            } else {
-                vm.allowed = true
-            }
+            }).then(function(response) {
+                var file = response.data; // new Blob([response], {type: 'application/pdf'});
+                var fileURL = window.URL.createObjectURL(file);
+                a.href = fileURL;
+                a.download = fileName;
+                a.click();
+            }, function() {});
         }
     }
 })();

@@ -48,7 +48,7 @@
                             Add To Test Series <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="testSeriesList">
-                            <li role="menuitem" ng-click="vm.addToTestSeries(testSeries.id);" ng-repeat="testSeries in vm.testSeriesList">
+                            <li role="menuitem" ng-click="vm.addToTestSeries(testSeries);" ng-repeat="testSeries in vm.testSeriesList">
                                 <a href="javascript:void(0);" ng-bind="testSeries.name"></a>
                             </li>
                         </ul>
@@ -71,7 +71,7 @@
                         <tbody>
                             <tr ng-repeat="testSeries in vm.testSeries">
                                 <th scope="row" ng-bind="$index + 1"></th>
-                                <td ng-bind="testSeries.name"></td>
+                                <td ng-bind="testSeries.name" ng-click="vm.getSeriesTests(testSeries)"></td>
                                 <td ng-bind="testSeries.description"></td>
                                 <td ng-bind="testSeries.testList"></td>
                                 <td>
@@ -93,8 +93,8 @@
                                 <th>#</th>
                                 <th>Title</th>
                                 <th>Durations</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
+                                <!-- <th>Start Date</th>
+                                <th>End Date</th> -->
                                 <th>Question Paper</th>
                                 <th>Students</th>
                                 <th>Actions</th>
@@ -108,8 +108,8 @@
                                 <th scope="row" ng-bind="$index + 1"></th>
                                 <td ng-bind="test.title"></td>
                                 <td ng-bind="test.durationInHrs"></td>
-                                <td ng-bind="test.startDate | date : 'fullDate'"></td>
-                                <td ng-bind="test.endDate | date : 'fullDate'"></td>
+                                <!-- <td ng-bind="test.startDate | date : 'fullDate'"></td>
+                                <td ng-bind="test.endDate | date : 'fullDate'"></td> -->
                                 <td ng-bind="test.questionPaperName"></td>
                                 <td ng-bind="test.userCount"></td>
                                 <td>
@@ -147,6 +147,7 @@
                                     <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.editQuestionPaper('edit', quesPaper); " style="vertical-align:-4px;"></i>
                                     <i class="fa fa-trash-o fa-lg fa-fw" title="Delete" aria-hidden="true" ng-click="vm.deleteQuestionPaper(quesPaper.id)"></i>
                                     <i class="fa fa-upload fa-lg fa-fw" title="Import Question" style="cursor:pointer;" aria-hidden="true" ngf-select="vm.importQuestion($file, quesPaper.id)" ng-model="vm.question.file" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB"></i>
+                                    <i class="fa fa-upload fa-lg fa-fw" title="Import Question" style="cursor:pointer;" aria-hidden="true" ngf-select="vm.importQuestionDoc($file, quesPaper.id)" ng-model="vm.question.file" name="file" ngf-pattern="'.zip'" ngf-accept="'.zip'" ngf-max-size="20MB"></i>
                                     <!-- <button class="btn btn-default" type="button" ngf-select="vm.importQuestion($file)" ng-model="vm.question.file" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB">
                                         <i class="fa fa-upload" aria-hidden="true"></i> Import Questions
                                     </button> -->

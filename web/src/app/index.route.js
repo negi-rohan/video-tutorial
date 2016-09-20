@@ -85,13 +85,17 @@
                 url: '/students',
                 templateUrl: 'app/partical/users.html'
             })
-            .state('main.createBatch', {
-                url: '/addBatch',
-                templateUrl: 'app/partical/createBatch.html'
+            .state('main.test.studentSeriesList', {
+                url: '/studentSeriesList',
+                templateUrl: 'app/test/userSeriesList.html',
+                controller: 'StudentSeriesListController',
+                controllerAs: 'vm'
             })
-            .state('main.editBatch', {
-                url: '/updateBatch',
-                templateUrl: 'app/partical/createBatch.html'
+            .state('main.test.userExamsList', {
+                url: '/studentExamList',
+                templateUrl: 'app/test/userExamList.html',
+                controller: 'StudentExamListController',
+                controllerAs: 'vm'
             })
             .state('main.createUser', {
                 url: '/addUser',
@@ -158,6 +162,12 @@
                 url: '/testSeriesStudent',
                 templateUrl: 'app/test/seriesStudent.html',
                 controller: 'SeriesStudentController',
+                controllerAs: 'vm'
+            })
+            .state('main.test.testSeriesTest', {
+                url: '/testSeriesTest',
+                templateUrl: 'app/test/seriesTest.html',
+                controller: 'SeriesTestController',
                 controllerAs: 'vm'
             })
             .state('main.examsList', {

@@ -3,10 +3,10 @@
 
     angular
         .module('web')
-        .controller('ExamListController', ExamListController);
+        .controller('StudentExamListController', StudentExamListController);
 
     /** @ngInject */
-    function ExamListController($http, CommonInfo, $state, _) {
+    function StudentExamListController($http, CommonInfo, $state, _) {
         var vm = this;
 
         vm.startExam = startExam;
@@ -16,8 +16,8 @@
 
         function activate() {
             CommonInfo.setInfo('exam', '');
-            vm.user = CommonInfo.getInfo('user');
-            vm.testSeries = CommonInfo.getInfo('testSeries');
+            vm.user = CommonInfo.getInfo('testUser');
+            vm.testSeries = CommonInfo.getInfo('userTestSeries');
             getAllExams();
         }
 
@@ -27,7 +27,6 @@
                     _.forEach(response.data.tests, function(value) {
                         value.durationInHrs = moment.duration(value.duration, 'seconds').format("HH:mm:ss");
                         value.isUpcoming = moment().isBefore(value.startDate);
-                        value.attachment = value.attachment ? value.attachment.split(',') : [];
                     });
                     vm.exams = response.data.tests;
                 }
@@ -37,7 +36,7 @@
         function startExam(test) {
             if (!test.status || test.status == 'pending') {
                 test.userId = vm.user.id;
-                test.userName = vm.user.fullName;
+                test.userName = vm.user.fulName;
                 CommonInfo.setInfo('exam', test);
                 $state.go('main.exam');
             }

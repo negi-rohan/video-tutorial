@@ -66,14 +66,32 @@ body {
 
 /* Text angular css for height starts*/
 
+.import-questions .ta-editor {
+    height: auto;
+    min-height: auto;
+    max-height: 200px;
+}
+
+.import-questions .ta-bind {
+    min-height: auto;
+}
+
 .test-questions .ta-editor {
     height: 200px;
     min-height: 200px;
 }
 
+.test-questions .ta-bind {
+    min-height: 197px;
+}
+
 .test-answer-options .ta-editor {
-    min-height: 100px;
-    height: 100px;
+    min-height: 61px;
+    height: 61px;
+}
+
+.test-answer-options .ta-bind {
+    min-height: 57px;
 }
 
 

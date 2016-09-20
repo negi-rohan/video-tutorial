@@ -1,0 +1,79 @@
+<div class="container-fluid" ng-cloak>
+    <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="$close();"><span aria-hidden="true">&times;</span></button>
+        <h3 ng-bind="data.testSeries.name"></h3>
+    </div>
+    <div class="modal-body">
+        <form>
+            <div ng-repeat="test in data.tests" class="row">
+                <div class="form-group col-md-12">
+                    <label ng-bind="test.title"></label>
+                </div>
+                <div class="col-md-12 row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="test.title">Start Date</label>
+                            <p class="input-group">
+                                <input type="text" class="form-control" datetime-picker="dd MMM yyyy HH:mm" ng-model="test.startDate" is-open="popup1.opened" />
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="popup1.opened = true"><i class="fa fa-calendar"></i></button>
+                                </span>
+                            </p>
+                            <!-- <p class="input-group">
+                                <input type="text" class="form-control" uib-datepicker-popup="{{vm.format}}" ng-model="test.startDate" is-open="popup1.opened" datepicker-options="vm.dateOptions" close-text="Close" />
+                                <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="popup1.opened = true">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </button>
+                            </span>
+                            </p> -->
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="test.duration">Result Date</label>
+                            <p class="input-group">
+                                <input type="text" class="form-control" datetime-picker="dd MMM yyyy HH:mm" ng-model="test.resultDate" is-open="popup2.opened" />
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="popup2.opened = true"><i class="fa fa-calendar"></i></button>
+                                </span>
+                            </p>
+                            <!-- <p class="input-group">
+                                <input type="text" class="form-control" uib-datepicker-popup="{{vm.format}}" ng-model="test.resultDate" is-open="popup2.opened" datepicker-options="vm.dateOptions" close-text="Close" />
+                                <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="popup2.opened = true">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </button>
+                            </span>
+                            </p> -->
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="test.duration">End Date</label>
+                            <p class="input-group">
+                                <input type="text" class="form-control" datetime-picker="dd MMM yyyy HH:mm" ng-model="test.endDate" is-open="popup3.opened" />
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="popup3.opened = true"><i class="fa fa-calendar"></i></button>
+                                </span>
+                            </p>
+                            <!-- <p class="input-group">
+                                <input type="text" class="form-control" uib-datepicker-popup="{{vm.format}}" ng-model="test.endDate" is-open="popup3.opened" datepicker-options="vm.dateOptions" close-text="Close" />
+                                <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="popup3.opened = true">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </button>
+                            </span>
+                            </p> -->
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <hr ng-if="!$last" />
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok();$close();">OK</button>
+    </div>
+</div>

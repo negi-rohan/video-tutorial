@@ -4,21 +4,19 @@
     angular
         .module('web', [
             'ngAnimate',
-            'ngCookies',
             'ngTouch',
             'ngSanitize',
-            'ngMessages',
             'ngAria',
             'ui.router',
             'ui.bootstrap',
-            'toastr',
             'ngStorage',
             'ngFileUpload',
             'angular-growl',
             'blockUI',
             'textAngular',
             'rt.resize',
-            'timer'
+            'timer',
+            'ui.bootstrap.datetimepicker'
         ]);
 
 })();

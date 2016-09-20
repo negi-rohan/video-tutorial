@@ -12,7 +12,7 @@
     function loginArea($window, resize) {
         return {
             restrict: 'A',
-            link: function(scope, elem, attrs) {
+            link: function(scope, elem) {
 
                 resize(scope).call(function() {
                     elem.css('height', $window.innerHeight + 'px');
@@ -40,7 +40,7 @@
             fullName: '',
             email: '',
             password: '',
-            phone: '',
+            phone: ''
         };
         vm.isOtp = true;
         vm.isOtpSend = false;

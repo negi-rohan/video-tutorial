@@ -86,6 +86,7 @@
         vm.deleteLesson = deleteLesson;
         vm.getLessonComments = getLessonComments;
         vm.getUsers = getUsers;
+        vm.showUserSeries = showUserSeries;
         vm.userSelection = userSelection;
         vm.selectedAllStudents = selectedAllStudents;
         vm.addStudentToCourse = addStudentToCourse;
@@ -611,9 +612,16 @@
                 $http.post(CommonInfo.getAppUrl() + '/api/testSeries/addUsers', data).then(function(response) {
                     if (response && response.data && !response.data.Error) {
                         growl.success('Student added to test series successfully');
+                    } else if(response && response.data && response.data.Error){
+                        growl.info(response.data.Message);
                     }
                 }, function(response) {});
             }
+        }
+
+        function showUserSeries(user) {
+            CommonInfo.setInfo('testUser', user);
+            $state.go('main.test.studentSeriesList');
         }
 
         function approveUser(user) {

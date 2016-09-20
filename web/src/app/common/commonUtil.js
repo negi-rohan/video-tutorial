@@ -5,7 +5,6 @@
         .module('web')
         .factory('CommonInfo', CommonInfo)
         .factory('credentials', credentials)
-        .factory('Modal', Modal)
         .directive('jwplayerjs', jwplayerjs)
         .directive('whenScrollEnds', whenScrollEnds)
         .filter('htmlToPlaintext', htmlToPlaintext)
@@ -35,8 +34,8 @@
                 setupVars: '=setup'
 
             },
-            link: function(scope, element, attrs) {
-                scope.$watch('setupVars', function(newValue, oldValue) {
+            link: function(scope, element) {
+                scope.$watch('setupVars', function() {
                     if (scope.setupVars) {
                         var id = scope.playerId || 'random_player_' + Math.floor((Math.random() * 999999999) + 1),
                             getTemplate = function(playerId) {
@@ -94,7 +93,7 @@
                 $localStorage.$reset();
             },
             getAppUrl: function() {
-                return 'http://52.66.119.248';
+                return 'http://localhost:3000';
             }
         };
     }
@@ -145,28 +144,8 @@
                             createQuestion: false
                         };
                         break;
-                };
+                }
                 return config;
-            }
-        };
-    }
-
-    /** @ngInject */
-    function Modal($uibModal) {
-        return {
-            openModal: function(templateUrl) {
-                var modalInstance = $uibModal.open({
-                    animation: true,
-                    templateUrl: templateUrl,
-                    bindToController: true,
-                    controllerAs: 'vm'
-                });
-
-                modalInstance.result.then(function(selectedItem) {
-
-                }, function() {
-                    $log.info('Modal dismissed at: ' + new Date());
-                });
             }
         };
     }

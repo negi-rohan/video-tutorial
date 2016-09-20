@@ -61,10 +61,12 @@
 
         vm.isExamStarted = false;
         vm.isExamEnded = false;
+        vm.isAdmin = false;
         vm.userCurrentQuestion = [];
         vm.timer = 0;
         vm.selectedLang = 0;
         vm.showLangChoice = 0;
+        vm.user = {};
 
         vm.startExam = startExam;
         vm.showQuestion = showQuestion;
@@ -74,8 +76,12 @@
         activate();
 
         function activate() {
+            var currentUser = CommonInfo.getInfo('user');
             vm.exam = CommonInfo.getInfo('exam');
-            vm.user = CommonInfo.getInfo('user');
+            vm.user.id = vm.exam.userId;
+            if (vm.user.id != currentUser.id)
+                vm.isAdmin = true;
+            vm.user.name = vm.exam.userName;
             if (vm.exam && vm.user) {
                 vm.isPreview = vm.exam.isPreview ? true : false;
                 vm.timer = vm.exam.duration;
@@ -124,7 +130,7 @@
                         } else {
                             vm.timer = vm.exam.userInfo.timeRemaining || vm.timer;
                             vm.showLangChoice = vm.exam.questions[0].questionText ? 1 : 0;
-                            if(vm.showLangChoice)
+                            if (vm.showLangChoice)
                                 vm.selectedLang = vm.exam.userInfo.selectedLang ? vm.exam.userInfo.selectedLang : 0;
                             else
                                 vm.selectedLang = 1;
@@ -138,11 +144,17 @@
                         }
                     } else {
                         growl.info('Some error occured, try after some time');
-                        $state.go('main.examsList');
+                        if (vm.isAdmin)
+                            $state.go('main.test.userExamsList');
+                        else
+                            $state.go('main.examsList');
                     }
                 }, function(response) {
                     growl.info('Some error occured, try after some time');
-                    $state.go('main.examsList');
+                    if (vm.isAdmin)
+                        $state.go('main.test.userExamsList');
+                    else
+                        $state.go('main.examsList');
                 });
             } else {
                 _.forEach(vm.exam.questions, function(value, key) {
@@ -238,19 +250,24 @@
                 selectedLang: vm.selectedLang
             };
             if (!vm.isPreview && !isInProcess) {
-                if (status == 'completed'){
+                if (status == 'completed') {
                     isInProcess = true;
                     vm.isExamEnded = true;
                     $interval.cancel(localSubmit);
                     $interval.cancel(serverSubmit);
                     localSubmit = serverSubmit = undefined;
+                    if(vm.isAdmin)
+                        data.timeRemaining = 0;
                 }
                 if (isForced || status == 'pending' || confirm('Are you sure, you want to submit(final) your answers')) {
                     $http.post(CommonInfo.getAppUrl() + '/api/exam/submit', data).then(function(response) {
                         if (response && response.data) {
                             if (status == 'completed') {
                                 growl.success('Your answers saved successfully');
-                                $state.go('main.examsList');
+                                if (vm.isAdmin)
+                                    $state.go('main.test.userExamsList');
+                                else
+                                    $state.go('main.examsList');
                             } else {
                                 if (status != 'pending') {
                                     if (submitAttempt <= 3) {
@@ -258,7 +275,10 @@
                                         submitExam(true);
                                     } else {
                                         growl.info('Unable to submit due to some server error, please try after some time');
-                                        $state.go('main.examsList');
+                                        if (vm.isAdmin)
+                                            $state.go('main.test.userExamsList');
+                                        else
+                                            $state.go('main.examsList');
                                     }
                                 }
                             }
@@ -270,7 +290,10 @@
                                 submitExam(true);
                             } else {
                                 growl.info('Unable to submit due to some server error, please try after some time');
-                                $state.go('main.examsList');
+                                if (vm.isAdmin)
+                                    $state.go('main.test.userExamsList');
+                                else
+                                    $state.go('main.examsList');
                             }
                         }
                     });
