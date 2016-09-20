@@ -93,7 +93,7 @@
                 $localStorage.$reset();
             },
             getAppUrl: function() {
-                return 'http://localhost:3000';
+                return 'http://139.59.3.159';
             }
         };
     }

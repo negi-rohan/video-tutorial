@@ -119,7 +119,7 @@
                                     <i class="fa fa-users fa-lg fa-fw" aria-hidden="true" ng-if="test.userCount" title="Export User" ng-click="vm.exportTestUsers(test);"></i>
                                     <i class="fa fa-check-square-o fa-lg fa-fw" title="Recheck paper" ng-if="test.userCount" aria-hidden="true" ng-click="vm.recheck(test.id)" style="color:blue;"></i>
                                     <i class="fa fa-check-square-o fa-lg fa-fw" title="Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluation(test.id)"></i>
-                                    <i class="fa fa-check-square-o fa-lg fa-fw" title="Re-Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluationAll(test.id)" style="color:red;"></i>
+                                    <i class="fa fa-check-square-o fa-lg fa-fw" title="Re-Check And Re-Evaluate" ng-if="test.userCount" aria-hidden="true" ng-click="vm.evaluationAll(test.id)" style="color:red;"></i>
                                     <i class="fa fa-upload fa-lg fa-fw" title="Upload Offline Score" style="cursor:pointer;" aria-hidden="true" ngf-select="vm.offlineScore($file, test.id)" ng-model="vm.tests.offLineScoreFile" name="file" ngf-pattern="'.xlsx'" ngf-accept="'.xlsx'" ngf-max-size="20MB"></i>
                                     <i class="fa fa-trash fa-lg fa-fw" title="Remove All offline Scores" aria-hidden="true" ng-click="vm.removeAllOfflineSores(test.id)" style="color:red;"></i>
                                     <i class="fa fa-search fa-lg fa-fw" title="Preview" aria-hidden="true" ng-click="vm.showTestPreview(test)"></i>
