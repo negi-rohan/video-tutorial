@@ -265,7 +265,7 @@ var self = {
                     } else {
                         ip = req.ip;
                     }
-                    console.log("client IP is *********************" + ip);
+                    console.log("client IP is *********************" + ip + ' : ' + rows[0].fullName);
                     var token = jwt.sign(rows[0], request.secretString, {
                         expiresIn: "1d" // expires in 24 hours
                     });
@@ -536,8 +536,8 @@ var self = {
             callback({ "Error": true, "Message": "Incorrect code" });
     },
     savePaymentDetails: function(req, paymentInfo, pool, callback) {
-        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        var queryValues = ["payment_details", "payment_request_id", "phone", "purpose", "amount", "email", "fullName", "userId", "courseId", paymentInfo.id, req.phone, req.purpose, req.amt, req.email, req.fullName, req.userId, req.courseId];
+        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        var queryValues = ["payment_details", "payment_request_id", "phone", "purpose", "amount", "email", "fullName", "userId", "courseId", "mode", paymentInfo.id, req.phone, req.purpose, req.amt, req.email, req.fullName, req.userId, req.courseId, "online"];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.beginTransaction(function(err) {
@@ -593,8 +593,8 @@ var self = {
                         });
                     }
                     if (request.status.toLowerCase() == 'credit') {
-                        query = "INSERT INTO ??(??, ??) SELECT courseId, userId FROM payment_details WHERE payment_request_id = ?";
-                        queryValues = ["course_subscription", "courseId", "userId", request.payment_request_id];
+                        query = "INSERT INTO ??(??, ??, ??) SELECT courseId, userId, mode FROM payment_details WHERE payment_request_id = ?";
+                        queryValues = ["course_subscription", "courseId", "userId", "mode", request.payment_request_id];
                         query = mysql.format(query, queryValues);
                         connection.query(query, function(err, rows) {
                             if (err) {
@@ -659,12 +659,48 @@ var self = {
                     if (err) {
                         callback({ "Error": true, "Message": err });
                     } else {
+                        self.sendSubscriptionMailToStudents(request, pool)
                         callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
                     }
                 });
             });
         } else {
             callback({ "Error": true, "Message": "No student to subscribe course" });
+        }
+    },
+    sendSubscriptionMailToStudents: function(req, pool) {
+        if (req && req.courseName && req.users) {
+            var query = "SELECT u.email FROM user u WHERE u.id in (?)";
+            var queryValues = [req.users];
+            query = mysql.format(query, queryValues);
+            pool.getConnection(function(err, connection) {
+                connection.query(query, function(err, rows) {
+                    connection.release();
+                    if (rows && rows.length > 0) {
+                        var mailList = _.map(rows, 'email');
+                        var transporter = nodemailer.createTransport({
+                            service: config.mail.service,
+                            auth: {
+                                user: config.mail.email, // Your email id
+                                pass: config.mail.password // Your password
+                            }
+                        });
+                        var mailOptions = {
+                            from: config.mail.email, // sender address
+                            bcc: mailList, // list of receivers
+                            subject: 'Info: ForumIAS Academy Notification', // Subject line
+                            html: '<b>Dear Student</b>, <p>You have been added to course  "' + req.courseName + '" on ForumIAS Academy.</p><p>Please login to your account in <a href="http://forumias.academy" target="_blank">forumias.academy</a> to access the Course. \n</p>'
+                        };
+                        transporter.sendMail(mailOptions, function(err, info) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                console.log("message sent");
+                            };
+                        });
+                    }
+                });
+            });
         }
     },
     addCourseWithUsers: function(query, request, pool, callback) { /// to add users to course

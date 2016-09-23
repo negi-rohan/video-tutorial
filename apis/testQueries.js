@@ -5,6 +5,8 @@ var async = require('async');
 var json2xls = require('json2xls');
 var fs = require('fs');
 var path = require('path');
+var nodemailer = require('nodemailer');
+var config = require('./config');
 
 var questionList = 0,
     subjectList = [];
@@ -158,7 +160,6 @@ var self = {
             }
             queryValues.push(values);
             query = mysql.format(query, queryValues);
-            console.log(query)
             pool.getConnection(function(err, connection) {
                 connection.query(query, function(err, rows) {
                     connection.release();
@@ -168,12 +169,48 @@ var self = {
                         else
                             callback({ "Error": true, "Message": err });
                     } else {
-                        callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
+                        self.sendSubscriptionMailToStudents(req, pool);
+                        callback({ "Error": false, "Message": "Test series subscribed successfully", "code": 1 });
                     }
                 });
             });
         } else {
             callback({ "Error": true, "Message": "No student to subscribe test series" });
+        }
+    },
+    sendSubscriptionMailToStudents: function(req, pool) {
+        if (req && req.testSeriesName && req.users) {
+            var query = "SELECT u.email FROM user u WHERE u.id in (?)";
+            var queryValues = [req.users];
+            query = mysql.format(query, queryValues);
+            pool.getConnection(function(err, connection) {
+                connection.query(query, function(err, rows) {
+                    connection.release();
+                    if (rows && rows.length > 0) {
+                        var mailList = _.map(rows, 'email');
+                        var transporter = nodemailer.createTransport({
+                            service: config.mail.service,
+                            auth: {
+                                user: config.mail.email, // Your email id
+                                pass: config.mail.password // Your password
+                            }
+                        });
+                        var mailOptions = {
+                            from: config.mail.email, // sender address
+                            bcc: mailList, // list of receivers
+                            subject: 'Info: ForumIAS Academy Notification', // Subject line
+                            html: '<b>Dear Student</b>, <p>You have been added to Test Series  "' + req.testSeriesName + '" on ForumIAS Academy.</p><p>Please login to your account in <a href="http://forumias.academy" target="_blank">forumias.academy</a> to access the test-series. \n</p>'
+                        };
+                        transporter.sendMail(mailOptions, function(err, info) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                console.log("message sent");
+                            };
+                        });
+                    }
+                });
+            });
         }
     },
     getSeriesUser: function(req, pool, callback) {
@@ -749,7 +786,7 @@ var self = {
                             async.eachSeries(userList, function(user, callback) {
                                     var data = _.filter(userAnswers, { 'userId': user.userId });
                                     var score = 0;
-                                    if(data && data.length > 0){
+                                    if (data && data.length > 0) {
                                         _.forEach(data, function(value) {
                                             var correctAnswer = _.find(questions, { 'id': value.questionId }).correctAnswer;
                                             if (correctAnswer == value.answer) {
@@ -768,7 +805,7 @@ var self = {
                                             callback(null, 123)
                                         });
                                     } else {
-                                         callback(null, 123)
+                                        callback(null, 123)
                                     }
                                 },
                                 function(err, rows) {
