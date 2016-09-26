@@ -161,7 +161,7 @@ var self = {
         if (request && request.courses && request.courses[0].courseId) {
             var course = _.find(coursesList, { 'id': parseInt(request.courses[0].courseId) });
             if (course && course.isSendMail) {
-                var query = "SELECT u.email FROM user u WHERE u.id in (SELECT c.userId FROM course_subscription c WHERE c.courseId = ?)";
+                var query = "SELECT u.email FROM user u WHERE u.profileType = 'student' AND u.id in (SELECT c.userId FROM course_subscription c WHERE c.courseId = ?)";
                 var queryValues = [request.courses[0].courseId];
                 query = mysql.format(query, queryValues);
                 pool.getConnection(function(err, connection) {

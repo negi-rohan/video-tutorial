@@ -749,6 +749,7 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                 _.forEach(result, function(value) {
                     if (value && value.name) {
                         var user = {};
+                        user.id = value.id;
                         user.fullName = value.name;
                         user.email = value.email;
                         user.phone = value.phone;

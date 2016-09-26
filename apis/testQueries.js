@@ -259,8 +259,8 @@ var self = {
         req.duration = req.duration ? req.duration * 3600 : '';
         req.startDate = req.startDate ? moment(req.startDate).format('YYYY-MM-DD HH:mm:SS') : '';
         req.endDate = req.endDate ? moment(req.endDate).format('YYYY-MM-DD HH:mm:SS') : '';
-        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title=VALUES(title), duration=VALUES(duration), startDate=VALUES(startDate), endDate=VALUES(endDate), marksPerQues=VALUES(marksPerQues), negativeMarks=VALUES(negativeMarks), instantResult=VALUES(instantResult), instantRank=VALUES(instantRank), instruction=VALUES(instruction), questionPaperId=VALUES(questionPaperId), attachment=VALUES(attachment), file=VALUES(file)";
-        var queryValues = ["tests", "id", "title", "duration", "startDate", "endDate", "marksPerQues", "negativeMarks", "instantResult", "instantRank", "instruction", "questionPaperId", "attachment", "file", req.id, req.title, req.duration, req.startDate, req.endDate, req.marksPerQues, req.negativeMarks, req.instantResult, req.instantRank, req.instruction, req.questionPaperId, req.attachment, req.file];
+        var query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title=VALUES(title), duration=VALUES(duration), marksPerQues=VALUES(marksPerQues), negativeMarks=VALUES(negativeMarks), instantResult=VALUES(instantResult), instantRank=VALUES(instantRank), instruction=VALUES(instruction), questionPaperId=VALUES(questionPaperId), attachment=VALUES(attachment), file=VALUES(file)";
+        var queryValues = ["tests", "id", "title", "duration", "marksPerQues", "negativeMarks", "instantResult", "instantRank", "instruction", "questionPaperId", "attachment", "file", req.id, req.title, req.duration, req.marksPerQues, req.negativeMarks, req.instantResult, req.instantRank, req.instruction, req.questionPaperId, req.attachment, req.file];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
@@ -1392,7 +1392,7 @@ var self = {
         });
     },
     calculateQuestionsDifficulty: function(req, pool, callback) {
-        var query = "INSERT INTO ?? (??, ??, ??, ??) SELECT t.questionId, count(*) as totalAttempt, count(case when t.answer = q.correctAnswer then 1 else null end) as correct, count(case when t.answer is null or t.answer = '' then 1 else null end) as unanswered FROM test_user_answer t LEFT JOIN (questions q) ON q.id = t.questionId GROUP BY t.questionId;"
+        var query = "INSERT INTO ?? (??, ??, ??, ??) SELECT t.questionId, count(*) as totalAttempt, count(case when t.answer = q.correctAnswer then 1 else null end) as correct, count(case when t.answer is null or t.answer = '' then 1 else null end) as unanswered FROM test_user_answer t LEFT JOIN (questions q) ON q.id = t.questionId GROUP BY t.questionId ON DUPLICATE KEY UPDATE totalAttempt = VALUES(totalAttempt), correct = VALUES(correct), unanswered = VALUES(unanswered);"
         var queryValues = ["questions_stats", "questionId", "totalAttempt", "correct", "unanswered"];
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
@@ -1410,8 +1410,8 @@ var self = {
         if (req.users && req.users.length > 0 && req.testId) {
             var query, queryValues;
             async.eachSeries(req.users, function(user, childCallback) {
-                query = "INSERT INTO ??(??, ??, ??, ??) VALUES (?, ?, ?, ?)";
-                queryValues = ["user", "fullName", "email", "phone", "profileType", user.fullName, user.email, user.phone, 'dummy'];
+                query = "INSERT INTO ??(??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE email=VALUES(email), phone=VALUES(phone), fullName=VALUES(fullName), profileType=VALUES(profileType)";
+                queryValues = ["user", "id", "fullName", "email", "phone", "profileType", user.id, user.fullName, user.email, user.phone, 'dummy'];
                 query = mysql.format(query, queryValues);
                 pool.getConnection(function(err, connection) {
                     connection.beginTransaction(function(err) {
@@ -1425,7 +1425,7 @@ var self = {
                                     childCallback(err);
                                 });
                             }
-                            var userId = rows.insertId
+                            var userId = user.id || rows.insertId
                             query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??) values (?, ?, ?, ?, ?, ?, ?)";
                             queryValues = ["testuserinfo", "userId", "testId", "totalQuestions", "correctAnswers", "incorrectAnswers", "score", "status", userId, req.testId, user.totalQuestions, user.correctAnswers, user.incorrectAnswers, user.score, 'evaluated'];
                             query = mysql.format(query, queryValues);
@@ -1437,9 +1437,9 @@ var self = {
                                     });
                                 }
                                 connection.commit(function(err) {
-                                    connection.release();
                                     if (err) {
                                         return connection.rollback(function() {
+                                            connection.release();
                                             childCallback(err);
                                         });
                                     }
