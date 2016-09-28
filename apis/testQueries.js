@@ -669,8 +669,14 @@ var self = {
                             connection.query(query, function(err, rows) {
                                 if (err) {
                                     console.log(err);
+                                } else {
+                                    console.log(req.userId + ' evaluated');
+                                    if(testInfo.isRankPublished){
+                                        self.instanttestEvaluation(req, pool, function(){
+                                            console.log('Rank publish after score calculation');
+                                        });
+                                    }
                                 }
-                                console.log(req.userId + ' evaluated')
                             });
                         });
                     }
@@ -817,11 +823,22 @@ var self = {
                                         queryValues = [req.testId];
                                         query = mysql.format(query, queryValues);
                                         connection.query(query, function(err, rows) {
-                                            connection.release();
                                             if (err) {
+                                                connection.release();
                                                 callback({ "Error": true, "Message": err });
+                                            } else {
+                                                query = "UPDATE tests SET isRankPublished = true WHERE id = ?";
+                                                queryValues = [req.testId];
+                                                query = mysql.format(query, queryValues);
+                                                connection.query(query, function(err, rows) {
+                                                    connection.release();
+                                                    if (err) {
+                                                        callback({ "Error": true, "Message": err });
+                                                    } else {
+                                                        callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+                                                    }
+                                                });
                                             }
-                                            callback({ "Error": false, "Message": "Evaluation completed Successfully" });
                                         });
                                     }
                                 }
@@ -883,11 +900,21 @@ var self = {
         query = mysql.format(query, queryValues);
         pool.getConnection(function(err, connection) {
             connection.query(query, function(err, rows) {
-                connection.release();
                 if (err) {
+                    connection.release();
                     callback({ "Error": true, "Message": err });
                 } else {
-                    callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+                    query = "UPDATE tests SET isRankPublished = true WHERE id = ?";
+                    queryValues = [req.testId];
+                    query = mysql.format(query, queryValues);
+                    connection.query(query, function(err, rows) {
+                        connection.release();
+                        if (err) {
+                            callback({ "Error": true, "Message": err });
+                        } else {
+                            callback({ "Error": false, "Message": "Evaluation completed Successfully" });
+                        }
+                    });
                 }
             });
         });
@@ -972,7 +999,28 @@ var self = {
         // wkhtmltopdf(req.html)
         //     .pipe(fs.createWriteStream(path.join(__dirname, 'public/out.pdf')));
         //fs.writeFileSync(path.join(__dirname, 'public/userTestInfo.xlsx'), xls, 'binary');
+        
         callback({ "Error": false, "Message": "Successfull", "url": request.protocol + '://' + request.get('host') + '/out.pdf' });
+    },
+    editUserAnswer: function(req, pool, callback) {
+        var values = [];
+        var query = "INSERT INTO ?? (??, ??, ??, ??) VALUES ? ON DUPLICATE KEY UPDATE answer=VALUES(answer)";
+        var queryValues = ["test_user_answer", "questionId", "userId", "testId", "answer"]; //, request.courseId, request.userId, request.mode];
+        for (var i = 0; i < req.answers.length; i++) {
+            values.push([req.answers[i].questionId, req.userId, req.testId, req.answers[i].answer]);
+        }
+        queryValues.push(values);
+        query = mysql.format(query, queryValues);
+        pool.getConnection(function(err, connection) {
+            connection.query(query, function(err, rows) {
+                connection.release();
+                if (err) {
+                    callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Answer updated successfully" });
+                }
+            });
+        });
     },
     addUpdateQuestionPaper: function(req, pool, callback) {
         var query = "INSERT INTO ??(??, ??) VALUES (?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name)";
@@ -1068,8 +1116,8 @@ var self = {
             async.eachSeries(req.questions, function(question, childCallback) {
                 var subjectId = _.find(subjectList, { 'name': question.subject });
                 subjectId = subjectId ? _.map([subjectId], 'id')[0] : 0;
-                query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE question=VALUES(question), type=VALUES(type), explanation=VALUES(explanation), correctAnswer=VALUES(correctAnswer), subjectId=VALUES(subjectId), questionText=VALUES(questionText), explanationText=VALUES(explanationText)";
-                queryValues = ["questions", "question", "type", "explanation", "correctAnswer", "subjectId", "questionText", "explanationText", "questionNo", question.question, question.type, question.explanation, question.correctAnswer, subjectId, question.questionText, question.explanationText, question.questionNo];
+                query = "INSERT INTO ??(??, ??, ??, ??, ??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE question=VALUES(question), type=VALUES(type), explanation=VALUES(explanation), correctAnswer=VALUES(correctAnswer), subjectId=VALUES(subjectId), questionText=VALUES(questionText), explanationText=VALUES(explanationText)";
+                queryValues = ["questions", "id", "question", "type", "explanation", "correctAnswer", "subjectId", "questionText", "explanationText", "questionNo", question.id, question.question, question.type, question.explanation, question.correctAnswer, subjectId, question.questionText, question.explanationText, question.questionNo];
                 query = mysql.format(query, queryValues);
                 self.addUpdateMcqQuestion(query, question, pool, function(result) {
                     if (result.Error) {
@@ -1306,6 +1354,44 @@ var self = {
                                 callback({ "Error": false, "Message": "Successfully", "questions": questions, "recordCount": recordCount });
                             }
                         });
+                    }
+                });
+            });
+        }
+    },
+    getQuestionsByQPId: function (req, pool, callback) {
+        var questions = answerList = [];
+        if (req.questionPaperId) {
+            var query = "SELECT q.* FROM ?? q WHERE q.isDeleted=false AND q.id IN (SELECT qq.questionId from question_questionpaper qq WHERE qq.questionPaperId = ?)";
+            var queryValues = ["questions", req.questionPaperId];
+            query = mysql.format(query, queryValues);
+            pool.getConnection(function(err, connection) {
+                connection.query(query, function(err, rows) {
+                    if (err) {
+                        connection.release();
+                        callback({ "Error": true, "Message": err });
+                    } else {
+                        if (err) {
+                            connection.release();
+                            callback({ "Error": true, "Message": err });
+                        } else {
+                            questions = rows;
+                            query = "SELECT * FROM ?? WHERE questionId IN (SELECT qq.questionId from question_questionpaper qq WHERE qq.questionPaperId = ?)";
+                            queryValues = ["answers", req.questionPaperId];
+                            query = mysql.format(query, queryValues);
+                            connection.query(query, function(err, rows) {
+                                connection.release();
+                                if (err) {
+                                    callback({ "Error": true, "Message": err });
+                                } else {
+                                    answerList = rows;
+                                    _.forEach(questions, function(value){
+                                        value.answers = _.filter(answerList, { 'questionId': value.id });
+                                    });
+                                    callback({ "Error": false, "Message": "Successfully", "questions": questions });
+                                }
+                            });
+                        }
                     }
                 });
             });

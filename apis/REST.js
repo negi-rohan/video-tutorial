@@ -486,6 +486,12 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
         });
     });
 
+    router.post("/exam/editUserAnswer", function(req, res) { /// get all tests
+        testQueryHelper.editUserAnswer(req.body, pool, function(result) {
+            res.json(result);
+        });
+    });
+
     router.post("/questionPaper", function(req, res) { /// get all tests
         testQueryHelper.addUpdateQuestionPaper(req.body, pool, function(result) {
             res.json(result);
@@ -693,10 +699,10 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                                                     };
                                                     question.answers.push(answer);
                                                     currently = 'answer';
-                                                } else if(_.startsWith(value.text, 'Ans)')) {
+                                                } else if (_.startsWith(value.text, 'Ans)')) {
                                                     var text = value.text.substring(value.text.indexOf(')') + 1);
                                                     question.correctAnswer = text.trim().toLowerCase();
-                                                } else if(_.startsWith(value.text, 'Exp)')) {
+                                                } else if (_.startsWith(value.text, 'Exp)')) {
                                                     var text = value.text.substring(0, value.text.indexOf(')') + 1);
                                                     value.html = value.html.replace(text, '');
                                                     question.explanation = '<p>' + value.html.trim() + '</p>';
@@ -718,6 +724,103 @@ REST_ROUTER.prototype.handleRoutes = function(router, pool, md5, jwt, imgUpload,
                                                 questionPaperId: req.body.questionPaperId
                                             };
                                             res.json({ "Error": true, "Message": "Success", "result": result });
+                                        }
+                                    });
+                                }
+                            });
+                            break;
+                        }
+                    }
+                }
+            });
+
+        } else {
+            res.json({ "Error": true, "Message": "No file attached" });
+        }
+    });
+
+    router.post("/question/importExplationsDoc", fileUpload, function(req, res) {
+        if (req && req.files && req.files.file && req.files.file.path) {
+            var zip = new AdmZip(req.files.file.path);
+
+            var targetDir = './public/question/' + req.body.questionPaperId + '/explanation';
+
+            if (fs.existsSync(targetDir)) {
+                console.log(rmDir(targetDir));
+            }
+
+            if (!fs.existsSync(targetDir)) {
+                fs.mkdirSync(targetDir);
+            }
+
+            zip.extractAllTo(targetDir);
+            var file;
+            fs.readdir(targetDir, function(err, list) {
+                if (err)
+                    res.json({ "Error": true, "Message": err });
+                else {
+                    for (var i = 0; i < list.length; i++) {
+                        if (path.extname(list[i]) === '.htm' || path.extname(list[i]) === '.html') {
+                            file = list[i];
+                            fs.readFile(targetDir + '/' + file, function(err, data) {
+                                if (err) {
+                                    console.log(err);
+                                    res.json({ "Error": true, "Message": err });
+                                } else {
+                                    var html = data.toString().replace(/\r\n|\r|\n/g, ' ');
+                                    html = html.replace(/<\!\[if \!supportLists\]>/g, '');
+                                    html = html.replace(/<\!\[endif\]>/g, '');
+                                    html = html.replace(/<\!\[if \!vml\]>/g, '');
+                                    var promise = htmlToJson.parse(unescape(html), {
+                                        sections: htmlToJson.createParser(['body > div > *[class]', {
+                                            'html': function($section) {
+                                                return $section.html().trim();
+                                            },
+                                            'text': function($section) {
+                                                return $section.text().trim();
+                                            },
+                                            'img': function($section) {
+                                                return $section.find('img').length > 0;
+                                            }
+                                        }])
+                                    }, function(err, results) {
+                                        if (results && results.sections && results.sections.filter && results.sections.filter.length > 0) {
+                                            testQueryHelper.getQuestionsByQPId(req.body, pool, function(response) {
+                                                if(response && response.questions && response.questions.length > 0){
+                                                    ///////////////////////////////////////////////////////
+                                                    var questions = [];
+                                                    var question = {};
+                                                    _.forEach(results.sections.filter, function(value, key) {
+                                                        if (value.img) {
+                                                            value.html = value.html.replace(/src="/g, 'src="' + req.protocol + '://' + req.get('host') + '/question/' + req.body.questionPaperId + '/')
+                                                        }
+                                                        if (_.startsWith(value.html, '<tr>')) {
+                                                            value.html = '<table>' + value.html + '</table>';
+                                                        }
+                                                        if (_.startsWith(value.text, 'Q.')) {
+                                                            if (question && question.question)
+                                                                questions.push(question);
+                                                            var text = value.text.substring(0, value.text.indexOf(')') + 1);
+                                                            var quesNo = parseInt(text.replace(/\D/g, ''));
+                                                            question = _.find(response.questions, {'questionNo' : quesNo}) || {};
+                                                            value.html = value.html.replace(text, '');
+                                                            question.explanation = '<p>' + value.html.trim() + '</p>';
+                                                        } else if ((value.text || value.img) && question && question.question) {
+                                                            question.explanation = question.explanation + '<p>' + value.html.trim() + '</p>';
+                                                        }
+                                                        if (key == results.sections.filter.length - 1)
+                                                            questions.push(question);
+                                                    });
+                                                    var result = {
+                                                        questions: questions,
+                                                        questionPaperId: req.body.questionPaperId
+                                                    };
+                                                    res.json({ "Error": false, "Message": "Success", "result": result });
+                                                    ///////////////////////////////////////////////////////
+                                                } else {
+                                                    res.json({ "Error": true, "Message": "No questions found" });
+                                                }
+                                            });
                                         }
                                     });
                                 }

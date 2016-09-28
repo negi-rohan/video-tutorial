@@ -265,7 +265,7 @@ var self = {
                     } else {
                         ip = req.ip;
                     }
-                    console.log("client IP is *********************" + ip + ' : ' + rows[0].fullName);
+                    console.log("client IP is *********************" + ip + ' : ' + rows[0].fullName + ': ' + new Date());
                     var token = jwt.sign(rows[0], request.secretString, {
                         expiresIn: "1d" // expires in 24 hours
                     });
@@ -637,8 +637,9 @@ var self = {
                 connection.release();
                 if (err) {
                     callback({ "Error": true, "Message": err });
+                } else {
+                    callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
                 }
-                callback({ "Error": false, "Message": "Course subscribed successfully", "code": 1 });
             });
         });
     },
