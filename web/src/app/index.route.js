@@ -8,11 +8,34 @@
     /** @ngInject */
     function routerConfig($stateProvider, $urlRouterProvider) {
         $stateProvider
-            .state('login', {
-                url: '/',
+            .state('home', {
+                url: '/home',
+                abstract: true,
+                templateUrl: 'app/home/home.html',
+                controller: 'HomeController',
+                controllerAs: 'vm'
+            })
+            .state('home.account', {
+                url: '/account',
                 templateUrl: 'app/login/login.html',
                 controller: 'LoginController',
                 controllerAs: 'vm'
+            })
+            .state('home.mainsTestSeries', {
+                url: '/mainsTestSeries',
+                templateUrl: 'app/home/mainsTestSeries.html'
+            })
+            .state('home.prelimsTestSeries', {
+                url: '/prelimsTestSeries',
+                templateUrl: 'app/home/prelimsTestSeries.html'
+            })
+            .state('home.aboutUs', {
+                url: '/aboutUs',
+                templateUrl: 'app/home/aboutUs.html'
+            })
+            .state('home.ourStudents', {
+                url: '/ourStudents',
+                templateUrl: 'app/home/ourStudents.html'
             })
             .state('reset', {
                 url: '/reset/:token',
@@ -146,6 +169,12 @@
                 controller: 'StudentListController',
                 controllerAs: 'vm'
             })
+            .state('main.test.editTestAnswer', {
+                url: '/studentAnswers',
+                templateUrl: 'app/test/editStudentAnswers.html',
+                controller: 'EditAnswersController',
+                controllerAs: 'vm'
+            })
             .state('main.test.questionList', {
                 url: '/questionList',
                 templateUrl: 'app/test/questionList.html',
@@ -187,9 +216,13 @@
                 templateUrl: 'app/test/testAnswers.html',
                 controller: 'TestAnswersController',
                 controllerAs: 'vm'
+            })
+            .state('main.termsAndConditions', {
+                url: '/term&conditions',
+                templateUrl: 'app/partical/termsAndConditions.html'
             });
 
-        $urlRouterProvider.otherwise('/');
+        $urlRouterProvider.otherwise('/home/account');
     }
 
 })();

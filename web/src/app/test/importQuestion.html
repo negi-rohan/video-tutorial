@@ -9,7 +9,7 @@
                 <tr class="success">
                     <th>#</th>
                     <th>Question</th>
-                    <th>Subject</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -20,6 +20,7 @@
                         <text-angular class="import-questions" ta-toolbar="toolBar" id="question.question" placeholder="Question" ng-model="question.question" ng-if="question.isQuestionEditable"></text-angular>
                     </td>
                     <td>
+                        Subject
                         <select ng-options="subject.name as subject.name for subject in subjects" ng-model="question.subject"></select>
                     </td>
                 </tr>
@@ -28,10 +29,14 @@
                     <td>
                         <div ng-repeat="answer in question.answers | orderBy: 'ansKey'">
                             <span ng-bind="($index + 97) | charCodeToChar"></span>)
-                            <span ng-bind-html="answer.answerText" style="display:inline-block;white-space:pre-wrap"></span>
+                            <span ng-bind-html="answer.answerText" style="display:inline-block;white-space:pre-wrap" ng-click="answer.isAnswerEditable = true" ng-if="!answer.isAnswerEditable"></span>
+                            <text-angular class="import-questions" ta-toolbar="toolBar" placeholder="option" ng-model="answer.answerText" ng-if="answer.isAnswerEditable"></text-angular>
                         </div>
                     </td>
-                    <td ng-bind="question.correctAnswer"></td>
+                    <td>
+                        Correct Answer
+                        <input ng-model="question.correctAnswer" />
+                    </td>
                 </tr>
                 <tr>
                     <td></td>

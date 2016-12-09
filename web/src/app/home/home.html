@@ -1,0 +1,82 @@
+<div ng-cloak>
+    <div class="home-top-bg" style="overflow-x:hidden;">
+        <header class="home-header">
+            <nav class="navbar navbar-custom navbar-fixed-top">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="navbar-header">
+                                <button type="button" class="navbar-toggle" ng-click="vm.isCollapsed = !vm.isCollapsed" aria-expanded="false">
+                                    <span class="sr-only">Toggle navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
+                                <a class="navbar-brand logo" href="http://forumias.academy"></a>
+                            </div>
+                            <div class="navbar-collapse collapse in" uib-collapse="vm.isCollapsed" aria-expanded="false">
+                                <ul class="nav navbar-nav navbar-right nav-margin">
+                                    <li class="" ui-sref="home.account" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
+                                        <a href="javascript:void(0);" class="uppercase">Home</a>
+                                    </li>
+                                    <li class="" ui-sref="home.aboutUs" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
+                                        <a href="javascript:void(0);" class="uppercase">About Us</a>
+                                    </li>
+                                    <li class="" ui-sref="home.mainsTestSeries" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
+                                        <a href="javascript:void(0);" class="uppercase">Mains Test Series</a>
+                                    </li>
+                                    <li class="" ui-sref="home.prelimsTestSeries" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
+                                        <a href="javascript:void(0);" class="uppercase">Prelims Test Series</a>
+                                    </li>
+                                    <li class="" ui-sref="home.ourStudents" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
+                                        <a href="javascript:void(0);" class="uppercase">Our Students</a>
+                                    </li>
+                                    <!-- <li class="">
+                                        <a href="javascript:void(0);" class="uppercase">Contact</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="uppercase" class="sign-in">Sign In</a>
+                                    </li>
+                                    <li class="sep-content text-center">
+                                        <span class="sep"></span>
+                                    </li>
+                                    <li class=" diff_link">
+                                        <a href="javascript:void(0);" class="uppercase">Sign Up</a>
+                                    </li> -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="clearfix"></div>
+        <div class="home-top-cont mob-home-top-cont">
+            <div ui-view></div>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <ul class="copyright">
+                        <li>Copyright © ForumIAS</li>
+                        <li ui-sref="home.aboutUs">
+                            <a href="javascript:void(0);">About Us</a>
+                        </li>
+                        <li ui-sref="home.mainsTestSeries">
+                            <a href="javascript:void(0);">Mains Test Series</a>
+                        </li>
+                        <li ui-sref="home.prelimsTestSeries">
+                            <a href="javascript:void(0);">Prelims Test Series</a>
+                        </li>
+                        <li ui-sref="home.ourStudents">
+                            <a href="javascript:void(0);">Our Students</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>

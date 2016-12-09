@@ -207,7 +207,7 @@
                 $http.post(CommonInfo.getAppUrl() + '/api/course/subscribe', data).then(function(response) {
                     if (response && response.data && !response.data.Error) {
                         if (response.data.url) {
-                            window.open(response.data.url + '?embed=form');
+                            window.open(response.data.url + '?embed=form', "_self");
                         } else if (response.data.code) {
                             growl.success('Course subscribed successfully');
                         }
@@ -258,7 +258,7 @@
             vm.lesson = lesson
             vm.lesson.comments = vm.lesson.comments || [];
             _.forEach(vm.lesson.files, function(value) {
-                value.filePath = _.replace(value.filePath, '/public', '');
+                value.filePath = value.filePath.replace('/public', '');
             });
             if (lesson.video && lesson.video != 'null') {
                 vm.lesson.options = {
@@ -589,11 +589,12 @@
             }
         }
 
-        function addStudentToCourse(courseId) {
+        function addStudentToCourse(courseId, courseName) {
             if (vm.selectedUserGrid && vm.selectedUserGrid.length > 0 && courseId) {
                 var data = {
                     courseId: courseId,
-                    users: vm.selectedUserGrid
+                    users: vm.selectedUserGrid,
+                    courseName: courseName
                 };
                 $http.post(CommonInfo.getAppUrl() + '/api/course/subscribeManual', data).then(function(response) {
                     if (response && response.data && !response.data.Error) {
@@ -603,11 +604,12 @@
             }
         }
 
-        function addStudentToTestSeries(testSeriesId) {
+        function addStudentToTestSeries(testSeriesId, testSeriesName) {
             if (vm.selectedUserGrid && vm.selectedUserGrid.length > 0 && testSeriesId) {
                 var data = {
                     testSeriesId: testSeriesId,
-                    users: vm.selectedUserGrid
+                    users: vm.selectedUserGrid,
+                    testSeriesName: testSeriesName
                 };
                 $http.post(CommonInfo.getAppUrl() + '/api/testSeries/addUsers', data).then(function(response) {
                     if (response && response.data && !response.data.Error) {
@@ -729,7 +731,7 @@
 
         function signout() {
             CommonInfo.reset();
-            $state.go('login');
+            $state.go('home.account');
         }
 
         function showCourseDemo(course) {

@@ -80,7 +80,7 @@
             },
             getInfo: function(item) {
                 if (!$localStorage.infoObj || !$localStorage.infoObj.user)
-                    $state.go('login');
+                    $state.go('home.account');
                 else
                     return angular.copy($localStorage.infoObj[item]);
             },

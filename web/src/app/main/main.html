@@ -37,46 +37,46 @@
                 </form>
                 <span class="navbar-form navbar-right">
                     Hello <span ng-bind="vm.userInfo.fullName"></span>
-                    <div>Roll No. <span ng-bind="vm.userInfo.id"></span></div>
+                <div>Roll No. <span ng-bind="vm.userInfo.id"></span></div>
                 </span>
                 <!-- project menu -->
                 <ul class="nav navbar-nav navbar-left">
-                    <li ui-sref="main.libary" ui-sref-active="active" ng-if="vm.config.tabs.library">
+                    <li ui-sref="main.libary" ui-sref-active="active" ng-if="vm.config.tabs.library" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);" ng-click="vm.courseLibary();">
                             <i class="fa fa-database fa-fw" aria-hidden="true"></i> Library
                         </a>
                     </li>
-                    <li ui-sref="main.myCourses" ui-sref-active="active" ng-if="vm.config.tabs.myCourses">
+                    <li ui-sref="main.myCourses" ui-sref-active="active" ng-if="vm.config.tabs.myCourses" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);" ng-click="vm.getMyCourses();">
                             <i class="fa fa-clone fa-fw" aria-hidden="true"></i> My Courses
                         </a>
                     </li>
-                    <li ui-sref="main.courses" ui-sref-active="active" ng-if="vm.config.tabs.allCourses">
+                    <li ui-sref="main.courses" ui-sref-active="active" ng-if="vm.config.tabs.allCourses" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);" ng-click="vm.getAllCourses();">
                             <i class="fa fa-database fa-fw" aria-hidden="true"></i> Course
                         </a>
                     </li>
-                    <li ui-sref="main.lessons" ui-sref-active="active" ng-if="vm.config.tabs.allLessons">
+                    <li ui-sref="main.lessons" ui-sref-active="active" ng-if="vm.config.tabs.allLessons" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);" ng-click="vm.getAllLessons();">
                             <i class="fa fa-clone fa-fw" aria-hidden="true"></i> Lessons
                         </a>
                     </li>
-                    <li ui-sref="main.instructors" ui-sref-active="active" ng-if="vm.config.tabs.instructor">
+                    <li ui-sref="main.instructors" ui-sref-active="active" ng-if="vm.config.tabs.instructor" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);" ng-click="vm.getUsers('instructor');">
                             <i class="fa fa-user fa-fw" aria-hidden="true"></i> Instructors
                         </a>
                     </li>
-                    <li ui-sref="main.students" ui-sref-active="active" ng-if="vm.config.tabs.students">
+                    <li ui-sref="main.students" ui-sref-active="active" ng-if="vm.config.tabs.students" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);" ng-click="vm.getUsers('student');">
                             <i class="fa fa-users fa-fw" aria-hidden="true"></i> Students
                         </a>
                     </li>
-                    <li ui-sref="main.test.home" ng-if="vm.config.tabs.test">
+                    <li ui-sref="main.test.home" ng-if="vm.config.tabs.test" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);" ng-click="vm.getAllTests();">
                             <i class="fa fa-certificate fa-fw" aria-hidden="true"></i> Test
                         </a>
                     </li>
-                    <li ui-sref="main.testSeries" ng-if="vm.config.tabs.exam">
+                    <li ui-sref="main.testSeries" ng-if="vm.config.tabs.exam" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);">
                             <i class="fa fa-certificate fa-fw" aria-hidden="true"></i> Test Series
                         </a>
@@ -92,4 +92,7 @@
             <div ui-view></div>
         </div>
     </div>
+   <!--  <footer>
+        <a ui-sref="main.termsAndConditions" > Terms And Conditions</a>
+    </footer> -->
 </div>

@@ -157,6 +157,11 @@
                         $state.go('main.examsList');
                 });
             } else {
+                vm.showLangChoice = vm.exam.questions[0].questionText ? 1 : 0;
+                if (vm.showLangChoice)
+                    vm.selectedLang = 0;
+                else
+                    vm.selectedLang = 1;
                 _.forEach(vm.exam.questions, function(value, key) {
                     vm.userCurrentQuestion[key] = {
                         questionId: value.id,
@@ -256,7 +261,7 @@
                     $interval.cancel(localSubmit);
                     $interval.cancel(serverSubmit);
                     localSubmit = serverSubmit = undefined;
-                    if(vm.isAdmin)
+                    if (vm.isAdmin)
                         data.timeRemaining = 0;
                 }
                 if (isForced || status == 'pending' || confirm('Are you sure, you want to submit(final) your answers')) {

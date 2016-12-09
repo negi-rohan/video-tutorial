@@ -1,0 +1,32 @@
+<div class="container-fluid" ng-cloak>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;">
+                    <thead>
+                        <tr class="success">
+                            <th>S No.</th>
+                            <th>Question</th>
+                            <th>Selected Answer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="question in vm.questions">
+                            <th scope="row" ng-bind="$index + 1"></th>
+                            <td>
+                                <div ng-bind-html="question.question" ng-if="vm.selectedLang == 1"></div>
+                                <div ng-bind-html="question.questionText" ng-if="vm.selectedLang == 2"></div>
+                            </td>
+                            <td>
+                                <input ng-model="question.userAnsKey" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-primary pull-right" ng-click="vm.saveUserAnswer()">
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

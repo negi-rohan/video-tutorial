@@ -1,178 +1,7 @@
-<div class="center-element text-center">
-    <div class="plain-color font-largest line-h2 mob-title-big">
-        <span class="weight-light">You Want To Crack IAS</span>
-        <div id="js-rotating" class="font-big-mid-large midtext mob-mid-title"> We Want To Help </div>
-    </div>
-    <div class="clear-fix"></div>
-</div>
-<div>
-    <div class="row">
-        <div class="col-md-4 col-md-offset-4 col-xs-12">
-            <div class="well" style="bottom:-25px;position:relative;">
-                <uib-tabset active="vm.activeForm">
-                    <uib-tab index="0" heading="Login">
-                        <form style="margin-top:15px;" ng-if="!vm.forget.status">
-                            <div class="form-group">
-                                <label for="profile.email">Email or Phone number</label>
-                                <input type="text" class="form-control" id="profile.email" placeholder="Email or Phone number" ng-model="vm.user.userName" />
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.password">Password</label>
-                                <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.user.password" ng-keyup="$event.keyCode == 13 && vm.login()" />
-                                <div class="text-right">
-                                    <a href="javascript:void(0);" ng-click="vm.forget.status = true;">Forgot Password</a>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <input class="btn btn-primary pull-right" type="button" ng-click="vm.login()" value="Login">
-                            </div>
-                            <div class="clearfix"></div>
-                        </form>
-                        <form style="margin-top:15px;" ng-if="vm.forget.status">
-                            <div class="form-group">
-                                <label for="profile.email">Email</label>
-                                <input type="text" required class="form-control" id="profile.email" placeholder="Email" ng-model="vm.forget.email" />
-                            </div>
-                            <div class="form-group">
-                                <input class="btn btn-primary pull-right" type="button" ng-click="vm.forgetPassword();" value="Send Request">
-                            </div>
-                            <div class="clearfix"></div>
-                        </form>
-                    </uib-tab>
-                    <uib-tab index="1" heading="Signup">
-                        <form style="margin-top:15px;" ng-if="vm.isOtp && !vm.isOtpSend && !vm.isOtpValid" name="signup">
-                            <div class="form-group">
-                                <label for="profile.phone">Phone</label>
-                                <input name="phone" type="text" required="" ng-minlength="10" min="10" class="form-control" id="profile.phone" maxlength="10" placeholder="Phone" ng-model="vm.newUser.phone" />
-                            </div>
-                            <input class="btn btn-primary pull-right" ng-disabled="!signup.phone.$valid" type="button" ng-click="vm.requestOtp()" value="Continue">
-                            <div class="clearfix"></div>
-                            <a href="javascript:void(0);" ng-click="vm.activeForm=0">
-                                <span>Exisiting User? Login</span>
-                            </a>
-                        </form>
-                        <form style="margin-top:15px;" ng-if="vm.isOtp && vm.isOtpSend && !vm.isOtpValid">
-                            <div class="form-group">
-                                <label for="profile.otp">Enter verification code</label>
-                                <input type="text" class="form-control" id="profile.otp" placeholder="Verification Code" ng-model="vm.newUser.otp" />
-                                <div class="text-right" ng-if="vm.showResendOtp">
-                                    <a href="javascript:void(0);" ng-click="vm.requestOtp();">Resend verification code</a>
-                                </div>
-                            </div>
-                            <input class="btn btn-primary pull-right" type="button" ng-click="vm.validateOtp()" value="Submit Verification Code">
-                            <div class="clearfix"></div>
-                        </form>
-                        <form style="margin-top:15px;" ng-if="!vm.isOtp || vm.isOtpValid">
-                            <div class="form-group">
-                                <label for="profile.fullName">Full Name</label>
-                                <i class="pull-right">(All fields are mandatory)</i>
-                                <input type="text" class="form-control" id="profile.fullName" placeholder="Full Name" ng-model="vm.newUser.fullName" />
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.email">Email</label>
-                                <input type="email" class="form-control" id="profile.email" placeholder="Email" ng-model="vm.newUser.email" />
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.phone">Phone</label>
-                                <input type="text" class="form-control" id="profile.phone" maxlength="10" ng-if="!vm.isOtp" placeholder="Phone" ng-model="vm.newUser.phone" />
-                                <p class="form-control-static" ng-bind="vm.newUser.phone" ng-if="vm.isOtp"></p>
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.password">Password</label>
-                                <input type="password" class="form-control" id="profile.password" placeholder="Password" ng-model="vm.newUser.password" />
-                            </div>
-                            <div class="form-group">
-                                <label for="profile.confirmPassword">Confirm Password</label>
-                                <input type="password" class="form-control" id="profile.confirmPassword" placeholder="Confirm Password" ng-model="vm.newUser.confirmPassword" />
-                            </div>
-                            <input class="btn btn-primary pull-right" type="button" ng-click="vm.signup()" value="Sign me Up">
-                            <div class="clearfix"></div>
-                        </form>
-                    </uib-tab>
-                </uib-tabset>
-            </div>
-        </div>
-    </div>
-</div>
-<section class="lighter-bg pricing-top plain-color">
+<section class="lighter-bg pricing-top plain-color" style="margin-top:-100px;">
     <div class="container">
         <div class="row text-content">
-            <div class="col-md-12 text-center line-h1">
-                <div class="pricing-title plain-color text-center mob-title">
-                    <u>Mains 2016 Test Series - Online + Classroom</u>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <!-- Mains 2016 Online Test Series for mobile -->
-            <div class="col-md-8 col-md-offset-2 plan-content text-dark mob-only">
-                <div class="pricing-plan mob-pricing-plan">
-                    <div class="col-md-6 col-sm-6">
-                        <div class="row">
-                            <div class="font-big uppercase dark-bg plain-color text-center font-big border-right start-plan">Batch 1 - August 20 - Online </div>
-                            <div class="starter-text plain-bg">
-                                <div class="font-large text-blue text-center">Rs. 13800</div>
-                                <div class="font-mid text-center text-darkest price-text">Test Plan Download</div>
-                                <div class="partition-border">&nbsp;</div>
-                                <ul class="text-center percent">
-                                    <li><span class="pricing-info"><a href="https://dl.dropboxusercontent.com/u/24251546/MGP/ForumIASMainsGuidanceProgram-Batch1.pdf"><button type="button" class="uppercase btn-normal lighter-bg btn-submit">Download</button></a></span></li>
-                                    <li><span class="pricing-info"><a href="http://imojo.in/68m3wz"><button type="button" class="uppercase btn-normal green-bg btn-submit">Enroll Now</button></a></span></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-sm-6">
-                        <div class="row">
-                            <div class="font-big uppercase dark-bg plain-color text-center font-big border-right start-plan">Batch 2 - October 15 - Online </div>
-                            <div class="starter-text plain-bg">
-                                <div class="font-large text-blue text-center"> Rs. 9200</div>
-                                <div class="font-mid text-center text-darkest price-text">Test Plan Download</div>
-                                <div class="partition-border">&nbsp;</div>
-                                <ul class="text-center percent">
-                                    <li><span class="pricing-info"><a href="https://dl.dropboxusercontent.com/u/24251546/MGP/ForumIASMainsGuidanceProgram-TestPlan8FLTs.pdf"><button type="button" class="uppercase btn-normal lighter-bg btn-submit">Download</button></a></span></li>
-                                    <li><span class="pricing-info"><a href="http://imojo.in/66u9i4"><button type="button" class="uppercase btn-normal green-bg btn-submit">Enroll Now</button></a></span></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Mains 2016 Online Test Series for mobile ends -->
-            <!-- Mains 2016 Online Test Series for desktop -->
-            <div class="col-md-12 no-mob">
-                <div class="table-cont">
-                    <div class="pricing-table-cont">
-                        <table width="100%" align="center" class="plain-bg pricing-table text-dark">
-                            <thead class="dark-bg plain-color">
-                                <tr>
-                                    <th width="27%">Program Name</th>
-                                    <th class="light-dark-bg" width="18%">Test Plan Download</th>
-                                    <th width="20%">Fees</th>
-                                    <th>Payment</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Mains 2016 Test Series - Batch 1 - August 20 - Online / Classroom</td>
-                                    <td align="center"><span class="pricing-info"><a href="https://dl.dropboxusercontent.com/u/24251546/MGP/ForumIASMainsGuidanceProgram-Batch1.pdf"><button type="button" class="uppercase btn-normal lighter-bg btn-submit">Download</button></a></span></td>
-                                    <td align="center"><b>Rs. 13800</b></td>
-                                    <td align="center"><span class="pricing-info"><a href="http://imojo.in/68m3wz"><button type="button" class="uppercase btn-normal green-bg btn-submit">Enroll Now</button></a></span></td>
-                                </tr>
-                                <tr>
-                                    <td>Mains 2016 Test Series - Batch 2 - October 15 - Online / Classroom</td>
-                                    <td align="center"><span class="pricing-info"><a href="https://dl.dropboxusercontent.com/u/24251546/MGP/ForumIASMainsGuidanceProgram-TestPlan8FLTs.pdf"><button type="button" class="uppercase btn-normal lighter-bg btn-submit">Download</button></a></span></td>
-                                    <td align="center"><b>Rs. 9200</b></td>
-                                    <td align="center"><span class="pricing-info"><a href="http://imojo.in/66u9i4"><button type="button" class="uppercase btn-normal green-bg btn-submit">Enroll Now</button></a></span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <!-- Mains 2016 Online Test Series for desktop ends-->
-        </div>
-        <div class="row text-content">
-            <div class="col-md-12 text-center line-h1 first" style="margin-top:30px;margin-bottom:0;">
+            <div class="col-md-12 text-center line-h1 first" style="margin-bottom:0;">
                 <div class="pricing-title plain-color text-center mob-title" style="margin-bottom:0;">
                     <u>Prelims 2017 Online Test Series</u>
                 </div>
@@ -247,10 +76,10 @@
                         <table width="100%" align="center" class="plain-bg pricing-table text-dark">
                             <thead class="dark-bg plain-color">
                                 <tr>
-                                    <th width="27%">Program Name</th>
-                                    <th class="light-dark-bg" width="18%">Test Plan Download</th>
-                                    <th width="20%">Fees</th>
-                                    <th>Payment</th>
+                                    <th width="27%" style="text-align:center;">Program Name</th>
+                                    <th class="light-dark-bg" width="18%" style="text-align:center;">Test Plan Download</th>
+                                    <th width="20%" style="text-align:center;">Fees</th>
+                                    <th style="text-align:center;">Payment</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -359,10 +188,10 @@
                         <table width="100%" align="center" class="plain-bg pricing-table text-dark">
                             <thead class="dark-bg plain-color">
                                 <tr>
-                                    <th width="27%">Program Name</th>
-                                    <th class="light-dark-bg" width="18%">Test Plan Download</th>
-                                    <th width="20%">Fees</th>
-                                    <th>Payment</th>
+                                    <th width="27%" style="text-align:center;">Program Name</th>
+                                    <th class="light-dark-bg" width="18%" style="text-align:center;">Test Plan Download</th>
+                                    <th width="20%" style="text-align:center;">Fees</th>
+                                    <th style="text-align:center;">Payment</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -40,7 +40,7 @@
                                     Add to courses <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="courseList">
-                                    <li role="menuitem" ng-click="vm.addStudentToCourse(course.id);" ng-repeat="course in vm.coursesNameList">
+                                    <li role="menuitem" ng-click="vm.addStudentToCourse(course.id, course.name);" ng-repeat="course in vm.coursesNameList">
                                         <a href="javascript:void(0);" ng-bind="course.name"></a>
                                     </li>
                                 </ul>
@@ -50,7 +50,7 @@
                                     Add to test series <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu-right" uib-dropdown-menu role="menu" aria-labelledby="testSeriesList">
-                                    <li role="menuitem" ng-click="vm.addStudentToTestSeries(testSeries.id);" ng-repeat="testSeries in vm.testSeriesList">
+                                    <li role="menuitem" ng-click="vm.addStudentToTestSeries(testSeries.id, testSeries.name);" ng-repeat="testSeries in vm.testSeriesList">
                                         <a href="javascript:void(0);" ng-bind="testSeries.name"></a>
                                     </li>
                                 </ul>

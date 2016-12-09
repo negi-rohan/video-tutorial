@@ -85,6 +85,7 @@
                         }
                     },
                     function(response) {
+                        console.log(response)
                         growl.info(response.data.Message);
                     }
                 );

@@ -62,6 +62,7 @@
         vm.addToPaper = addToPaper;
         vm.importQuestion = importQuestion;
         vm.importQuestionDoc = importQuestionDoc;
+        vm.importExplanationDoc = importExplanationDoc;
         vm.getTestUsers = getTestUsers;
         vm.exportTestUsers = exportTestUsers;
         vm.getTestUserPagination = getTestUserPagination;
@@ -621,6 +622,64 @@
                     url: CommonInfo.getAppUrl() + '/api/question/importDoc',
                     data: {
                         file: vm.question.file,
+                        questionPaperId: quesPaperId
+                    }
+                }).then(function(resp) {
+                    if (resp && resp.data && resp.data.result && resp.data.result.questions && resp.data.result.questions.length > 0) {
+                        var item = {
+                            subjects: vm.subjectList,
+                            data: resp.data.result
+                        };
+                        var modalInstance = $uibModal.open({
+                            animation: true,
+                            templateUrl: 'app/test/importQuestion.html',
+                            size: 'lg',
+                            controller: function($scope, item) {
+                                $scope.questions = item.data.questions;
+                                $scope.questionPaperId = item.data.questionPaperId;
+                                $scope.subjects = item.subjects;
+                                $scope.toolBar = [
+                                    ['h1', 'h2', 'h3', 'bold', 'italics', 'underline'],
+                                    ['ol', 'ul'],
+                                    ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+                                    ['html', 'insertImage', 'insertLink', 'insertVideo']
+                                ];
+                                $scope.ok = function() {
+                                    var data = {
+                                        questions: $scope.questions,
+                                        questionPaperId: $scope.questionPaperId
+                                    };
+                                    $http.post(CommonInfo.getAppUrl() + '/api/question/add', data).then(function(response) {
+                                        if (response && response.data && !response.data.Error) {
+                                            growl.success('Questions added successfully');
+                                            getAllquestionPapers();
+                                        }
+                                    }, function(response) {});
+                                };
+                            },
+                            resolve: {
+                                item: function() {
+                                    return item;
+                                }
+                            }
+                        });
+                    }
+                }, function(resp) {
+                    console.log('Error status: ' + resp.status);
+                }, function(evt) {
+                    var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                    console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
+                });
+            }
+        }
+
+        function importExplanationDoc(file, quesPaperId) {
+            console.log(vm.question.explanationFile)
+            if (vm.question.explanationFile) {
+                Upload.upload({
+                    url: CommonInfo.getAppUrl() + '/api/question/importExplationsDoc',
+                    data: {
+                        file: vm.question.explanationFile,
                         questionPaperId: quesPaperId
                     }
                 }).then(function(resp) {

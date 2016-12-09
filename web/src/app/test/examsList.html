@@ -13,8 +13,8 @@
                             <th>Syllabus</th>
                             <!-- <th>Questions</th> -->
                             <th>Score</th>
-                            <!-- <th>Rank</th> -->
-                            <th>Percentile</th>
+                            <th>Rank</th>
+                            <!-- <th>Percentile</th> -->
                             <th>Files</th>
                             <th>Actions</th>
                         </tr>
@@ -36,8 +36,8 @@
                             </td>
                             <!-- <td ng-bind="exam.questionCount"></td> -->
                             <td ng-bind="exam.score"></td>
-                            <!-- <td ng-bind="exam.rank"></td> -->
-                            <td ng-bind="exam.percentile"></td>
+                            <td ng-bind="exam.rank"></td>
+                            <!-- <td ng-bind="exam.percentile"></td> -->
                             <td>
                                 <div ng-if="exam.status=='evaluated' && exam.attachment.length > 0">
                                     <a target="_self" href="{{exam.attachment[0]}}" download="file" ng-if="exam.attachment[0]">

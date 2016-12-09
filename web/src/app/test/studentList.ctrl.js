@@ -19,6 +19,7 @@
 
         vm.searchStudent = searchStudent;
         vm.showAnswers = showAnswers;
+        vm.editAnswers = editAnswers;
         vm.getTestUsers = getTestUsers;
 
         activate();
@@ -52,6 +53,12 @@
             var data = { userId: userId, testId: test.id };
             CommonInfo.setInfo('testAnswer', data);
             $state.go('main.examAnswers');
+        }
+
+        function editAnswers(userId) {
+            var data = { userId: userId, testId: test.id };
+            CommonInfo.setInfo('testAnswer', data);
+            $state.go('main.test.editTestAnswer');
         }
     }
 })();

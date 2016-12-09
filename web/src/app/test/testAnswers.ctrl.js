@@ -55,7 +55,7 @@
                 if (response && response.data && !response.data.Error) {
                     vm.userAnswers = response.data.userAnswers;
                     vm.selectedLang = vm.userAnswers.selectedLang;
-                    if (vm.userAnswers.score) {
+                    if (vm.userAnswers.rank) {
                         getTestUsers();
                     }
                     vm.userAnswers.totalCorrect = 0;
@@ -84,6 +84,7 @@
                                         vm.userAnswers.totalIncorrect++;
                                         value.result = 'incorrect';
                                     }
+                                    console.log(value.id)
                                     if (value.userAnsKey) {
                                         if (vm.selectedLang == 1)
                                             value.userAnswer = _.find(value.answers, { 'ansKey': value.userAnsKey }).answerText;
@@ -133,30 +134,57 @@
         }
 
         function getHtml() {
-            vm.html = angular.element(document.getElementById('exportthis')).html()
-                //window.open('http://api.pdflayer.com/api/convert?access_key=107c1f80174a598cc874954ba28e72d8&document_url=' + 'https://www.google.co.in/', "_blank")
+            $http.post(CommonInfo.getAppUrl() + '/api/exam/userAnswersPdf', { }).then(function(response) {
+                if (response && response.data && !response.data.Error) {
+                    vm.testUsers = response.data.testUsers;
+                }
+            }, function(response) {});
+
+            // var docDefinition = {
+            //     footer: function(currentPage, pageCount) {
+            //         return { text: 'simple text', alignment: (currentPage % 2) ? 'left' : 'right', alignment: 'center' };
+            //     },
+            //     content: [
+            //         'paragraph 1',
+            //         'paragraph 2', {
+            //             columns: [
+            //                 'first column is a simple text', [
+            //                     // second column consists of paragraphs 
+            //                     'paragraph A',
+            //                     'paragraph B',
+            //                     'these paragraphs will be rendered one below another inside the column'
+            //                 ]
+            //             ]
+            //         }
+            //     ]
+            // };
+            
+            // pdfMake.createPdf(docDefinition).download();
+            // vm.html = angular.element(document.getElementById('exportthis')).html()
+
+            //window.open('http://api.pdflayer.com/api/convert?access_key=107c1f80174a598cc874954ba28e72d8&document_url=' + 'https://www.google.co.in/', "_blank")
 
             // $http.post('http://api.html2pdfrocket.com/pdf?apikey=49b117f1-e0ad-4dab-a598-37ed668b3f96&value=' + encodeURIComponent(vm.html), {}).then(function(response){
             //     window.open(response, "_blank");
             // }, function(response) {});
 
-            var fileName = "test.pdf";
-            var a = document.createElement("a");
-            document.body.appendChild(a);
-            a.style = "display: none";
-            $http({
-                url: 'http://api.html2pdfrocket.com/pdf?apikey=49b117f1-e0ad-4dab-a598-37ed668b3f96&value=' + encodeURIComponent(vm.html),
-                method: "POST",
-                headers: {'Content-type': 'application/x-www-form-urlencoded'},
-                responseType: "blob"
+            // var fileName = "test.pdf";
+            // var a = document.createElement("a");
+            // document.body.appendChild(a);
+            // a.style = "display: none";
+            // $http({
+            //     url: 'http://api.html2pdfrocket.com/pdf?apikey=49b117f1-e0ad-4dab-a598-37ed668b3f96&value=' + encodeURIComponent(vm.html),
+            //     method: "POST",
+            //     headers: {'Content-type': 'application/x-www-form-urlencoded'},
+            //     responseType: "blob"
 
-            }).then(function(response) {
-                var file = response.data; // new Blob([response], {type: 'application/pdf'});
-                var fileURL = window.URL.createObjectURL(file);
-                a.href = fileURL;
-                a.download = fileName;
-                a.click();
-            }, function() {});
+            // }).then(function(response) {
+            //     var file = response.data; // new Blob([response], {type: 'application/pdf'});
+            //     var fileURL = window.URL.createObjectURL(file);
+            //     a.href = fileURL;
+            //     a.download = fileName;
+            //     a.click();
+            // }, function() {});
         }
     }
 })();
