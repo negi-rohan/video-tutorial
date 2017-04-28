@@ -68,8 +68,8 @@
                             <!-- <td ng-bind="user.percentile"></td> -->
                             <td ng-bind="user.timeSpent"></td>
                             <td>
-                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.showAnswers(user.id)" ng-if="user.profileType == 'student'">
-                                    <i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i> Review Result
+                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.resetUserInfo(user.id)" ng-if="user.profileType == 'student'">
+                                    <i class="fa fa-newspaper-o fa-fw" aria-hidden="true"></i> Reset Test
                                 </button>
                                 <button type="button" class="btn btn-primary btn-xs" ng-click="vm.editAnswers(user.id)" ng-if="user.profileType == 'student'">
                                     <i class="fa fa-pencil-square-o fa-fw" aria-hidden="true"></i> Edit Answers

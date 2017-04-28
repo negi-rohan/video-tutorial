@@ -16,6 +16,7 @@
             'textAngular',
             'rt.resize',
             'timer',
+            //'angular-loading-bar',
             'ui.bootstrap.datetimepicker'
         ]);
 

@@ -26,7 +26,7 @@
                 if (response && response.data) {
                     _.forEach(response.data.tests, function(value) {
                         value.durationInHrs = moment.duration(value.duration, 'seconds').format("HH:mm:ss");
-                        value.isUpcoming = moment().isBefore(value.startDate);
+                        //value.isUpcoming = moment().isBefore(value.startDate);
                     });
                     vm.exams = response.data.tests;
                 }

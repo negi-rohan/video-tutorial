@@ -11,6 +11,7 @@
         var perPage = 40;
         var course;
 
+        vm.courseName;
         vm.currentCourseUserPage = 1;
         vm.sarchText = '';
         vm.courseUsers = [];
@@ -19,11 +20,13 @@
 
         vm.searchStudent = searchStudent;
         vm.getCourseUsers = getCourseUsers;
+        vm.deleteStudent = deleteStudent;
 
         activate();
 
         function activate() {
             course = CommonInfo.getInfo('CourseUser');
+            vm.courseName = course.name;
             if (course && course.id) {
                 getCourseUsers(1);
             }
@@ -42,6 +45,20 @@
 
         function searchStudent() {
             getCourseUsers(1);
+        }
+
+        function deleteStudent(userId) {
+            if (userId) {
+                if (confirm('Are you sure, you want to remove student from course')) {
+                    $http.post(CommonInfo.getAppUrl() + '/api/course/removeUser', { 'courseId': course.id, 'userId': userId }).then(function(response) {
+                        if (response && response.data && !response.data.Error) {
+                            growl.success(response.data.Message);
+                            vm.searchText = '';
+                            getCourseUsers(1);
+                        }
+                    }, function(response) {});
+                }
+            }
         }
     }
 })();

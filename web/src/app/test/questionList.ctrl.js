@@ -6,18 +6,14 @@
         .controller('QuestionListController', QuestionListController);
 
     /** @ngInject */
-    function QuestionListController($http, CommonInfo, $state) {
+    function QuestionListController($http, CommonInfo, $state, $location, $anchorScroll, $window, $timeout) {
         var vm = this;
         var questionPaper;
-        var perPage = 40;
 
         vm.questions = [];
-        vm.currentPage = 1;
-        vm.questionCount;
-        vm.lastPage;
 
         vm.getAllQuestions = getAllQuestions;
-        // vm.getQuestionById = getQuestionById;
+        vm.getQuestionById = getQuestionById;
         // vm.updateQuestion = updateQuestion;
 
 
@@ -25,18 +21,31 @@
 
         function activate() {
             questionPaper = CommonInfo.getInfo('selectedQuestionPaper');
-            if(questionPaper && questionPaper.id){
+            if (questionPaper && questionPaper.id) {
                 getAllQuestions(1);
             }
         }
 
         function getAllQuestions(pageNo) {
-            $http.post(CommonInfo.getAppUrl() + '/api/question/byQPId', { page: pageNo, perPage: perPage, questionPaperId: questionPaper.id }).then(function(response) {
+            $http.post(CommonInfo.getAppUrl() + '/api/question/byQPId', { questionPaperId: questionPaper.id }).then(function(response) {
                 if (response && response.data) {
-                    vm.currentPage = pageNo
                     vm.questions = response.data.questions;
-                    vm.questionCount = response.data.recordCount;
-                    vm.lastPage = Math.ceil(vm.questionCount / perPage) || 1;
+                    vm.questionCount = vm.questions.length;
+                    if (CommonInfo.getInfo('scrollQues')) {
+                        // $anchorScroll.yOffset = 50;
+                        // $location.hash(CommonInfo.getInfo('scrollQues'));
+
+                        var prevScrollPos = CommonInfo.getInfo('scrollQues') || [0, 0];
+                        $timeout(function() {
+                            $window.scrollTo(prevScrollPos[0], prevScrollPos[1]);
+                        }, 0);
+
+                        // $timeout(function() {
+                        //      $location.hash(CommonInfo.getInfo('scrollQues'));
+                        //  }, 10000);
+                        //$anchorScroll($location.hash(CommonInfo.getInfo('scrollQues')));
+                    }
+                    CommonInfo.setInfo('scrollQues', '');
                 }
             }, function(response) {});
         }
@@ -54,7 +63,7 @@
 
         function editQuestion(mode, question) {
             vm.objMode = mode;
-            vm.question = question || {};
+            CommonInfo.setInfo('editQPQuestion', question);
             vm.question.correctAnswer = vm.question.correctAnswer || '';
             if (!vm.question.answers) {
                 vm.question.answers = getNewAnswerSet();
@@ -62,11 +71,10 @@
             if (!vm.question.childQuestions) {
                 vm.question.childQuestions = [{ correctAnswer: '', question: '', isDeleted: 0, answers: getNewAnswerSet() }];
             }
-            if (mode == 'edit') {
-                $state.go('main.test.editQuestion');
-            } else if (mode == 'insert') {
-                $state.go('main.test.createQuestion');
-            }
+            CommonInfo.setInfo('scrollQues', "question_" + question.id);
+            //CommonInfo.setInfo('scrollQues', $location.hash());
+            CommonInfo.setInfo('scrollQues', [ $window.pageXOffset, $window.pageYOffset ]);
+            $state.go('main.test.editQPQuestion');
         }
 
         function addChildQuestion() {

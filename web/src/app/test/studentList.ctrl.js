@@ -19,6 +19,7 @@
 
         vm.searchStudent = searchStudent;
         vm.showAnswers = showAnswers;
+        vm.resetUserInfo = resetUserInfo;
         vm.editAnswers = editAnswers;
         vm.getTestUsers = getTestUsers;
 
@@ -59,6 +60,20 @@
             var data = { userId: userId, testId: test.id };
             CommonInfo.setInfo('testAnswer', data);
             $state.go('main.test.editTestAnswer');
+        }
+
+        function resetUserInfo(userId) {
+            if (confirm('Are you sure, you want to reset student answers for test')) {
+                $http.post(CommonInfo.getAppUrl() + '/api/exam/removeUserInfo', { 'userId': userId, 'testId': test.id }).then(function(response) {
+                    if (response && response.data && !response.data.Error) {
+                        growl.success(response.data.Message);
+                        vm.searchText = '';
+                        getTestUsers(1);
+                    }
+                }, function(response) {
+                    console.log(response);
+                });
+            }
         }
     }
 })();

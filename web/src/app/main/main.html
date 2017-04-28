@@ -71,12 +71,12 @@
                             <i class="fa fa-users fa-fw" aria-hidden="true"></i> Students
                         </a>
                     </li>
-                    <li ui-sref="main.test.home" ng-if="vm.config.tabs.test" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
+                    <li ui-sref="main.test.home" ui-sref-active="active" ng-if="vm.config.tabs.test" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);" ng-click="vm.getAllTests();">
                             <i class="fa fa-certificate fa-fw" aria-hidden="true"></i> Test
                         </a>
                     </li>
-                    <li ui-sref="main.testSeries" ng-if="vm.config.tabs.exam" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
+                    <li ui-sref="main.testSeries" ui-sref-active="active" ng-if="vm.config.tabs.exam" ng-click="vm.isCollapsed = (!vm.isCollapsed) ? !vm.isCollapsed : vm.isCollapsed">
                         <a href="javascript:void(0);">
                             <i class="fa fa-certificate fa-fw" aria-hidden="true"></i> Test Series
                         </a>
@@ -89,7 +89,7 @@
     <!-- header nav ends -->
     <div class="row" style="margin-top:65px;">
         <div class="col-md-12">
-            <div ui-view></div>
+            <div ui-view autoscroll="false"></div>
         </div>
     </div>
    <!--  <footer>

@@ -16,6 +16,9 @@
                 <div class="embed-responsive embed-responsive-16by9" ng-if="vm.lesson.options">
                     <jwplayerjs player-id="videoPlayer" setup="vm.lesson.options"></jwplayerjs>
                 </div>
+                <div class="embed-responsive embed-responsive-16by9" ng-if="vm.lesson.embed_video">
+                    <div ng-bind-html="vm.lesson.embed_video"></div>
+                </div>
                 <div class="panel-footer">
                     <div ng-bind-html="vm.lesson.description"></div>
                     <div ng-if="vm.lesson.files">

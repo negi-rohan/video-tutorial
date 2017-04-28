@@ -181,6 +181,12 @@
                 controller: 'QuestionListController',
                 controllerAs: 'vm'
             })
+            .state('main.test.editQPQuestion', {
+                url: '/editQPQuestion',
+                templateUrl: 'app/test/editQPQuestion.html',
+                controller: 'EditQPQuestion',
+                controllerAs: 'vm'
+            })
             .state('main.testSeries', {
                 url: '/Series',
                 templateUrl: 'app/test/testSeries.html',

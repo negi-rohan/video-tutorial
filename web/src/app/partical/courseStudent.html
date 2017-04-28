@@ -3,7 +3,8 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <form class="form-inline pull-left" role="search">
+                    <div ng-bind="vm.courseName" class="pull-left" style="font-size:17px;"></div>
+                    <form class="form-inline pull-right" role="search">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Search..." ng-model="vm.searchText" ng-keyup="($event.which === 13 || !vm.searchText) && vm.searchStudent();" />
                             <span class="input-group-btn">
@@ -40,21 +41,27 @@
                 <table class="table table-striped table-hover table-bordered" style="border:1px solid lightgrey;margin-bottom:0px;">
                     <thead>
                         <tr class="success">
-                        	<th>Roll No.</th>
-                        	<th>Name</th>
-                        	<th>Email</th>
-                        	<th>Phone</th>
-                        	<th>Mode</th>
+                            <th>Roll No.</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Mode</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                    	<tr ng-repeat="user in vm.courseUsers">
-                    		<td ng-bind="user.id"></td>
-                    		<td ng-bind="user.fullName"></td>
-                    		<td ng-bind="user.email"></td>
-                    		<td ng-bind="user.phone"></td>
-                    		<td ng-bind="user.mode"></td>
-                    	</tr>
+                        <tr ng-repeat="user in vm.courseUsers">
+                            <td ng-bind="user.id"></td>
+                            <td ng-bind="user.fullName"></td>
+                            <td ng-bind="user.email"></td>
+                            <td ng-bind="user.phone"></td>
+                            <td ng-bind="user.mode"></td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.deleteStudent(user.id)">
+                                    <i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> Remove Student
+                                </button>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
                 <nav aria-label="Page navigation">

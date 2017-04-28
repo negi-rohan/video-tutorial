@@ -17,7 +17,7 @@
     // }
 
     /** @ngInject */
-    function MainController($http, CommonInfo, Upload, $state, credentials, $uibModal, _, growl, $scope) {
+    function MainController($http, CommonInfo, Upload, $state, credentials, $uibModal, _, growl, $scope, $sce) {
         var vm = this;
 
         vm.userInfo; // hold user info[both]
@@ -255,7 +255,8 @@
         }
 
         function selectLesson(lesson) {
-            vm.lesson = lesson
+            vm.lesson = lesson;
+            vm.lesson.embed_video = angular.isString(vm.lesson.embed_video)? $sce.trustAsHtml(vm.lesson.embed_video) : vm.lesson.embed_video;
             vm.lesson.comments = vm.lesson.comments || [];
             _.forEach(vm.lesson.files, function(value) {
                 value.filePath = value.filePath.replace('/public', '');

@@ -28,6 +28,7 @@
                         value.durationInHrs = moment.duration(value.duration, 'seconds').format("HH:mm:ss");
                         value.isUpcoming = moment().isBefore(value.startDate);
                         value.attachment = value.attachment ? value.attachment.split(',') : [];
+                        value.isOver = moment().isAfter(value.endDate);
                     });
                     vm.exams = response.data.tests;
                 }

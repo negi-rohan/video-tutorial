@@ -52,7 +52,7 @@
                                 <button type="button" class="btn btn-primary btn-xs" ng-disabled="true" ng-if="exam.isUpcoming">
                                     <i class="fa fa-info fa-fw" aria-hidden="true"></i> Upcoming
                                 </button>
-                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.startExam(exam)" ng-if="!exam.status && !exam.isUpcoming">
+                                <button type="button" class="btn btn-primary btn-xs" ng-click="vm.startExam(exam)" ng-if="!exam.status && !exam.isUpcoming &&  !exam.isOver">
                                     <i class="fa fa-play fa-fw" aria-hidden="true"></i> Start Exam
                                 </button>
                                 <button type="button" class="btn btn-primary btn-xs" ng-click="vm.startExam(exam)" ng-if="exam.status == 'pending'">

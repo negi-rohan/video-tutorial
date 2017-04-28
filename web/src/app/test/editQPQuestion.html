@@ -1,0 +1,139 @@
+<div class="container-fluid" ng-cloak>
+    <form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="question.type">Type</label>
+                    <select class="form-control" ng-options="type for type in vm.questionType" ng-model="vm.question.type">
+                        <option value="">Choose</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="question.subject">Subject</label>
+                    <select class="form-control" ng-options="subject.id as subject.name for subject in vm.subjectList" ng-model="vm.question.subjectId">
+                        <option value="">Choose</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="question.question">Question</label>
+                    <text-angular class="test-questions" ta-toolbar="vm.toolBar" id="question.question" placeholder="Question" ng-model="vm.question.question"></text-angular>
+                </div>
+            </div>
+        </div>
+        <div ng-if="vm.question.type=='MCQ'">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Option</th>
+                        <th>Is Correct</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="answer in vm.question.answers | orderBy: 'ansKey' | filter: { isDeleted: 0 }" ng-init="answer.ansKey = vm.keyCode[$index]">
+                        <td scope="row" ng-bind="vm.keyCode[$index]"></td>
+                        <td>
+                            <text-angular class="test-answer-options" ta-toolbar="vm.toolBar" placeholder="Answer option" ng-model="answer.answerText"></text-angular>
+                        </td>
+                        <td>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="answerOption" ng-model="vm.question.correctAnswer" ng-value="vm.keyCode[$index]">
+                                </label>
+                            </div>
+                        </td>
+                        <td>
+                            <i class="fa fa-trash-o" aria-hidden="true" ng-click="answer.isDeleted = 1"></i>
+                            <i class="fa fa-plus-square-o" aria-hidden="true" ng-if="$last" ng-click="vm.question.answers.push({answerText: '', isDeleted: 0})"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row" ng-if="vm.question.type=='Passage'">
+            <table class="table">
+                Child Question For Passage
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Questions</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="bg-success" ng-repeat-start="childQuestion in vm.question.childQuestions | filter: { isDeleted: 0 }" ng-init="questionIndex = $index">
+                        <td colspan="2">
+                            Question <span ng-bind="$index + 1"></span>
+                        </td>
+                        <td>
+                            <i class="fa fa-trash-o" ng-click="childQuestion.isDeleted = 1" aria-hidden="true"></i>
+                            <i class="fa fa-plus-square-o" aria-hidden="true" ng-if="$last" ng-click="vm.addChildQuestion()"></i>
+                        </td>
+                    </tr>
+                    <tr ng-repeat-end>
+                        <td scope="row" ng-bind="$index + 1"></td>
+                        <td>
+                            <text-angular class="test-answer-options" ta-toolbar="vm.toolBar" placeholder="Question" ng-model="childQuestion.question"></text-angular>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Option</th>
+                                        <th>Is Correct</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="answer in childQuestion.answers | filter: { isDeleted: 0 }" ng-init="answer.ansKey = vm.keyCode[$index]">
+                                        <td scope="row" ng-bind="vm.keyCode[$index]"></td>
+                                        <td>
+                                            <text-angular class="test-answer-options" ta-toolbar="vm.toolBar" placeholder="Answer option" ng-model="answer.answerText"></text-angular>
+                                        </td>
+                                        <td>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="answerOption_{{questionIndex}}" ng-model="childQuestion.correctAnswer" ng-value="vm.keyCode[$index]">
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <i class="fa fa-trash-o" aria-hidden="true" ng-click="answer.isDeleted = 1"></i>
+                                            <i class="fa fa-plus-square-o" aria-hidden="true" ng-if="$last" ng-click="childQuestion.answers.push({answerText: '', isDeleted: 0})"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="form-group">
+                                <label for="question.question">Explanation</label>
+                                <text-angular class="test-answer-options" ta-toolbar="vm.toolBar" placeholder="Explanation" ng-model="childQuestion.explanation"></text-angular>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row" ng-if="vm.question.type=='MCQ'">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="question.question">Explanation</label>
+                    <text-angular class="test-questions" ta-toolbar="vm.toolBar" placeholder="Explanation" ng-model="vm.question.explanation"></text-angular>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-default pull-right" ng-click="vm.updateQuestion(false)">
+                    <span ng-if="vm.objMode == 'edit'">Update</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

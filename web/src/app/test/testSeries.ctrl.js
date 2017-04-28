@@ -10,6 +10,7 @@
         var vm = this;
 
         vm.showExam = showExam;
+        vm.subscribeTestSeries = subscribeTestSeries;
 
         activate();
 
@@ -32,6 +33,23 @@
             if(testSeries && testSeries.id){
                 CommonInfo.setInfo('testSeries', testSeries);
                 $state.go('main.examsList');
+            }
+        }
+
+        function subscribeTestSeries(series) {
+            if (series.id && vm.user.id) {
+                var data = {
+                    testSeriesId: series.id,
+                    users: [vm.user.id],
+                    testSeriesName: series.name
+                };
+                $http.post(CommonInfo.getAppUrl() + '/api/testSeries/addUsers', data).then(function(response) {
+                    if (response && response.data && !response.data.Error) {
+                        showExam(series);
+                    } else if(response && response.data && response.data.Error){
+                        growl.info(response.data.Message);
+                    }
+                }, function(response) {});
             }
         }
     }

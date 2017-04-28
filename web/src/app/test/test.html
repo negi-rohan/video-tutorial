@@ -110,7 +110,7 @@
                                 <td ng-bind="test.durationInHrs"></td>
                                 <!-- <td ng-bind="test.startDate | date : 'fullDate'"></td>
                                 <td ng-bind="test.endDate | date : 'fullDate'"></td> -->
-                                <td ng-bind="test.questionPaperName"></td>
+                                <td ng-bind="test.questionPaperName" ng-click="vm.showQuestions({id: test.questionPaperId, name: test.questionPaperName});"></td>
                                 <td ng-bind="test.userCount"></td>
                                 <td>
                                     <i class="fa fa-pencil-square-o fa-lg fa-fw" title="Edit" aria-hidden="true" ng-click="vm.getTestById(test.id); " style="vertical-align:-4px;"></i>
